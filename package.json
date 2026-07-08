@@ -1,0 +1,7 @@
+{
+  "name": "prj-dimensionamento-fotovoltaico",
+  "private": true,
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
