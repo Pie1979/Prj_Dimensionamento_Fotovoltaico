@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PV Sizing Dashboard v3</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="js/calculator.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header__brand">
+        <h1>PV Sizing Dashboard</h1>
+        <p class="header__subtitle">Dimensionamento fotovoltaico trasparente — ogni numero è tracciabile</p>
+      </div>
+      <div class="scenario-selector" role="group" aria-label="Seleziona scenario di irraggiamento">
+        <span class="scenario-selector__label">Scenario irraggiamento</span>
+        <div class="scenario-selector__buttons">
+          <button type="button" class="scenario-btn active" data-scenario="1">Reale (100%)</button>
+          <button type="button" class="scenario-btn" data-scenario="0.8">80%</button>
+          <button type="button" class="scenario-btn" data-scenario="0.5">50%</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="steps">
+      <!-- PASSO 1 -->
+      <section class="step-card" id="passo-1">
+        <div class="step-card__header">
+          <span class="step-card__badge">Passo 1</span>
+          <h2>Identikit Bolletta</h2>
+        </div>
+        <p class="step-card__intro">Inserisci i dati della bolletta annuale per calcolare il costo energetico di riferimento.</p>
+        <div class="input-grid">
+          <label class="field">
+            <span class="field__label">Consumo annuo</span>
+            <div class="field__control">
+              <input type="number" id="consumo" value="2301" min="0" step="1">
+              <span class="field__unit">kWh</span>
+            </div>
+          </label>
+          <label class="field">
+            <span class="field__label">Spesa annua</span>
+            <div class="field__control">
+              <input type="number" id="spesa" value="892.92" min="0" step="0.01">
+              <span class="field__unit">€</span>
+            </div>
+          </label>
+          <label class="field">
+            <span class="field__label">Irraggiamento locale</span>
+            <div class="field__control">
+              <input type="number" id="irraggiamento" value="1400" min="0" step="10">
+              <span class="field__unit">kWh/kWp</span>
+            </div>
+          </label>
+        </div>
+        <div class="intermediate-row">
+          <div class="intermediate">
+            <span class="intermediate__label">Costo energia</span>
+            <span class="intermediate__value" id="out-costo-energia">—</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PASSO 2 -->
+      <section class="step-card" id="passo-2">
+        <div class="step-card__header">
+          <span class="step-card__badge">Passo 2</span>
+          <h2>Dimensionamento &amp; Sovrapproduzione</h2>
+        </div>
+        <p class="step-card__intro">Definisci la potenza dell'impianto e verifica produzione, autoconsumo e copertura del fabbisogno.</p>
+        <div class="input-grid input-grid--compact">
+          <label class="field">
+            <span class="field__label">Potenza impianto</span>
+            <div class="field__control">
+              <input type="number" id="kwp" value="4.5" min="0" step="0.1">
+              <span class="field__unit">kWp</span>
+            </div>
+          </label>
+          <label class="field">
+            <span class="field__label">Costo impianto</span>
+            <div class="field__control">
+              <input type="number" id="costo" value="6990" min="0" step="10">
+              <span class="field__unit">€</span>
+            </div>
+          </label>
+          <label class="field">
+            <span class="field__label">Prezzo vendita GSE</span>
+            <div class="field__control">
+              <input type="number" id="prezzo-gse" value="0.06" min="0" step="0.01">
+              <span class="field__unit">€/kWh</span>
+            </div>
+          </label>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi kpi--primary">
+            <span class="kpi__label">Produzione Totale</span>
+            <span class="kpi__value" id="out-produzione">—</span>
+            <span class="kpi__detail" id="out-produzione-detail">Produzione lorda annua</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Autoconsumo</span>
+            <span class="kpi__value" id="out-autoconsumo">—</span>
+            <span class="kpi__detail" id="out-autoconsumo-detail">—</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__label">Sovrapproduzione</span>
+            <span class="kpi__value" id="out-sovrapproduzione">—</span>
+            <span class="kpi__detail" id="out-sovraproduzione-detail">—</span>
+          </div>
+          <div class="kpi kpi--accent">
+            <span class="kpi__label">Indice di Copertura</span>
+            <span class="kpi__value" id="out-copertura">—</span>
+            <span class="kpi__detail">% fabbisogno coperto da autoconsumo</span>
+          </div>
+        </div>
+        <div class="formula-box">
+          <p><strong>Produzione lorda</strong> = kWp × Irraggiamento × Scenario</p>
+          <p><strong>Autoconsumo</strong> = min(Consumo, Produzione × tasso autoconsumo dinamico)</p>
+          <p><strong>Sovrapproduzione</strong> = Produzione − Autoconsumo</p>
+          <p><strong>Copertura</strong> = Autoconsumo ÷ Consumo × 100</p>
+        </div>
+      </section>
+
+      <!-- PASSO 3 -->
+      <section class="step-card" id="passo-3">
+        <div class="step-card__header">
+          <span class="step-card__badge">Passo 3</span>
+          <h2>Simulazione Economica</h2>
+        </div>
+        <p class="step-card__intro">Breakdown annuo del beneficio: risparmio da autoconsumo e ricavo da vendita al GSE, con detrazione fiscale.</p>
+        <div class="breakdown">
+          <div class="breakdown__item">
+            <div class="breakdown__header">
+              <span class="breakdown__icon breakdown__icon--self">⚡</span>
+              <span class="breakdown__title">Autoconsumo</span>
+            </div>
+            <div class="breakdown__calc" id="out-autoconsumo-calc">—</div>
+            <div class="breakdown__result" id="out-risparmio-autoconsumo">—</div>
+          </div>
+          <div class="breakdown__item">
+            <div class="breakdown__header">
+              <span class="breakdown__icon breakdown__icon--gse">↗</span>
+              <span class="breakdown__title">Vendita GSE</span>
+            </div>
+            <div class="breakdown__calc" id="out-gse-calc">—</div>
+            <div class="breakdown__result" id="out-ricavo-gse">—</div>
+          </div>
+          <div class="breakdown__item breakdown__item--fiscal">
+            <div class="breakdown__header">
+              <span class="breakdown__icon breakdown__icon--fiscal">%</span>
+              <span class="breakdown__title">Detrazione fiscale (10 anni)</span>
+            </div>
+            <div class="breakdown__calc" id="out-detrazione-calc">—</div>
+            <div class="breakdown__result" id="out-quota-detrazione">—</div>
+          </div>
+        </div>
+        <div class="summary-bar">
+          <div class="summary-bar__item">
+            <span>Beneficio operativo annuo</span>
+            <strong id="out-beneficio-operativo">—</strong>
+          </div>
+          <div class="summary-bar__item summary-bar__item--highlight">
+            <span>Beneficio totale (anni 1–10)</span>
+            <strong id="out-beneficio-totale">—</strong>
+          </div>
+          <div class="summary-bar__item">
+            <span>Costo netto da recuperare</span>
+            <strong id="out-costo-netto">—</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- PASSO 4 -->
+      <section class="step-card step-card--verdict" id="passo-4">
+        <div class="step-card__header">
+          <span class="step-card__badge">Passo 4</span>
+          <h2>Verdetto Finale</h2>
+        </div>
+        <div class="verdict">
+          <div class="verdict__main" id="verdict-card">
+            <div class="verdict__payback-label">Tempo di rientro stimato</div>
+            <div class="verdict__payback-value" id="out-payback">—</div>
+            <div class="verdict__message" id="out-verdict-message">—</div>
+          </div>
+          <div class="verdict__comparison">
+            <p id="out-bill-comparison">—</p>
+            <p class="verdict__note">Il grafico confronta il costo cumulativo <em>senza</em> fotovoltaico (bolletta) con il saldo dell'investimento <em>con</em> fotovoltaico.</p>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="payback-chart" aria-label="Grafico payback investimento fotovoltaico"></canvas>
+        </div>
+        <div class="chart-legend" id="chart-legend"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>PV Sizing Dashboard v3 — Calcoli trasparenti · Scenario attivo: <strong id="out-scenario-label">Reale (100%)</strong></p>
+    </footer>
+  </div>
+</body>
+</html>
