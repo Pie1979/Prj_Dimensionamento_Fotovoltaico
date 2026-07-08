@@ -20,6 +20,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-900 font-sans antialiased">
 
@@ -49,12 +51,14 @@
       </div>
     </div>
 
-    <!-- CARICA DATI -->
-    <div class="flex justify-center">
-      <button type="button" id="btn-load-real" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl shadow transition-colors">
+    <!-- CARICA FATTURA -->
+    <div class="flex flex-col items-center gap-2">
+      <input type="file" id="input-fattura" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,application/pdf,image/*,text/plain" class="hidden">
+      <label for="input-fattura" id="btn-fattura" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl shadow transition-colors cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-        Carica i miei dati reali
-      </button>
+        <span id="btn-fattura-label">La mia fattura</span>
+      </label>
+      <p id="fattura-status" class="text-xs text-slate-500 text-center max-w-md hidden"></p>
     </div>
 
     <!-- PASSO 1 -->
@@ -570,6 +574,231 @@ function caricaDatiReali() {
   aggiornaUI();
 }
 
+/* ================================================================
+   PARSER BOLLETTA — estrazione automatica da PDF / immagine
+   ================================================================ */
+
+/** Converte numeri italiani (2.301,50) in float */
+function parseNumeroIT(str) {
+  if (!str) return NaN;
+  let s = String(str).trim().replace(/\s/g, '');
+  if (/,\d{1,2}$/.test(s) && s.includes('.')) {
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else if (s.includes(',')) {
+    s = s.replace(',', '.');
+  }
+  return parseFloat(s);
+}
+
+/** Mostra stato caricamento fattura */
+function setFatturaStatus(msg, type = 'info') {
+  const el = document.getElementById('fattura-status');
+  if (!el) return;
+  el.classList.remove('hidden', 'text-green-600', 'text-red-600', 'text-amber-600', 'text-slate-500');
+  const colors = { info: 'text-slate-500', ok: 'text-green-600', warn: 'text-amber-600', err: 'text-red-600' };
+  el.classList.add(colors[type] || colors.info);
+  el.textContent = msg;
+}
+
+/** Imposta stato loading sul pulsante fattura */
+function setFatturaLoading(loading) {
+  const label = document.getElementById('btn-fattura-label');
+  const btn = document.getElementById('btn-fattura');
+  if (loading) {
+    label.textContent = 'Analisi in corso…';
+    btn.classList.add('opacity-70', 'pointer-events-none');
+  } else {
+    label.textContent = 'La mia fattura';
+    btn.classList.remove('opacity-70', 'pointer-events-none');
+  }
+}
+
+/** Estrae testo da PDF con pdf.js */
+async function estraiTestoDaPdf(file) {
+  if (typeof pdfjsLib === 'undefined') throw new Error('Libreria PDF non disponibile');
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const buffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+  const pagine = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    pagine.push(content.items.map((it) => it.str).join(' '));
+  }
+  return pagine.join('\n');
+}
+
+/** Estrae testo da immagine con OCR (Tesseract, lingua italiana) */
+async function estraiTestoDaImmagine(file) {
+  if (typeof Tesseract === 'undefined') throw new Error('Libreria OCR non disponibile');
+  setFatturaStatus('OCR in corso — può richiedere alcuni secondi…', 'info');
+  const { data: { text } } = await Tesseract.recognize(file, 'ita', {
+    logger: (m) => {
+      if (m.status === 'recognizing text' && m.progress) {
+        setFatturaStatus(`OCR in corso… ${Math.round(m.progress * 100)}%`, 'info');
+      }
+    },
+  });
+  return text;
+}
+
+/** Rileva moltiplicatore per annualizzare consumo da bolletta periodica */
+function rilevaMoltiplicatoreAnnuo(testo) {
+  const t = testo.toLowerCase();
+  if (/consumo\s+annuo|annuo\s+consumo|energia\s+annua|annual consumption/.test(t)) return 1;
+  if (/mensil|1\s*mese|un\s*mese/.test(t)) return 12;
+  if (/trimestr|3\s*mesi/.test(t)) return 4;
+  if (/semestr|6\s*mesi/.test(t)) return 2;
+  if (/bimestr|2\s*mesi|due\s*mesi|bi\s*mestrale/.test(t)) return 6;
+  return 6; // default bimestrale (bolletta italiana tipica)
+}
+
+/** Estrae consumo kWh e spesa € dal testo bolletta */
+function estraiDatiBolletta(testo) {
+  const risultato = { consumo: null, spesa: null, dettagli: [] };
+  if (!testo || testo.length < 10) return risultato;
+
+  const normalizzato = testo.replace(/\s+/g, ' ');
+  const moltiplicatore = rilevaMoltiplicatoreAnnuo(normalizzato);
+
+  // --- CONSUMO kWh ---
+  const patternConsumo = [
+    /consumo\s+annuo[^0-9]{0,30}([\d.,]+)\s*kwh/gi,
+    /consumo\s+totale\s+annuo[^0-9]{0,20}([\d.,]+)/gi,
+    /energia\s+annua[^0-9]{0,30}([\d.,]+)\s*kwh/gi,
+    /consumo\s+(?:energia\s+)?(?:elettric[ao]\s+)?(?:del\s+periodo|periodo|fatturato)[^0-9]{0,30}([\d.,]+)\s*kwh/gi,
+    /consumo[^0-9]{0,20}([\d.,]+)\s*kwh/gi,
+    /([\d.,]+)\s*kwh/gi,
+  ];
+
+  let consumiTrovati = [];
+  for (const rx of patternConsumo) {
+    let m;
+    while ((m = rx.exec(normalizzato)) !== null) {
+      const v = parseNumeroIT(m[1]);
+      if (!isNaN(v) && v >= 50 && v <= 50000) consumiTrovati.push({ v, prio: rx.source.includes('annuo') ? 3 : 1 });
+    }
+  }
+
+  if (consumiTrovati.length) {
+    consumiTrovati.sort((a, b) => b.prio - a.prio || b.v - a.v);
+    const migliore = consumiTrovati[0];
+    risultato.consumo = Math.round(migliore.prio >= 3 ? migliore.v : migliore.v * moltiplicatore);
+    risultato.dettagli.push(migliore.prio >= 3 ? 'Consumo annuo rilevato' : `Consumo periodo annualizzato (×${moltiplicatore})`);
+  }
+
+  // --- SPESA € ---
+  const patternSpesa = [
+    /totale\s+da\s+pagare[^0-9€]{0,15}€?\s*([\d.,]+)/gi,
+    /importo\s+totale[^0-9€]{0,15}€?\s*([\d.,]+)/gi,
+    /totale\s+(?:bolletta|fattura|documento)[^0-9€]{0,15}€?\s*([\d.,]+)/gi,
+    /da\s+pagare[^0-9€]{0,10}€?\s*([\d.,]+)/gi,
+    /importo\s+da\s+pagare[^0-9€]{0,10}€?\s*([\d.,]+)/gi,
+    /€\s*([\d.,]+)/gi,
+  ];
+
+  let speseTrovate = [];
+  for (const rx of patternSpesa) {
+    let m;
+    while ((m = rx.exec(normalizzato)) !== null) {
+      const v = parseNumeroIT(m[1]);
+      if (!isNaN(v) && v >= 20 && v <= 10000) {
+        const prio = /totale|pagare|importo/i.test(m[0]) ? 3 : 1;
+        speseTrovate.push({ v, prio });
+      }
+    }
+  }
+
+  if (speseTrovate.length) {
+    speseTrovate.sort((a, b) => b.prio - a.prio || b.v - a.v);
+    const migliore = speseTrovate[0];
+    const spesaAnnuaEsplicita = /spesa\s+annua|costo\s+annuo|importo\s+annuo/i.test(normalizzato);
+    risultato.spesa = spesaAnnuaEsplicita
+      ? migliore.v
+      : Math.round(migliore.v * moltiplicatore * 100) / 100;
+    risultato.dettagli.push(spesaAnnuaEsplicita ? 'Spesa annua rilevata' : `Spesa periodo annualizzata (×${moltiplicatore})`);
+  }
+
+  return risultato;
+}
+
+/** Applica i dati estratti ai campi del simulatore */
+function applicaDatiBolletta(dati) {
+  let compilati = 0;
+
+  if (dati.consumo) {
+    document.getElementById('consumo').value = dati.consumo;
+    compilati++;
+  }
+  if (dati.spesa) {
+    document.getElementById('spesa').value = Math.round(dati.spesa * 100) / 100;
+    compilati++;
+  }
+
+  // Irraggiamento: default ENEA se non presente in bolletta
+  const irrEl = document.getElementById('irraggiamento');
+  if (!irrEl.value) {
+    irrEl.value = DATI_REALI.irraggiamento;
+    dati.dettagli.push('Irraggiamento: default ENEA 1.400 kWh/kWp');
+  }
+
+  // kWp, batteria e costo non sono presenti in bolletta — l'utente li inserisce al Passo 2/4
+  const mancanti = [];
+  if (!document.getElementById('kwp').value) mancanti.push('potenza kWp');
+  if (!document.getElementById('costo').value) mancanti.push('prezzo impianto');
+  if (mancanti.length) dati.dettagli.push(`Inserisci manualmente: ${mancanti.join(', ')}`);
+
+  aggiornaUI();
+  return compilati;
+}
+
+/** Gestisce il caricamento file fattura */
+async function gestisciCaricamentoFattura(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  setFatturaLoading(true);
+  setFatturaStatus(`Analisi di "${file.name}"…`, 'info');
+
+  try {
+    let testo = '';
+    const tipo = file.type.toLowerCase();
+    const nome = file.name.toLowerCase();
+
+    if (tipo === 'application/pdf' || nome.endsWith('.pdf')) {
+      testo = await estraiTestoDaPdf(file);
+    } else if (tipo.startsWith('image/') || /\.(png|jpe?g|webp)$/.test(nome)) {
+      testo = await estraiTestoDaImmagine(file);
+    } else if (tipo === 'text/plain' || nome.endsWith('.txt')) {
+      testo = await file.text();
+    } else {
+      throw new Error('Formato non supportato. Usa PDF, PNG, JPG o TXT.');
+    }
+
+    const dati = estraiDatiBolletta(testo);
+
+    if (!dati.consumo && !dati.spesa) {
+      throw new Error('Non ho trovato consumo (kWh) o spesa (€) nella bolletta. Prova con un PDF originale o una foto più nitida.');
+    }
+
+    const n = applicaDatiBolletta(dati);
+    const parti = [];
+    if (dati.consumo) parti.push(`${fmt0(dati.consumo)} kWh`);
+    if (dati.spesa) parti.push(`${fmt2(dati.spesa)} €`);
+    setFatturaStatus(
+      `✓ Bolletta analizzata: ${parti.join(' · ')}. ${dati.dettagli.join('. ')}.`,
+      'ok'
+    );
+  } catch (err) {
+    setFatturaStatus(err.message || 'Errore durante l\'analisi della bolletta.', 'err');
+  } finally {
+    setFatturaLoading(false);
+    event.target.value = '';
+  }
+}
+
 /** Init */
 document.addEventListener('DOMContentLoaded', () => {
   // Scenario buttons
@@ -591,10 +820,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById(id).addEventListener('input', aggiornaUI);
   });
 
-  document.getElementById('btn-load-real').addEventListener('click', caricaDatiReali);
+  document.getElementById('input-fattura').addEventListener('change', gestisciCaricamentoFattura);
 
-  // Carica dati reali al primo avvio
-  caricaDatiReali();
+  // Avvio con campi vuoti — si compilano caricando la fattura
+  aggiornaUI();
 });
 </script>
 </body>
