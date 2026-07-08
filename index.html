@@ -110,35 +110,36 @@
       </div>
       <div class="p-6 space-y-5">
         <p class="text-sm text-slate-600 leading-relaxed">Definiamo l'impianto e calcoliamo quanta energia produce, quanta usi direttamente e quanta vendi in rete. Così capisci se l'impianto è sovradimensionato rispetto ai tuoi consumi.</p>
-        <div class="grid md:grid-cols-3 gap-4">
-          <label class="block">
+        <div class="grid md:grid-cols-3 gap-4 items-stretch">
+          <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Irraggiamento Locale</span>
-            <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanta energia produce 1 kWp di pannelli nella tua zona in un anno. Per l'Italia centrale usa ~1.400 kWh/kWp (fonte ENEA).</p>
-            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
+            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[4.5rem] leading-relaxed">Quanta energia produce 1 kWp di pannelli nella tua zona in un anno. Per l'Italia centrale usa ~1.400 kWh/kWp (fonte ENEA).</p>
+            <div class="flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
               <input type="number" id="irraggiamento" placeholder="1400" min="0" step="10"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
-              <span class="flex items-center px-2 bg-slate-50 text-xs text-slate-500 border-l border-slate-300">kWh/kWp</span>
+              <span class="flex items-center px-2 bg-slate-50 text-xs text-slate-500 border-l border-slate-300 whitespace-nowrap">kWh/kWp</span>
             </div>
-            <span class="text-xs text-slate-400 mt-0.5 block">Valore tipico Italia centrale</span>
+            <span class="text-xs text-slate-400 mt-1.5 block min-h-[1.25rem]">Valore tipico Italia centrale</span>
           </label>
-          <label class="block">
+          <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Potenza Impianto Proposta</span>
-            <p class="text-xs text-slate-400 mt-0.5 mb-1">La potenza totale dei pannelli in kWp (kilowatt di picco). È il valore che trovi nel preventivo dell'installatore, es. 4,5 kWp.</p>
-            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
+            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[4.5rem] leading-relaxed">La potenza totale dei pannelli in kWp (kilowatt di picco). È il valore che trovi nel preventivo dell'installatore, es. 4,5 kWp.</p>
+            <div class="flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
               <input type="number" id="kwp" placeholder="4.50" min="0" step="0.1"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
-              <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">kWp</span>
+              <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300 whitespace-nowrap">kWp</span>
             </div>
+            <span class="text-xs text-slate-400 mt-1.5 block min-h-[1.25rem] invisible" aria-hidden="true">—</span>
           </label>
-          <label class="block">
+          <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Capacità Batteria</span>
-            <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanta energia può accumulare la batteria in kWh. Campo opzionale: verrà usato in una versione futura per calcolare più autoconsumo.</p>
-            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
+            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[4.5rem] leading-relaxed">Quanta energia può accumulare la batteria in kWh. Campo opzionale: verrà usato in una versione futura per calcolare più autoconsumo.</p>
+            <div class="flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
               <input type="number" id="batteria" placeholder="5.12" min="0" step="0.01"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
-              <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">kWh</span>
+              <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300 whitespace-nowrap">kWh</span>
             </div>
-            <span class="text-xs text-slate-400 mt-0.5 block">Opzionale</span>
+            <span class="text-xs text-slate-400 mt-1.5 block min-h-[1.25rem]">Opzionale</span>
           </label>
         </div>
 
