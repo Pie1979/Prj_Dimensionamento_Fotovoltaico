@@ -1,10 +1,14 @@
-# Calcolo Dimensionamento Fotovoltaico
+# Simulatore FV + Batteria – Analisi di Convenienza 2026
 
-Strumento web per il dimensionamento fotovoltaico residenziale con calcoli trasparenti, organizzato in 4 passi.
+Strumento web self-contained per la simulazione di impianti fotovoltaici residenziali, con calcoli trasparenti organizzati in 4 passi.
 
-## Avvio rapido
+## URL pubblico
 
-Apri `index.html` direttamente nel browser, oppure avvia un server locale:
+**https://pie1979.github.io/Prj_Dimensionamento_Fotovoltaico/**
+
+## Avvio locale
+
+Apri `index.html` nel browser, oppure:
 
 ```bash
 python3 -m http.server 8080
@@ -12,59 +16,43 @@ python3 -m http.server 8080
 
 Poi visita [http://localhost:8080](http://localhost:8080).
 
-## Struttura
+## Struttura (4 Passi)
 
 | Passo | Contenuto |
 |-------|-----------|
-| **1 — Identikit Bolletta** | Consumo, spesa annua, irraggiamento → costo €/kWh |
-| **2 — Dimensionamento** | kWp, costo impianto, produzione, autoconsumo, sovrapproduzione, copertura |
-| **3 — Simulazione Economica** | Risparmio autoconsumo, vendita GSE, detrazione fiscale 50% / 10 anni |
-| **4 — Verdetto** | Payback colorato + grafico Chart.js vs bolletta |
+| **1 — Identikit Bolletta** | Consumo, spesa annua → costo reale energia (€/kWh) |
+| **2 — Dimensionamento** | Irraggiamento, kWp, batteria (futuro), produzione, autoconsumo, sovraproduzione, copertura |
+| **3 — Simulazione Economica** | Risparmio bolletta, ricavo GSE, detrazione 50% / 10 anni |
+| **4 — Verdetto** | Investimento netto, payback colorato, grafico cumulativo 15 anni |
 
 ## Scenari
 
-Il selettore in alto aggiorna tutti i calcoli e il grafico:
-
-- **Reale (100%)** — irraggiamento pieno
-- **80%** — scenario conservativo
-- **50%** — scenario pessimistico
+- **Produzione Reale (100%)**
+- **Simulazione 80%**
+- **Simulazione 50%**
 
 ## Modello di calcolo
 
 ```
 Produzione lorda     = kWp × Irraggiamento × Scenario
-Autoconsumo          = min(Consumo, Produzione × tasso dinamico)
-Sovrapproduzione     = Produzione − Autoconsumo
-Copertura            = Autoconsumo ÷ Consumo × 100
+Autoconsumo          = min(Produzione, Consumo)
+Sovraproduzione      = max(0, Produzione − Consumo)
+Copertura            = (Produzione / Consumo) × 100
 
-Costo netto          = Costo impianto × 50%
-Quota detrazione     = Costo netto ÷ 10 anni  (sommata al beneficio, anni 1–10)
-Beneficio operativo  = Autoconsumo × €/kWh + Sovrapproduzione × Prezzo GSE
+Risparmio bolletta   = Autoconsumo × (Spesa / Consumo)
+Ricavo GSE           = Sovraproduzione × 0,09 €/kWh
+Investimento netto   = Costo × 50%
+Quota detrazione     = (Costo × 50%) / 10 anni
 ```
 
-Il tasso di autoconsumo diminuisce al crescere del rapporto produzione/consumo (impianti sovradimensionati immessi di più in rete).
+## Dipendenze (CDN)
 
-## Valori di riferimento
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Chart.js 4](https://www.chartjs.org/)
+- Google Fonts (Inter)
 
-Con i default precompilati si ottiene ~**3 anni e 1 mese** di payback:
+Nessuna installazione richiesta — tutto in un unico file `index.html`.
 
-| Parametro | Valore |
-|-----------|--------|
-| Consumo | 2.301 kWh |
-| Spesa | 892,92 € |
-| Irraggiamento | 1.400 kWh/kWp |
-| Potenza | 4,5 kWp |
-| Costo impianto | 6.990 € |
+## Deploy
 
-## File
-
-```
-index.html          UI principale
-css/styles.css      Stili
-js/calculator.js    Motore di calcolo
-js/app.js           Controller UI e grafico payback
-```
-
-## Dipendenze
-
-- [Chart.js 4](https://www.chartjs.org/) — caricato via CDN, nessuna installazione richiesta
+Push su `main` → deploy automatico via GitHub Actions su GitHub Pages.

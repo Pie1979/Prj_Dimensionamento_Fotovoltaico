@@ -3,204 +3,599 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calcolo Dimensionamento Fotovoltaico</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <title>Simulatore FV + Batteria – Analisi di Convenienza 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' },
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <script src="js/calculator.js" defer></script>
-  <script src="js/app.js" defer></script>
 </head>
-<body>
-  <div class="app">
-    <header class="header">
-      <div class="header__brand">
-        <h1>Calcolo Dimensionamento Fotovoltaico</h1>
-        <p class="header__subtitle">Dimensionamento fotovoltaico trasparente — ogni numero è tracciabile</p>
-      </div>
-      <div class="scenario-selector" role="group" aria-label="Seleziona scenario di irraggiamento">
-        <span class="scenario-selector__label">Scenario irraggiamento</span>
-        <div class="scenario-selector__buttons">
-          <button type="button" class="scenario-btn active" data-scenario="1">Reale (100%)</button>
-          <button type="button" class="scenario-btn" data-scenario="0.8">80%</button>
-          <button type="button" class="scenario-btn" data-scenario="0.5">50%</button>
-        </div>
-      </div>
+<body class="bg-slate-100 text-slate-900 font-sans antialiased">
+
+  <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- HEADER -->
+    <header class="text-center space-y-2">
+      <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
+        Simulatore FV + Batteria – Analisi di Convenienza 2026
+      </h1>
+      <p class="text-slate-500 text-sm">Calcoli trasparenti · ogni numero è tracciabile</p>
     </header>
 
-    <main class="steps">
-      <!-- PASSO 1 -->
-      <section class="step-card" id="passo-1">
-        <div class="step-card__header">
-          <span class="step-card__badge">Passo 1</span>
-          <h2>Identikit Bolletta</h2>
-        </div>
-        <p class="step-card__intro">Inserisci i dati della bolletta annuale per calcolare il costo energetico di riferimento.</p>
-        <div class="input-grid">
-          <label class="field">
-            <span class="field__label">Consumo annuo</span>
-            <div class="field__control">
-              <input type="number" id="consumo" value="2301" min="0" step="1">
-              <span class="field__unit">kWh</span>
-            </div>
-          </label>
-          <label class="field">
-            <span class="field__label">Spesa annua</span>
-            <div class="field__control">
-              <input type="number" id="spesa" value="892.92" min="0" step="0.01">
-              <span class="field__unit">€</span>
-            </div>
-          </label>
-          <label class="field">
-            <span class="field__label">Irraggiamento locale</span>
-            <div class="field__control">
-              <input type="number" id="irraggiamento" value="1400" min="0" step="10">
-              <span class="field__unit">kWh/kWp</span>
-            </div>
-          </label>
-        </div>
-        <div class="intermediate-row">
-          <div class="intermediate">
-            <span class="intermediate__label">Costo energia</span>
-            <span class="intermediate__value" id="out-costo-energia">—</span>
-          </div>
-        </div>
-      </section>
+    <!-- SELEZTORE SCENARIO -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 text-center">Scenario di produzione</p>
+      <div class="grid grid-cols-3 gap-2" role="group" aria-label="Seleziona scenario">
+        <button type="button" data-scenario="1" class="scenario-btn active-scenario rounded-xl py-3 px-2 text-sm font-semibold transition-all border-2 border-brand-600 bg-brand-600 text-white shadow-md">
+          Produzione Reale<br><span class="text-xs font-normal opacity-80">(100%)</span>
+        </button>
+        <button type="button" data-scenario="0.8" class="scenario-btn rounded-xl py-3 px-2 text-sm font-semibold transition-all border-2 border-slate-200 bg-white text-slate-600 hover:border-brand-500">
+          Simulazione<br><span class="text-xs font-normal">80%</span>
+        </button>
+        <button type="button" data-scenario="0.5" class="scenario-btn rounded-xl py-3 px-2 text-sm font-semibold transition-all border-2 border-slate-200 bg-white text-slate-600 hover:border-brand-500">
+          Simulazione<br><span class="text-xs font-normal">50%</span>
+        </button>
+      </div>
+    </div>
 
-      <!-- PASSO 2 -->
-      <section class="step-card" id="passo-2">
-        <div class="step-card__header">
-          <span class="step-card__badge">Passo 2</span>
-          <h2>Dimensionamento &amp; Sovrapproduzione</h2>
-        </div>
-        <p class="step-card__intro">Definisci la potenza dell'impianto e verifica produzione, autoconsumo e copertura del fabbisogno.</p>
-        <div class="input-grid input-grid--compact">
-          <label class="field">
-            <span class="field__label">Potenza impianto</span>
-            <div class="field__control">
-              <input type="number" id="kwp" value="4.5" min="0" step="0.1">
-              <span class="field__unit">kWp</span>
+    <!-- CARICA DATI -->
+    <div class="flex justify-center">
+      <button type="button" id="btn-load-real" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl shadow transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        Carica i miei dati reali
+      </button>
+    </div>
+
+    <!-- PASSO 1 -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-brand-50 border-b border-brand-100 px-6 py-4 flex items-center gap-3">
+        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Passo 1</span>
+        <h2 class="text-lg font-bold">Identikit Bolletta</h2>
+      </div>
+      <div class="p-6 space-y-5">
+        <div class="grid md:grid-cols-2 gap-4">
+          <label class="block">
+            <span class="text-sm font-medium text-slate-600">Consumo Annuo Corrente</span>
+            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
+              <input type="number" id="consumo" placeholder="2301" min="0" step="1"
+                class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
+              <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">kWh</span>
             </div>
           </label>
-          <label class="field">
-            <span class="field__label">Costo impianto</span>
-            <div class="field__control">
-              <input type="number" id="costo" value="6990" min="0" step="10">
-              <span class="field__unit">€</span>
-            </div>
-          </label>
-          <label class="field">
-            <span class="field__label">Prezzo vendita GSE</span>
-            <div class="field__control">
-              <input type="number" id="prezzo-gse" value="0.06" min="0" step="0.01">
-              <span class="field__unit">€/kWh</span>
+          <label class="block">
+            <span class="text-sm font-medium text-slate-600">Spesa Annua Corrente</span>
+            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
+              <input type="number" id="spesa" placeholder="892.92" min="0" step="0.01"
+                class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
+              <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">€</span>
             </div>
           </label>
         </div>
-        <div class="kpi-grid">
-          <div class="kpi kpi--primary">
-            <span class="kpi__label">Produzione Totale</span>
-            <span class="kpi__value" id="out-produzione">—</span>
-            <span class="kpi__detail" id="out-produzione-detail">Produzione lorda annua</span>
-          </div>
-          <div class="kpi">
-            <span class="kpi__label">Autoconsumo</span>
-            <span class="kpi__value" id="out-autoconsumo">—</span>
-            <span class="kpi__detail" id="out-autoconsumo-detail">—</span>
-          </div>
-          <div class="kpi">
-            <span class="kpi__label">Sovrapproduzione</span>
-            <span class="kpi__value" id="out-sovrapproduzione">—</span>
-            <span class="kpi__detail" id="out-sovraproduzione-detail">—</span>
-          </div>
-          <div class="kpi kpi--accent">
-            <span class="kpi__label">Indice di Copertura</span>
-            <span class="kpi__value" id="out-copertura">—</span>
-            <span class="kpi__detail">% fabbisogno coperto da autoconsumo</span>
-          </div>
+        <div class="bg-slate-50 rounded-xl px-5 py-4 flex items-center justify-between border border-slate-200">
+          <span class="text-sm font-medium text-slate-600">Costo Reale Energia</span>
+          <span class="text-xl font-bold tabular-nums text-brand-700" id="out-costo-energia">—</span>
         </div>
-        <div class="formula-box">
-          <p><strong>Produzione lorda</strong> = kWp × Irraggiamento × Scenario</p>
-          <p><strong>Autoconsumo</strong> = min(Consumo, Produzione × tasso autoconsumo dinamico)</p>
-          <p><strong>Sovrapproduzione</strong> = Produzione − Autoconsumo</p>
-          <p><strong>Copertura</strong> = Autoconsumo ÷ Consumo × 100</p>
-        </div>
-      </section>
+        <p class="text-xs text-slate-400">= Spesa Annua ÷ Consumo Annuo (€/kWh, 3 decimali)</p>
+      </div>
+    </section>
 
-      <!-- PASSO 3 -->
-      <section class="step-card" id="passo-3">
-        <div class="step-card__header">
-          <span class="step-card__badge">Passo 3</span>
-          <h2>Simulazione Economica</h2>
-        </div>
-        <p class="step-card__intro">Breakdown annuo del beneficio: risparmio da autoconsumo e ricavo da vendita al GSE, con detrazione fiscale.</p>
-        <div class="breakdown">
-          <div class="breakdown__item">
-            <div class="breakdown__header">
-              <span class="breakdown__icon breakdown__icon--self">⚡</span>
-              <span class="breakdown__title">Autoconsumo</span>
+    <!-- PASSO 2 -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-brand-50 border-b border-brand-100 px-6 py-4 flex items-center gap-3">
+        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Passo 2</span>
+        <h2 class="text-lg font-bold">Il Dimensionamento &amp; Sovrapproduzione</h2>
+      </div>
+      <div class="p-6 space-y-5">
+        <div class="grid md:grid-cols-3 gap-4">
+          <label class="block">
+            <span class="text-sm font-medium text-slate-600">Irraggiamento Locale</span>
+            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
+              <input type="number" id="irraggiamento" placeholder="1400" min="0" step="10"
+                class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
+              <span class="flex items-center px-2 bg-slate-50 text-xs text-slate-500 border-l border-slate-300">kWh/kWp</span>
             </div>
-            <div class="breakdown__calc" id="out-autoconsumo-calc">—</div>
-            <div class="breakdown__result" id="out-risparmio-autoconsumo">—</div>
-          </div>
-          <div class="breakdown__item">
-            <div class="breakdown__header">
-              <span class="breakdown__icon breakdown__icon--gse">↗</span>
-              <span class="breakdown__title">Vendita GSE</span>
+            <span class="text-xs text-slate-400 mt-0.5 block">1.400 (dati ENEA)</span>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-slate-600">Potenza Impianto Proposta</span>
+            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
+              <input type="number" id="kwp" placeholder="4.50" min="0" step="0.1"
+                class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
+              <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">kWp</span>
             </div>
-            <div class="breakdown__calc" id="out-gse-calc">—</div>
-            <div class="breakdown__result" id="out-ricavo-gse">—</div>
-          </div>
-          <div class="breakdown__item breakdown__item--fiscal">
-            <div class="breakdown__header">
-              <span class="breakdown__icon breakdown__icon--fiscal">%</span>
-              <span class="breakdown__title">Detrazione fiscale (10 anni)</span>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-slate-600">Capacità Batteria</span>
+            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
+              <input type="number" id="batteria" placeholder="5.12" min="0" step="0.01"
+                class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
+              <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">kWh</span>
             </div>
-            <div class="breakdown__calc" id="out-detrazione-calc">—</div>
-            <div class="breakdown__result" id="out-quota-detrazione">—</div>
-          </div>
+            <span class="text-xs text-slate-400 mt-0.5 block">Opzionale · logica futura</span>
+          </label>
         </div>
-        <div class="summary-bar">
-          <div class="summary-bar__item">
-            <span>Beneficio operativo annuo</span>
-            <strong id="out-beneficio-operativo">—</strong>
-          </div>
-          <div class="summary-bar__item summary-bar__item--highlight">
-            <span>Beneficio totale (anni 1–10)</span>
-            <strong id="out-beneficio-totale">—</strong>
-          </div>
-          <div class="summary-bar__item">
-            <span>Costo netto da recuperare</span>
-            <strong id="out-costo-netto">—</strong>
-          </div>
-        </div>
-      </section>
 
-      <!-- PASSO 4 -->
-      <section class="step-card step-card--verdict" id="passo-4">
-        <div class="step-card__header">
-          <span class="step-card__badge">Passo 4</span>
-          <h2>Verdetto Finale</h2>
-        </div>
-        <div class="verdict">
-          <div class="verdict__main" id="verdict-card">
-            <div class="verdict__payback-label">Tempo di rientro stimato</div>
-            <div class="verdict__payback-value" id="out-payback">—</div>
-            <div class="verdict__message" id="out-verdict-message">—</div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-200 rounded-xl p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-teal-600 mb-1">Produzione Totale Lorda</p>
+            <p class="text-2xl font-extrabold tabular-nums" id="out-produzione">—</p>
+            <p class="text-xs text-teal-700/70 mt-1" id="out-produzione-formula">kWp × Irraggiamento × Scenario</p>
           </div>
-          <div class="verdict__comparison">
-            <p id="out-bill-comparison">—</p>
-            <p class="verdict__note">Il grafico confronta il costo cumulativo <em>senza</em> fotovoltaico (bolletta) con il saldo dell'investimento <em>con</em> fotovoltaico.</p>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Autoconsumo Stimato</p>
+            <p class="text-2xl font-extrabold tabular-nums" id="out-autoconsumo">—</p>
+            <p class="text-xs text-slate-400 mt-1">min(Produzione, Consumo)</p>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Sovrapproduzione / Immessa in Rete</p>
+            <p class="text-2xl font-extrabold tabular-nums" id="out-sovrapproduzione">—</p>
+            <p class="text-xs text-slate-400 mt-1">max(0, Produzione − Consumo)</p>
+          </div>
+          <div class="bg-gradient-to-br from-blue-50 to-sky-50 border border-blue-200 rounded-xl p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-blue-600 mb-1">Indice di Copertura</p>
+            <p class="text-2xl font-extrabold tabular-nums text-blue-700" id="out-copertura">—</p>
+            <p class="text-sm font-medium text-blue-800/80 mt-1" id="out-copertura-commento">—</p>
           </div>
         </div>
-        <div class="chart-container">
-          <canvas id="payback-chart" aria-label="Grafico payback investimento fotovoltaico"></canvas>
-        </div>
-        <div class="chart-legend" id="chart-legend"></div>
-      </section>
-    </main>
+      </div>
+    </section>
 
-    <footer class="footer">
-      <p>Calcolo Dimensionamento Fotovoltaico — Calcoli trasparenti · Scenario attivo: <strong id="out-scenario-label">Reale (100%)</strong></p>
+    <!-- PASSO 3 -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-brand-50 border-b border-brand-100 px-6 py-4 flex items-center gap-3">
+        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Passo 3</span>
+        <h2 class="text-lg font-bold">La Simulazione Economica</h2>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="border border-slate-200 rounded-xl p-4">
+            <p class="text-sm font-semibold text-slate-700 mb-1">Risparmio in Bolletta da Autoconsumo</p>
+            <p class="text-xs text-slate-400 mb-2" id="out-risparmio-calc">—</p>
+            <p class="text-xl font-bold tabular-nums text-emerald-600" id="out-risparmio">—</p>
+          </div>
+          <div class="border border-slate-200 rounded-xl p-4">
+            <p class="text-sm font-semibold text-slate-700 mb-1">Ricavo da Vendita GSE / Bonifico GSE</p>
+            <p class="text-xs text-slate-400 mb-2" id="out-gse-calc">—</p>
+            <p class="text-xl font-bold tabular-nums text-emerald-600" id="out-ricavo-gse">—</p>
+          </div>
+          <div class="border border-amber-200 bg-amber-50 rounded-xl p-4">
+            <p class="text-sm font-semibold text-amber-800 mb-1">Quota Annuale Detrazione Fiscale</p>
+            <p class="text-xs text-amber-600/70 mb-2" id="out-detrazione-calc">—</p>
+            <p class="text-xl font-bold tabular-nums text-amber-700" id="out-quota-detrazione">—</p>
+          </div>
+          <div class="border-2 border-brand-500 bg-brand-50 rounded-xl p-4">
+            <p class="text-sm font-bold text-brand-800 mb-1">Beneficio Economico Totale Annuo</p>
+            <p class="text-xs text-brand-600/70 mb-2" id="out-beneficio-calc">—</p>
+            <p class="text-2xl font-extrabold tabular-nums text-brand-700" id="out-beneficio-totale">—</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PASSO 4 -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-brand-50 border-b border-brand-100 px-6 py-4 flex items-center gap-3">
+        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Passo 4</span>
+        <h2 class="text-lg font-bold">Il Verdetto Finale</h2>
+      </div>
+      <div class="p-6 space-y-6">
+        <div class="grid md:grid-cols-2 gap-4">
+          <label class="block">
+            <span class="text-sm font-medium text-slate-600">Prezzo Chiavi in Mano</span>
+            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
+              <input type="number" id="costo" placeholder="6990" min="0" step="10"
+                class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
+              <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">€</span>
+            </div>
+          </label>
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm"><span class="text-slate-500">Detrazione fiscale 50%</span><span class="font-semibold tabular-nums" id="out-detrazione-totale">—</span></div>
+            <div class="flex justify-between text-sm"><span class="text-slate-500">Investimento Netto</span><span class="font-bold tabular-nums text-lg" id="out-investimento-netto">—</span></div>
+          </div>
+        </div>
+
+        <div id="verdict-box" class="rounded-2xl p-6 text-center border-2 transition-colors">
+          <p class="text-xs font-semibold uppercase tracking-wider opacity-70 mb-2">Tempo di Rientro</p>
+          <p class="text-4xl font-extrabold tabular-nums mb-2" id="out-payback">—</p>
+          <p class="text-sm" id="out-payback-detail">—</p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+          <p class="text-sm font-semibold text-slate-700 mb-3">Grafico Payback — cumulativo 15 anni</p>
+          <div class="relative h-72">
+            <canvas id="payback-chart"></canvas>
+          </div>
+          <p class="mt-4 text-sm font-medium text-slate-700 leading-relaxed" id="out-messaggio-bolletta">—</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="text-center text-xs text-slate-400 pb-4">
+      Scenario attivo: <strong id="out-scenario-label" class="text-brand-600">Produzione Reale (100%)</strong>
     </footer>
   </div>
+
+<script>
+/* ================================================================
+   SIMULATORE FV + BATTERIA — Motore di calcolo
+   Ogni funzione commenta la formula applicata.
+   ================================================================ */
+
+const FISCAL = { DETRAZIONE: 0.50, ANNI: 10 };
+const PREZZO_GSE = 0.09; // €/kWh — tariffa Ritiro Dedicato di riferimento
+const ANNI_GRAFICO = 15;
+
+const SCENARIO_LABELS = {
+  1:   'Produzione Reale (100%)',
+  0.8: 'Simulazione 80%',
+  0.5: 'Simulazione 50%',
+};
+
+const DATI_REALI = {
+  consumo: 2301,
+  spesa: 892.92,
+  irraggiamento: 1400,
+  kwp: 4.5,
+  batteria: 5.12,
+  costo: 6990,
+};
+
+let scenarioFactor = 1;
+let paybackChart = null;
+
+// --- Formattazione numeri italiani ---
+const fmt0 = (v) => new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 }).format(v);
+const fmt2 = (v) => new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+const fmt3 = (v) => new Intl.NumberFormat('it-IT', { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(v);
+const fmt1pct = (v) => new Intl.NumberFormat('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(v) + '%';
+const eur = (v) => fmt2(v) + ' €';
+const kwh = (v) => fmt0(v) + ' kWh';
+
+function parseInput(id) {
+  const el = document.getElementById(id);
+  return el ? (parseFloat(el.value) || 0) : 0;
+}
+
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+/** Costo Reale Energia = Spesa / Consumo (€/kWh) */
+function calcolaCostoEnergia(spesa, consumo) {
+  return consumo > 0 ? spesa / consumo : 0;
+}
+
+/** Produzione Lorda = kWp × Irraggiamento × FattoreScenario */
+function calcolaProduzioneLorda(kwp, irraggiamento, fattore) {
+  return kwp * irraggiamento * fattore;
+}
+
+/** Autoconsumo = min(Produzione Lorda, Consumo Annuo) */
+function calcolaAutoconsumo(produzione, consumo) {
+  return Math.min(produzione, consumo);
+}
+
+/** Sovrapproduzione = max(0, Produzione Lorda − Consumo Annuo) */
+function calcolaSovrapproduzione(produzione, consumo) {
+  return Math.max(0, produzione - consumo);
+}
+
+/** Indice di Copertura = (Produzione / Consumo) × 100 */
+function calcolaIndiceCopertura(produzione, consumo) {
+  return consumo > 0 ? (produzione / consumo) * 100 : 0;
+}
+
+/** Commento testuale sul rapporto produzione/consumo */
+function commentoCopertura(produzione, consumo) {
+  if (consumo <= 0) return '';
+  const ratio = produzione / consumo;
+  if (ratio >= 2.8) return 'Produce quasi il TRIPLO dei consumi';
+  if (ratio >= 1.8) return 'Produce quasi il DOPPIO dei consumi';
+  if (ratio >= 1.2) return 'Copre ampiamente i consumi annui';
+  if (ratio >= 0.9) return 'Copre quasi interamente i consumi';
+  if (ratio >= 0.5) return 'Copre circa la metà dei consumi';
+  return 'Impianto sottodimensionato rispetto al consumo';
+}
+
+/** Risparmio Bolletta = Autoconsumo × Costo Reale Energia */
+function calcolaRisparmioBolletta(autoconsumo, costoEnergia) {
+  return autoconsumo * costoEnergia;
+}
+
+/** Ricavo GSE = Sovrapproduzione × tariffa GSE */
+function calcolaRicavoGse(sovrapproduzione) {
+  return sovrapproduzione * PREZZO_GSE;
+}
+
+/** Investimento Netto = Costo Totale × 50% */
+function calcolaInvestimentoNetto(costo) {
+  return costo * FISCAL.DETRAZIONE;
+}
+
+/** Quota Annuale Detrazione = (Costo × 50%) / 10 */
+function calcolaQuotaDetrazione(costo) {
+  return (costo * FISCAL.DETRAZIONE) / FISCAL.ANNI;
+}
+
+/** Beneficio totale: operativo + quota detrazione (solo primi 10 anni) */
+function calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, anno) {
+  const base = risparmio + ricavoGse;
+  return anno <= FISCAL.ANNI ? base + quotaDetrazione : base;
+}
+
+/** Payback con interpolazione — usa beneficio potenziato anni 1-10 */
+function calcolaPayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione) {
+  if (investimentoNetto <= 0) return { years: 0, reached: true };
+
+  let cumulativo = -investimentoNetto;
+  for (let anno = 1; anno <= 50; anno++) {
+    const beneficio = calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, anno);
+    const precedente = cumulativo;
+    cumulativo += beneficio;
+    if (cumulativo >= 0) {
+      const frazione = beneficio > 0 ? (-precedente) / beneficio : 1;
+      return { years: (anno - 1) + frazione, reached: true };
+    }
+  }
+  return { years: 51, reached: false };
+}
+
+/** Formatta payback in "X anni e Y mesi" */
+function formatPayback(years) {
+  if (!isFinite(years) || years <= 0) return '—';
+  if (years > 50) return 'Oltre 50 anni';
+  const mesiTotali = Math.round(years * 12);
+  const anni = Math.floor(mesiTotali / 12);
+  const mesi = mesiTotali % 12;
+  if (anni === 0) return `${mesi} ${mesi === 1 ? 'mese' : 'mesi'}`;
+  if (mesi === 0) return `${anni} ${anni === 1 ? 'anno' : 'anni'}`;
+  return `${anni} ${anni === 1 ? 'anno' : 'anni'} e ${mesi} ${mesi === 1 ? 'mese' : 'mesi'}`;
+}
+
+/** Colore payback: verde ≤3, arancione 3-5, rosso >5 */
+function colorePayback(years) {
+  if (years <= 3) return 'green';
+  if (years <= 5) return 'orange';
+  return 'red';
+}
+
+const COLORI = {
+  green:  { border: '#16a34a', bg: 'rgba(22,163,74,0.12)',  box: 'bg-green-50 border-green-500 text-green-700' },
+  orange: { border: '#ea580c', bg: 'rgba(234,88,12,0.12)',  box: 'bg-orange-50 border-orange-500 text-orange-700' },
+  red:    { border: '#dc2626', bg: 'rgba(220,38,38,0.12)',   box: 'bg-red-50 border-red-500 text-red-700' },
+};
+
+/** Genera serie cumulative per grafico payback (0–15 anni) */
+function generaSeriePayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione, spesaAnnua) {
+  const labels = [];
+  const saldoInvestimento = [];
+  const bollettaCumulativa = [];
+  let saldo = -investimentoNetto;
+  let cumBolletta = 0;
+
+  for (let y = 0; y <= ANNI_GRAFICO; y++) {
+    labels.push(`Anno ${y}`);
+    if (y === 0) {
+      saldoInvestimento.push(-investimentoNetto);
+      bollettaCumulativa.push(0);
+      continue;
+    }
+    cumBolletta += spesaAnnua;
+    bollettaCumulativa.push(cumBolletta);
+    const beneficio = calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, y);
+    saldo += beneficio;
+    saldoInvestimento.push(saldo);
+  }
+  return { labels, saldoInvestimento, bollettaCumulativa };
+}
+
+/** Calcolo completo — orchestratore principale */
+function calcola() {
+  const consumo       = parseInput('consumo');
+  const spesa         = parseInput('spesa');
+  const irraggiamento = parseInput('irraggiamento');
+  const kwp           = parseInput('kwp');
+  const costo         = parseInput('costo');
+  // batteria: riservata a logica futura
+
+  const costoEnergia      = calcolaCostoEnergia(spesa, consumo);
+  const produzioneLorda   = calcolaProduzioneLorda(kwp, irraggiamento, scenarioFactor);
+  const autoconsumo       = calcolaAutoconsumo(produzioneLorda, consumo);
+  const sovrapproduzione  = calcolaSovrapproduzione(produzioneLorda, consumo);
+  const indiceCopertura   = calcolaIndiceCopertura(produzioneLorda, consumo);
+  const risparmio         = calcolaRisparmioBolletta(autoconsumo, costoEnergia);
+  const ricavoGse         = calcolaRicavoGse(sovrapproduzione);
+  const investimentoNetto = calcolaInvestimentoNetto(costo);
+  const detrazioneTotale  = costo * FISCAL.DETRAZIONE;
+  const quotaDetrazione   = calcolaQuotaDetrazione(costo);
+  const beneficioOperativo = risparmio + ricavoGse;
+  const beneficioTotale10  = beneficioOperativo + quotaDetrazione;
+  const payback           = calcolaPayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione);
+  const colore            = colorePayback(payback.years);
+  const serie             = generaSeriePayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione, spesa);
+
+  return {
+    consumo, spesa, kwp, irraggiamento, costo,
+    costoEnergia, produzioneLorda, autoconsumo, sovrapproduzione,
+    indiceCopertura, risparmio, ricavoGse, investimentoNetto,
+    detrazioneTotale, quotaDetrazione, beneficioOperativo,
+    beneficioTotale10, payback, colore, serie,
+  };
+}
+
+/** Aggiorna tutta l'interfaccia */
+function aggiornaUI() {
+  const r = calcola();
+
+  // Passo 1
+  setText('out-costo-energia', fmt3(r.costoEnergia) + ' €/kWh');
+
+  // Passo 2
+  setText('out-produzione', kwh(r.produzioneLorda));
+  setText('out-produzione-formula',
+    `${fmt2(r.kwp)} kWp × ${fmt0(r.irraggiamento)} × ${Math.round(scenarioFactor * 100)}%`);
+  setText('out-autoconsumo', kwh(r.autoconsumo));
+  setText('out-sovrapproduzione', kwh(r.sovrapproduzione));
+  setText('out-copertura', fmt1pct(r.indiceCopertura));
+  setText('out-copertura-commento', commentoCopertura(r.produzioneLorda, r.consumo));
+
+  // Passo 3
+  setText('out-risparmio-calc', `${kwh(r.autoconsumo)} × ${fmt3(r.costoEnergia)} €/kWh`);
+  setText('out-risparmio', eur(r.risparmio) + '/anno');
+  setText('out-gse-calc', `${kwh(r.sovrapproduzione)} × ${fmt2(PREZZO_GSE)} €/kWh`);
+  setText('out-ricavo-gse', eur(r.ricavoGse) + '/anno');
+  setText('out-detrazione-calc', `50% di ${eur(r.costo)} ÷ ${FISCAL.ANNI} anni`);
+  setText('out-quota-detrazione', eur(r.quotaDetrazione) + '/anno');
+  setText('out-beneficio-calc',
+    `${eur(r.beneficioOperativo)} + ${eur(r.quotaDetrazione)} detrazione (anni 1–10)`);
+  setText('out-beneficio-totale', eur(r.beneficioTotale10) + '/anno');
+
+  // Passo 4
+  setText('out-detrazione-totale', eur(r.detrazioneTotale));
+  setText('out-investimento-netto', eur(r.investimentoNetto));
+  setText('out-payback', formatPayback(r.payback.years));
+  setText('out-payback-detail',
+    r.payback.reached
+      ? `Investimento netto recuperato in ${formatPayback(r.payback.years)}`
+      : 'Payback oltre 50 anni — rivedi i parametri');
+
+  const box = document.getElementById('verdict-box');
+  box.className = `rounded-2xl p-6 text-center border-2 transition-colors ${COLORI[r.colore].box}`;
+
+  setText('out-messaggio-bolletta',
+    `Rispetto al continuare a pagare la bolletta elettrica, questo impianto ` +
+    (r.payback.reached
+      ? `si ripaga in ${formatPayback(r.payback.years)}. ` +
+        `In ${FISCAL.ANNI} anni avresti speso ${eur(r.spesa * FISCAL.ANNI)} in bolletta senza alcun ritorno, ` +
+        `mentre con il fotovoltaico generi un beneficio cumulativo di ${eur(r.beneficioTotale10 * FISCAL.ANNI)} ` +
+        `(inclusa detrazione) nei primi ${FISCAL.ANNI} anni.`
+      : `non raggiunge il pareggio nei tempi previsti. Continuare a pagare ${eur(r.spesa)}/anno non genera valore patrimoniale.`)
+  );
+
+  setText('out-scenario-label', SCENARIO_LABELS[scenarioFactor]);
+
+  aggiornaGrafico(r);
+}
+
+/** Grafico Chart.js payback cumulativo */
+function aggiornaGrafico(r) {
+  const canvas = document.getElementById('payback-chart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  const c = COLORI[r.colore];
+  const { labels, saldoInvestimento, bollettaCumulativa } = r.serie;
+  const paybackIdx = r.payback.reached
+    ? Math.min(Math.ceil(r.payback.years), ANNI_GRAFICO)
+    : null;
+
+  if (paybackChart) paybackChart.destroy();
+
+  paybackChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Bolletta cumulativa (senza FV)',
+          data: bollettaCumulativa,
+          borderColor: '#94a3b8',
+          backgroundColor: 'rgba(148,163,184,0.08)',
+          borderDash: [6, 4],
+          borderWidth: 2,
+          fill: true,
+          tension: 0.15,
+          pointRadius: 0,
+        },
+        {
+          label: 'Saldo investimento (con FV)',
+          data: saldoInvestimento,
+          borderColor: c.border,
+          backgroundColor: c.bg,
+          borderWidth: 3,
+          fill: true,
+          tension: 0.15,
+          pointRadius: saldoInvestimento.map((_, i) => i === paybackIdx ? 7 : 0),
+          pointBackgroundColor: saldoInvestimento.map((_, i) => i === paybackIdx ? c.border : 'transparent'),
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16 } },
+        tooltip: {
+          callbacks: {
+            label(ctx) {
+              const v = ctx.parsed.y;
+              return `${ctx.dataset.label}: ${v >= 0 ? '+' : ''}${fmt2(v)} €`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { maxTicksLimit: 16, font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { callback: (v) => fmt0(v) + ' €', font: { size: 11 } },
+        },
+      },
+    },
+  });
+}
+
+/** Carica dati reali predefiniti */
+function caricaDatiReali() {
+  document.getElementById('consumo').value       = DATI_REALI.consumo;
+  document.getElementById('spesa').value         = DATI_REALI.spesa;
+  document.getElementById('irraggiamento').value = DATI_REALI.irraggiamento;
+  document.getElementById('kwp').value           = DATI_REALI.kwp;
+  document.getElementById('batteria').value      = DATI_REALI.batteria;
+  document.getElementById('costo').value         = DATI_REALI.costo;
+  aggiornaUI();
+}
+
+/** Init */
+document.addEventListener('DOMContentLoaded', () => {
+  // Scenario buttons
+  document.querySelectorAll('.scenario-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.scenario-btn').forEach((b) => {
+        b.classList.remove('active-scenario', 'border-brand-600', 'bg-brand-600', 'text-white', 'shadow-md');
+        b.classList.add('border-slate-200', 'bg-white', 'text-slate-600');
+      });
+      btn.classList.add('active-scenario', 'border-brand-600', 'bg-brand-600', 'text-white', 'shadow-md');
+      btn.classList.remove('border-slate-200', 'bg-white', 'text-slate-600');
+      scenarioFactor = parseFloat(btn.dataset.scenario);
+      aggiornaUI();
+    });
+  });
+
+  // Input reattivi
+  ['consumo', 'spesa', 'irraggiamento', 'kwp', 'batteria', 'costo'].forEach((id) => {
+    document.getElementById(id).addEventListener('input', aggiornaUI);
+  });
+
+  document.getElementById('btn-load-real').addEventListener('click', caricaDatiReali);
+
+  // Carica dati reali al primo avvio
+  caricaDatiReali();
+});
+</script>
 </body>
 </html>
