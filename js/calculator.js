@@ -1,5 +1,5 @@
 /**
- * PV Sizing Calculator v3
+ * Calcolo Dimensionamento Fotovoltaico — Motore di calcolo
  * Motore di calcolo trasparente per dimensionamento fotovoltaico residenziale.
  */
 

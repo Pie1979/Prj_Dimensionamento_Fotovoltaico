@@ -1,4 +1,4 @@
-# PV Sizing Dashboard v3
+# Calcolo Dimensionamento Fotovoltaico
 
 Strumento web per il dimensionamento fotovoltaico residenziale con calcoli trasparenti, organizzato in 4 passi.
 

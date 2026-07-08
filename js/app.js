@@ -1,5 +1,5 @@
 /**
- * PV Sizing Dashboard v3 — UI Controller
+ * Calcolo Dimensionamento Fotovoltaico — UI Controller
  */
 
 let currentScenario = 1;
