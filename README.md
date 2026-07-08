@@ -4,16 +4,16 @@ Strumento web self-contained per la simulazione di impianti fotovoltaici residen
 
 ## URL pubblico
 
+- **Vercel (principale):** https://prj-dimensionamento-fotovoltaico.vercel.app
 - **GitHub Pages:** https://pie1979.github.io/Prj_Dimensionamento_Fotovoltaico/
-- **Vercel:** deploy automatico da `main` (con Web Analytics attivo)
 
 ## Vercel Analytics
 
 Il progetto include `@vercel/analytics`. Per attivare le statistiche:
 
-1. Importa il repo su [vercel.com](https://vercel.com) (Framework: **Other**)
-2. Abilita **Web Analytics** nel progetto (Settings → Analytics)
-3. Ogni push su `main` aggiorna il deploy
+1. Apri il [dashboard Vercel](https://vercel.com/pm79/prj-dimensionamento-fotovoltaico)
+2. Vai su **Analytics → Enable Web Analytics**
+3. Ogni push su `main` aggiorna il deploy automaticamente (repo collegato)
 
 ## Avvio locale
 
