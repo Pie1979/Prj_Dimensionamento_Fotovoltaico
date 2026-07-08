@@ -49,6 +49,7 @@
           Simulazione<br><span class="text-xs font-normal">50%</span>
         </button>
       </div>
+      <p class="text-xs text-slate-500 text-center mt-3 leading-relaxed">Simula condizioni ottimali (100%), prudenziali (80%) o pessimistiche (50%) di sole per testare la robustezza dell'investimento.</p>
     </div>
 
     <!-- CARICA FATTURA -->
@@ -58,6 +59,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
         <span id="btn-fattura-label">La mia fattura</span>
       </label>
+      <p class="text-xs text-slate-500 text-center max-w-md">Carica il PDF o la foto della tua bolletta elettrica: il simulatore leggerà consumo e spesa in automatico.</p>
       <p id="fattura-status" class="text-xs text-slate-500 text-center max-w-md hidden"></p>
     </div>
 
@@ -68,9 +70,11 @@
         <h2 class="text-lg font-bold">Identikit Bolletta</h2>
       </div>
       <div class="p-6 space-y-5">
+        <p class="text-sm text-slate-600 leading-relaxed">Partiamo dalla tua situazione attuale: quanta energia consumi e quanto paghi ogni anno. Questi due numeri servono a capire quanto costa oggi ogni kWh che usi in casa.</p>
         <div class="grid md:grid-cols-2 gap-4">
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Consumo Annuo Corrente</span>
+            <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanti kWh consumi in un anno intero. Lo trovi in bolletta come "consumo annuo" oppure sommando i consumi dei periodi fatturati.</p>
             <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
               <input type="number" id="consumo" placeholder="2301" min="0" step="1"
                 class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
@@ -79,6 +83,7 @@
           </label>
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Spesa Annua Corrente</span>
+            <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanto spendi in un anno per l'elettricità (tasse incluse). Se hai solo la bolletta bimestrale, moltiplica l'importo per 6.</p>
             <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
               <input type="number" id="spesa" placeholder="892.92" min="0" step="0.01"
                 class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
@@ -87,10 +92,13 @@
           </label>
         </div>
         <div class="bg-slate-50 rounded-xl px-5 py-4 flex items-center justify-between border border-slate-200">
-          <span class="text-sm font-medium text-slate-600">Costo Reale Energia</span>
+          <div>
+            <span class="text-sm font-medium text-slate-600">Costo Reale Energia</span>
+            <p class="text-xs text-slate-400 mt-0.5">Quanto ti costa ogni kWh oggi, calcolato dalla tua bolletta.</p>
+          </div>
           <span class="text-xl font-bold tabular-nums text-brand-700" id="out-costo-energia">—</span>
         </div>
-        <p class="text-xs text-slate-400">= Spesa Annua ÷ Consumo Annuo (€/kWh, 3 decimali)</p>
+        <p class="text-xs text-slate-400">Formula: Spesa Annua ÷ Consumo Annuo (€/kWh)</p>
       </div>
     </section>
 
@@ -101,18 +109,21 @@
         <h2 class="text-lg font-bold">Il Dimensionamento &amp; Sovrapproduzione</h2>
       </div>
       <div class="p-6 space-y-5">
+        <p class="text-sm text-slate-600 leading-relaxed">Definiamo l'impianto e calcoliamo quanta energia produce, quanta usi direttamente e quanta vendi in rete. Così capisci se l'impianto è sovradimensionato rispetto ai tuoi consumi.</p>
         <div class="grid md:grid-cols-3 gap-4">
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Irraggiamento Locale</span>
+            <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanta energia produce 1 kWp di pannelli nella tua zona in un anno. Per l'Italia centrale usa ~1.400 kWh/kWp (fonte ENEA).</p>
             <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
               <input type="number" id="irraggiamento" placeholder="1400" min="0" step="10"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-2 bg-slate-50 text-xs text-slate-500 border-l border-slate-300">kWh/kWp</span>
             </div>
-            <span class="text-xs text-slate-400 mt-0.5 block">1.400 (dati ENEA)</span>
+            <span class="text-xs text-slate-400 mt-0.5 block">Valore tipico Italia centrale</span>
           </label>
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Potenza Impianto Proposta</span>
+            <p class="text-xs text-slate-400 mt-0.5 mb-1">La potenza totale dei pannelli in kWp (kilowatt di picco). È il valore che trovi nel preventivo dell'installatore, es. 4,5 kWp.</p>
             <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
               <input type="number" id="kwp" placeholder="4.50" min="0" step="0.1"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
@@ -121,12 +132,13 @@
           </label>
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Capacità Batteria</span>
+            <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanta energia può accumulare la batteria in kWh. Campo opzionale: verrà usato in una versione futura per calcolare più autoconsumo.</p>
             <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
               <input type="number" id="batteria" placeholder="5.12" min="0" step="0.01"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">kWh</span>
             </div>
-            <span class="text-xs text-slate-400 mt-0.5 block">Opzionale · logica futura</span>
+            <span class="text-xs text-slate-400 mt-0.5 block">Opzionale</span>
           </label>
         </div>
 
@@ -135,21 +147,25 @@
             <p class="text-xs font-semibold uppercase tracking-wide text-teal-600 mb-1">Produzione Totale Lorda</p>
             <p class="text-2xl font-extrabold tabular-nums" id="out-produzione">—</p>
             <p class="text-xs text-teal-700/70 mt-1" id="out-produzione-formula">kWp × Irraggiamento × Scenario</p>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Tutta l'energia che i pannelli generano in un anno, prima di qualsiasi perdita o utilizzo.</p>
           </div>
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Autoconsumo Stimato</p>
             <p class="text-2xl font-extrabold tabular-nums" id="out-autoconsumo">—</p>
             <p class="text-xs text-slate-400 mt-1">min(Produzione, Consumo)</p>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Energia prodotta e consumata subito in casa, senza passare dalla rete. Ti fa risparmiare sulla bolletta.</p>
           </div>
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Sovrapproduzione / Immessa in Rete</p>
             <p class="text-2xl font-extrabold tabular-nums" id="out-sovrapproduzione">—</p>
             <p class="text-xs text-slate-400 mt-1">max(0, Produzione − Consumo)</p>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Energia in eccesso venduta al GSE. Non la usi in casa, ma genera un compenso annuale.</p>
           </div>
           <div class="bg-gradient-to-br from-blue-50 to-sky-50 border border-blue-200 rounded-xl p-4">
             <p class="text-xs font-semibold uppercase tracking-wide text-blue-600 mb-1">Indice di Copertura</p>
             <p class="text-2xl font-extrabold tabular-nums text-blue-700" id="out-copertura">—</p>
             <p class="text-sm font-medium text-blue-800/80 mt-1" id="out-copertura-commento">—</p>
+            <p class="text-xs text-slate-500 mt-2 leading-relaxed">Quanto la produzione copre i tuoi consumi. Sopra il 100% significa che produci più di quanto consumi.</p>
           </div>
         </div>
       </div>
@@ -162,24 +178,29 @@
         <h2 class="text-lg font-bold">La Simulazione Economica</h2>
       </div>
       <div class="p-6 space-y-4">
+        <p class="text-sm text-slate-600 leading-relaxed">Traduciamo l'energia in soldi: quanto risparmi in bolletta, quanto incassi dal GSE e quanto recuperi con la detrazione fiscale. La somma è il tuo guadagno netto ogni anno.</p>
         <div class="grid sm:grid-cols-2 gap-3">
           <div class="border border-slate-200 rounded-xl p-4">
             <p class="text-sm font-semibold text-slate-700 mb-1">Risparmio in Bolletta da Autoconsumo</p>
+            <p class="text-xs text-slate-400 mb-2 leading-relaxed">Quanto non paghi più in bolletta grazie all'energia usata direttamente in casa.</p>
             <p class="text-xs text-slate-400 mb-2" id="out-risparmio-calc">—</p>
             <p class="text-xl font-bold tabular-nums text-emerald-600" id="out-risparmio">—</p>
           </div>
           <div class="border border-slate-200 rounded-xl p-4">
             <p class="text-sm font-semibold text-slate-700 mb-1">Ricavo da Vendita GSE / Bonifico GSE</p>
+            <p class="text-xs text-slate-400 mb-2 leading-relaxed">Il compenso annuale che ricevi per l'energia immessa in rete e venduta al GSE.</p>
             <p class="text-xs text-slate-400 mb-2" id="out-gse-calc">—</p>
             <p class="text-xl font-bold tabular-nums text-emerald-600" id="out-ricavo-gse">—</p>
           </div>
           <div class="border border-amber-200 bg-amber-50 rounded-xl p-4">
             <p class="text-sm font-semibold text-amber-800 mb-1">Quota Annuale Detrazione Fiscale</p>
+            <p class="text-xs text-amber-600/70 mb-2 leading-relaxed">La detrazione IRPEF del 50% spalmata in 10 anni. È un beneficio fiscale aggiuntivo, non un risparmio in bolletta.</p>
             <p class="text-xs text-amber-600/70 mb-2" id="out-detrazione-calc">—</p>
             <p class="text-xl font-bold tabular-nums text-amber-700" id="out-quota-detrazione">—</p>
           </div>
           <div class="border-2 border-brand-500 bg-brand-50 rounded-xl p-4">
             <p class="text-sm font-bold text-brand-800 mb-1">Beneficio Economico Totale Annuo</p>
+            <p class="text-xs text-brand-600/70 mb-2 leading-relaxed">La somma di risparmio bolletta + ricavo GSE + quota detrazione. È quanto "guadagni" ogni anno nei primi 10 anni.</p>
             <p class="text-xs text-brand-600/70 mb-2" id="out-beneficio-calc">—</p>
             <p class="text-2xl font-extrabold tabular-nums text-brand-700" id="out-beneficio-totale">—</p>
           </div>
@@ -194,29 +215,39 @@
         <h2 class="text-lg font-bold">Il Verdetto Finale</h2>
       </div>
       <div class="p-6 space-y-6">
+        <p class="text-sm text-slate-600 leading-relaxed">Confrontiamo quanto spendi per l'impianto con quanto risparmi ogni anno. Il tempo di rientro ti dice in quanti anni l'investimento si ripaga da solo.</p>
         <div class="grid md:grid-cols-2 gap-4">
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Prezzo Chiavi in Mano</span>
+            <p class="text-xs text-slate-400 mt-0.5 mb-1">Il costo totale dell'impianto comprensivo di pannelli, inverter, installazione e pratiche. È l'importo del preventivo "tutto incluso".</p>
             <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
               <input type="number" id="costo" placeholder="6990" min="0" step="10"
                 class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">€</span>
             </div>
           </label>
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm"><span class="text-slate-500">Detrazione fiscale 50%</span><span class="font-semibold tabular-nums" id="out-detrazione-totale">—</span></div>
-            <div class="flex justify-between text-sm"><span class="text-slate-500">Investimento Netto</span><span class="font-bold tabular-nums text-lg" id="out-investimento-netto">—</span></div>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between text-sm"><span class="text-slate-500">Detrazione fiscale 50%</span><span class="font-semibold tabular-nums" id="out-detrazione-totale">—</span></div>
+              <p class="text-xs text-slate-400 mt-0.5">Metà del costo che recuperi in detrazione IRPEF in 10 anni.</p>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm"><span class="text-slate-500">Investimento Netto</span><span class="font-bold tabular-nums text-lg" id="out-investimento-netto">—</span></div>
+              <p class="text-xs text-slate-400 mt-0.5">Quanto spendi davvero di tasca tua dopo la detrazione (Costo × 50%).</p>
+            </div>
           </div>
         </div>
 
         <div id="verdict-box" class="rounded-2xl p-6 text-center border-2 transition-colors">
-          <p class="text-xs font-semibold uppercase tracking-wider opacity-70 mb-2">Tempo di Rientro</p>
+          <p class="text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Tempo di Rientro</p>
+          <p class="text-xs opacity-60 mb-2">Quanti anni servono per recuperare l'investimento netto con risparmi, ricavi GSE e detrazione.</p>
           <p class="text-4xl font-extrabold tabular-nums mb-2" id="out-payback">—</p>
           <p class="text-sm" id="out-payback-detail">—</p>
         </div>
 
         <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
-          <p class="text-sm font-semibold text-slate-700 mb-3">Grafico Payback — cumulativo 15 anni</p>
+          <p class="text-sm font-semibold text-slate-700 mb-1">Grafico Payback — cumulativo 15 anni</p>
+          <p class="text-xs text-slate-500 mb-3 leading-relaxed">La linea colorata mostra il saldo del tuo investimento nel tempo. Quando arriva a zero, l'impianto è ripagato. La linea grigia è quanto avresti speso in bolletta senza fotovoltaico.</p>
           <div class="relative h-72">
             <canvas id="payback-chart"></canvas>
           </div>
