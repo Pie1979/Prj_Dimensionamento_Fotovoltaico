@@ -12,31 +12,90 @@
           colors: {
             brand: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' },
           },
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          fontFamily: { sans: ['Poppins', 'system-ui', 'sans-serif'] },
         },
       },
     };
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 40%, #fffbeb 100%);
+      background-attachment: fixed;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, #0d948820 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .app-shell { position: relative; z-index: 1; }
+    .kpi-value { transition: opacity 0.25s ease, transform 0.25s ease; }
+    .kpi-value.kpi-pulse { animation: kpiPulse 0.45s ease; }
+    @keyframes kpiPulse {
+      0% { opacity: 0.5; transform: scale(0.97); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .input-wrap { transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; }
+    .input-wrap.input-filled { border-color: #34d399 !important; background: #f0fdf4; box-shadow: 0 0 0 3px #34d39922; }
+    .btn-fattura { background: linear-gradient(135deg, #0d9488, #0369a1); transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-fattura:hover { transform: translateY(-2px); box-shadow: 0 8px 24px #0d948844; }
+    .step-line { height: 3px; flex: 1; background: #e2e8f0; border-radius: 99px; }
+    .step-line.active { background: linear-gradient(90deg, #0d9488, #f59e0b); }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
-<body class="bg-slate-100 text-slate-900 font-sans antialiased">
+<body class="text-slate-900 font-sans antialiased min-h-screen">
 
-  <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+  <div class="app-shell max-w-4xl mx-auto px-4 py-8 space-y-6">
 
-    <!-- HEADER -->
-    <header class="text-center space-y-2">
-      <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
-        Simulatore FV + Batteria – Analisi di Convenienza 2026
-      </h1>
-      <p class="text-slate-500 text-sm">Calcoli trasparenti · ogni numero è tracciabile</p>
+    <!-- HERO -->
+    <header class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-brand-500 to-teal-700 p-8 text-white shadow-xl shadow-brand-600/20 text-center">
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+      <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-amber-300/20 rounded-full blur-xl"></div>
+      <div class="relative flex flex-col items-center gap-3">
+        <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-3xl shadow-lg">☀️</div>
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">
+          Simulatore FV + Batteria<br class="md:hidden"> – Analisi di Convenienza 2026
+        </h1>
+        <p class="text-white/90 text-sm md:text-base max-w-lg">Scopri in 4 passi se l'impianto conviene — calcoli trasparenti, ogni numero è tracciabile.</p>
+      </div>
     </header>
 
+    <!-- STEPPER -->
+    <nav class="bg-white/80 backdrop-blur rounded-2xl shadow-sm border border-white p-4" aria-label="Progresso analisi">
+      <div class="flex items-center gap-2">
+        <div class="flex flex-col items-center gap-1 min-w-0 flex-1">
+          <div class="w-8 h-8 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center shadow">1</div>
+          <span class="text-[10px] font-semibold text-blue-600 text-center leading-tight">Bolletta</span>
+        </div>
+        <div class="step-line active"></div>
+        <div class="flex flex-col items-center gap-1 min-w-0 flex-1">
+          <div class="w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center shadow">2</div>
+          <span class="text-[10px] font-semibold text-brand-700 text-center leading-tight">Dimensionamento</span>
+        </div>
+        <div class="step-line active"></div>
+        <div class="flex flex-col items-center gap-1 min-w-0 flex-1">
+          <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shadow">3</div>
+          <span class="text-[10px] font-semibold text-emerald-600 text-center leading-tight">Economia</span>
+        </div>
+        <div class="step-line active"></div>
+        <div class="flex flex-col items-center gap-1 min-w-0 flex-1">
+          <div class="w-8 h-8 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center shadow">4</div>
+          <span class="text-[10px] font-semibold text-amber-600 text-center leading-tight">Verdetto</span>
+        </div>
+      </div>
+    </nav>
+
     <!-- SELEZTORE SCENARIO -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-md border border-white p-5">
       <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 text-center">Scenario di produzione</p>
       <div class="grid grid-cols-3 gap-2" role="group" aria-label="Seleziona scenario">
         <button type="button" data-scenario="1" class="scenario-btn active-scenario rounded-xl py-3 px-2 text-sm font-semibold transition-all border-2 border-brand-600 bg-brand-600 text-white shadow-md">
@@ -55,8 +114,8 @@
     <!-- CARICA FATTURA -->
     <div class="flex flex-col items-center gap-2">
       <input type="file" id="input-fattura" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,application/pdf,image/*,text/plain" class="hidden">
-      <label for="input-fattura" id="btn-fattura" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl shadow transition-colors cursor-pointer">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+      <label for="input-fattura" id="btn-fattura" class="btn-fattura inline-flex items-center gap-3 px-6 py-3 text-white text-sm font-semibold rounded-2xl shadow-lg cursor-pointer">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
         <span id="btn-fattura-label">La mia fattura</span>
       </label>
       <p class="text-xs text-slate-500 text-center max-w-md">Carica il PDF o la foto della tua bolletta elettrica: il simulatore leggerà consumo e spesa in automatico.</p>
@@ -64,10 +123,10 @@
     </div>
 
     <!-- PASSO 1 -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="bg-brand-50 border-b border-brand-100 px-6 py-4 flex items-center gap-3">
-        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Passo 1</span>
-        <h2 class="text-lg font-bold">Identikit Bolletta</h2>
+    <section id="passo-1" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-50 to-sky-50 border-b border-blue-100 px-6 py-4 flex items-center gap-3">
+        <span class="bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide shadow-sm">Passo 1</span>
+        <h2 class="text-lg font-bold text-blue-900">Identikit Bolletta</h2>
       </div>
       <div class="p-6 space-y-5">
         <p class="text-sm text-slate-600 leading-relaxed">Partiamo dalla tua situazione attuale: quanta energia consumi e quanto paghi ogni anno. Questi due numeri servono a capire quanto costa oggi ogni kWh che usi in casa.</p>
@@ -75,7 +134,7 @@
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Consumo Annuo Corrente</span>
             <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanti kWh consumi in un anno intero. Lo trovi in bolletta come "consumo annuo" oppure sommando i consumi dei periodi fatturati.</p>
-            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
+            <div class="input-wrap mt-1 flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400" data-field="consumo">
               <input type="number" id="consumo" placeholder="2301" min="0" step="1"
                 class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">kWh</span>
@@ -84,8 +143,8 @@
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Spesa Annua Corrente</span>
             <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanto spendi in un anno per l'elettricità (tasse incluse). Se hai solo la bolletta bimestrale, moltiplica l'importo per 6.</p>
-            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
-              <input type="number" id="spesa" placeholder="892.92" min="0" step="0.01"
+            <div class="input-wrap mt-1 flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400" data-field="spesa">
+              <input type="text" inputmode="decimal" id="spesa" placeholder="892,92"
                 class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">€</span>
             </div>
@@ -103,10 +162,10 @@
     </section>
 
     <!-- PASSO 2 -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="bg-brand-50 border-b border-brand-100 px-6 py-4 flex items-center gap-3">
-        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Passo 2</span>
-        <h2 class="text-lg font-bold">Il Dimensionamento &amp; Sovrapproduzione</h2>
+    <section id="passo-2" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
+      <div class="bg-gradient-to-r from-brand-50 to-teal-50 border-b border-brand-100 px-6 py-4 flex items-center gap-3">
+        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide shadow-sm">Passo 2</span>
+        <h2 class="text-lg font-bold text-brand-900">Il Dimensionamento &amp; Sovrapproduzione</h2>
       </div>
       <div class="p-6 space-y-5">
         <p class="text-sm text-slate-600 leading-relaxed">Definiamo l'impianto e calcoliamo quanta energia produce, quanta usi direttamente e quanta vendi in rete. Così capisci se l'impianto è sovradimensionato rispetto ai tuoi consumi.</p>
@@ -114,8 +173,8 @@
           <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Irraggiamento Locale</span>
             <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[4.5rem] leading-relaxed">Quanta energia produce 1 kWp di pannelli nella tua zona in un anno. Per l'Italia centrale usa ~1.400 kWh/kWp (fonte ENEA).</p>
-            <div class="flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
-              <input type="number" id="irraggiamento" placeholder="1400" min="0" step="10"
+            <div class="input-wrap flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500" data-field="irraggiamento">
+              <input type="text" inputmode="decimal" id="irraggiamento" value="1400" placeholder="1400"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-2 bg-slate-50 text-xs text-slate-500 border-l border-slate-300 whitespace-nowrap">kWh/kWp</span>
             </div>
@@ -124,8 +183,8 @@
           <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Potenza Impianto Proposta</span>
             <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[4.5rem] leading-relaxed">La potenza totale dei pannelli in kWp (kilowatt di picco). È il valore che trovi nel preventivo dell'installatore, es. 4,5 kWp.</p>
-            <div class="flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
-              <input type="number" id="kwp" placeholder="4.50" min="0" step="0.1"
+            <div class="input-wrap flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500" data-field="kwp">
+              <input type="text" inputmode="decimal" id="kwp" placeholder="4,50"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300 whitespace-nowrap">kWp</span>
             </div>
@@ -134,8 +193,8 @@
           <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Capacità Batteria</span>
             <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[4.5rem] leading-relaxed">Energia accumulabile in kWh. Campo opzionale, per calcoli futuri con batteria.</p>
-            <div class="flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
-              <input type="number" id="batteria" placeholder="5.12" min="0" step="0.01"
+            <div class="input-wrap flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500" data-field="batteria">
+              <input type="text" inputmode="decimal" id="batteria" placeholder="5,12"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300 whitespace-nowrap">kWh</span>
             </div>
@@ -144,27 +203,39 @@
         </div>
 
         <div class="grid sm:grid-cols-2 gap-3">
-          <div class="bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-200 rounded-xl p-4">
-            <p class="text-xs font-semibold uppercase tracking-wide text-teal-600 mb-1">Produzione Totale Lorda</p>
-            <p class="text-2xl font-extrabold tabular-nums" id="out-produzione">—</p>
+          <div class="bg-white border border-teal-100 border-l-4 border-l-teal-500 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">⚡</span>
+              <p class="text-xs font-semibold uppercase tracking-wide text-teal-600">Produzione Totale Lorda</p>
+            </div>
+            <p class="text-2xl font-extrabold tabular-nums kpi-value" id="out-produzione">—</p>
             <p class="text-xs text-teal-700/70 mt-1" id="out-produzione-formula">kWp × Irraggiamento × Scenario</p>
             <p class="text-xs text-slate-500 mt-2 leading-relaxed">Tutta l'energia che i pannelli generano in un anno, prima di qualsiasi perdita o utilizzo.</p>
           </div>
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Autoconsumo Stimato</p>
-            <p class="text-2xl font-extrabold tabular-nums" id="out-autoconsumo">—</p>
+          <div class="bg-white border border-slate-200 border-l-4 border-l-emerald-500 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">🏠</span>
+              <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600">Autoconsumo Stimato</p>
+            </div>
+            <p class="text-2xl font-extrabold tabular-nums kpi-value" id="out-autoconsumo">—</p>
             <p class="text-xs text-slate-400 mt-1">min(Produzione, Consumo)</p>
             <p class="text-xs text-slate-500 mt-2 leading-relaxed">Energia prodotta e consumata subito in casa, senza passare dalla rete. Ti fa risparmiare sulla bolletta.</p>
           </div>
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Sovrapproduzione / Immessa in Rete</p>
-            <p class="text-2xl font-extrabold tabular-nums" id="out-sovrapproduzione">—</p>
+          <div class="bg-white border border-slate-200 border-l-4 border-l-sky-500 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">↗</span>
+              <p class="text-xs font-semibold uppercase tracking-wide text-sky-600">Sovrapproduzione / Immessa in Rete</p>
+            </div>
+            <p class="text-2xl font-extrabold tabular-nums kpi-value" id="out-sovrapproduzione">—</p>
             <p class="text-xs text-slate-400 mt-1">max(0, Produzione − Consumo)</p>
             <p class="text-xs text-slate-500 mt-2 leading-relaxed">Energia in eccesso venduta al GSE. Non la usi in casa, ma genera un compenso annuale.</p>
           </div>
-          <div class="bg-gradient-to-br from-blue-50 to-sky-50 border border-blue-200 rounded-xl p-4">
-            <p class="text-xs font-semibold uppercase tracking-wide text-blue-600 mb-1">Indice di Copertura</p>
-            <p class="text-2xl font-extrabold tabular-nums text-blue-700" id="out-copertura">—</p>
+          <div class="bg-white border border-blue-100 border-l-4 border-l-blue-500 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">📊</span>
+              <p class="text-xs font-semibold uppercase tracking-wide text-blue-600">Indice di Copertura</p>
+            </div>
+            <p class="text-2xl font-extrabold tabular-nums text-blue-700 kpi-value" id="out-copertura">—</p>
             <p class="text-sm font-medium text-blue-800/80 mt-1" id="out-copertura-commento">—</p>
             <p class="text-xs text-slate-500 mt-2 leading-relaxed">Quanto la produzione copre i tuoi consumi. Sopra il 100% significa che produci più di quanto consumi.</p>
           </div>
@@ -173,34 +244,46 @@
     </section>
 
     <!-- PASSO 3 -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="bg-brand-50 border-b border-brand-100 px-6 py-4 flex items-center gap-3">
-        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Passo 3</span>
-        <h2 class="text-lg font-bold">La Simulazione Economica</h2>
+    <section id="passo-3" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
+      <div class="bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100 px-6 py-4 flex items-center gap-3">
+        <span class="bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide shadow-sm">Passo 3</span>
+        <h2 class="text-lg font-bold text-emerald-900">La Simulazione Economica</h2>
       </div>
       <div class="p-6 space-y-4">
         <p class="text-sm text-slate-600 leading-relaxed">Traduciamo l'energia in soldi: quanto risparmi in bolletta, quanto incassi dal GSE e quanto recuperi con la detrazione fiscale. La somma è il tuo guadagno netto ogni anno.</p>
         <div class="grid sm:grid-cols-2 gap-3">
-          <div class="border border-slate-200 rounded-xl p-4">
-            <p class="text-sm font-semibold text-slate-700 mb-1">Risparmio in Bolletta da Autoconsumo</p>
+          <div class="border border-slate-200 border-l-4 border-l-emerald-400 bg-white rounded-xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-1">
+              <span>💡</span>
+              <p class="text-sm font-semibold text-slate-700">Risparmio in Bolletta da Autoconsumo</p>
+            </div>
             <p class="text-xs text-slate-400 mb-2 leading-relaxed">Quanto non paghi più in bolletta grazie all'energia usata direttamente in casa.</p>
             <p class="text-xs text-slate-400 mb-2" id="out-risparmio-calc">—</p>
             <p class="text-xl font-bold tabular-nums text-emerald-600" id="out-risparmio">—</p>
           </div>
-          <div class="border border-slate-200 rounded-xl p-4">
-            <p class="text-sm font-semibold text-slate-700 mb-1">Ricavo da Vendita GSE / Bonifico GSE</p>
+          <div class="border border-slate-200 border-l-4 border-l-sky-400 bg-white rounded-xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-1">
+              <span>↗</span>
+              <p class="text-sm font-semibold text-slate-700">Ricavo da Vendita GSE / Bonifico GSE</p>
+            </div>
             <p class="text-xs text-slate-400 mb-2 leading-relaxed">Il compenso annuale che ricevi per l'energia immessa in rete e venduta al GSE.</p>
             <p class="text-xs text-slate-400 mb-2" id="out-gse-calc">—</p>
             <p class="text-xl font-bold tabular-nums text-emerald-600" id="out-ricavo-gse">—</p>
           </div>
-          <div class="border border-amber-200 bg-amber-50 rounded-xl p-4">
-            <p class="text-sm font-semibold text-amber-800 mb-1">Quota Annuale Detrazione Fiscale</p>
+          <div class="border border-amber-200 border-l-4 border-l-amber-400 bg-amber-50/50 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-1">
+              <span>%</span>
+              <p class="text-sm font-semibold text-amber-800">Quota Annuale Detrazione Fiscale</p>
+            </div>
             <p class="text-xs text-amber-600/70 mb-2 leading-relaxed">La detrazione IRPEF del 50% spalmata in 10 anni. È un beneficio fiscale aggiuntivo, non un risparmio in bolletta.</p>
             <p class="text-xs text-amber-600/70 mb-2" id="out-detrazione-calc">—</p>
             <p class="text-xl font-bold tabular-nums text-amber-700" id="out-quota-detrazione">—</p>
           </div>
-          <div class="border-2 border-brand-500 bg-brand-50 rounded-xl p-4">
-            <p class="text-sm font-bold text-brand-800 mb-1">Beneficio Economico Totale Annuo</p>
+          <div class="border-2 border-brand-500 border-l-4 border-l-brand-600 bg-gradient-to-br from-brand-50 to-teal-50 rounded-xl p-4 shadow-md">
+            <div class="flex items-center gap-2 mb-1">
+              <span>💰</span>
+              <p class="text-sm font-bold text-brand-800">Beneficio Economico Totale Annuo</p>
+            </div>
             <p class="text-xs text-brand-600/70 mb-2 leading-relaxed">La somma di risparmio bolletta + ricavo GSE + quota detrazione. È quanto "guadagni" ogni anno nei primi 10 anni.</p>
             <p class="text-xs text-brand-600/70 mb-2" id="out-beneficio-calc">—</p>
             <p class="text-2xl font-extrabold tabular-nums text-brand-700" id="out-beneficio-totale">—</p>
@@ -210,10 +293,10 @@
     </section>
 
     <!-- PASSO 4 -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="bg-brand-50 border-b border-brand-100 px-6 py-4 flex items-center gap-3">
-        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">Passo 4</span>
-        <h2 class="text-lg font-bold">Il Verdetto Finale</h2>
+    <section id="passo-4" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
+      <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-100 px-6 py-4 flex items-center gap-3">
+        <span class="bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide shadow-sm">Passo 4</span>
+        <h2 class="text-lg font-bold text-amber-900">Il Verdetto Finale</h2>
       </div>
       <div class="p-6 space-y-6">
         <p class="text-sm text-slate-600 leading-relaxed">Confrontiamo quanto spendi per l'impianto con quanto risparmi ogni anno. Il tempo di rientro ti dice in quanti anni l'investimento si ripaga da solo.</p>
@@ -221,8 +304,8 @@
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Prezzo Chiavi in Mano</span>
             <p class="text-xs text-slate-400 mt-0.5 mb-1">Il costo totale dell'impianto comprensivo di pannelli, inverter, installazione e pratiche. È l'importo del preventivo "tutto incluso".</p>
-            <div class="mt-1 flex rounded-lg border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500">
-              <input type="number" id="costo" placeholder="6990" min="0" step="10"
+            <div class="input-wrap mt-1 flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-amber-400" data-field="costo">
+              <input type="text" inputmode="decimal" id="costo" placeholder="6990"
                 class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">€</span>
             </div>
@@ -239,7 +322,8 @@
           </div>
         </div>
 
-        <div id="verdict-box" class="rounded-2xl p-6 text-center border-2 transition-colors">
+        <div id="verdict-box" class="rounded-2xl p-8 text-center border-2 transition-all shadow-lg">
+          <span id="out-verdict-badge" class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide mb-4 hidden"></span>
           <p class="text-xs font-semibold uppercase tracking-wider opacity-70 mb-1">Tempo di Rientro</p>
           <p class="text-xs opacity-60 mb-2">Quanti anni servono per recuperare l'investimento netto con risparmi, ricavi GSE e detrazione.</p>
           <p class="text-4xl font-extrabold tabular-nums mb-2" id="out-payback">—</p>
@@ -298,14 +382,67 @@ const fmt1pct = (v) => new Intl.NumberFormat('it-IT', { minimumFractionDigits: 1
 const eur = (v) => fmt2(v) + ' €';
 const kwh = (v) => fmt0(v) + ' kWh';
 
+function parseNumeroInput(val) {
+  if (val === null || val === undefined || val === '') return 0;
+  let s = String(val).trim().replace(/\s/g, '');
+  // Formato italiano: 1.400,50 oppure 5,8
+  if (/,\d{1,2}$/.test(s) && s.includes('.')) {
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else if (s.includes(',') && !s.includes('.')) {
+    s = s.replace(',', '.');
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+    s = s.replace(/\./g, '');
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
 function parseInput(id) {
   const el = document.getElementById(id);
-  return el ? (parseFloat(el.value) || 0) : 0;
+  return el ? parseNumeroInput(el.value) : 0;
 }
 
 function setText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
+}
+
+/** Evidenzia input compilati con bordo verde */
+function aggiornaStatoInput() {
+  document.querySelectorAll('.input-wrap[data-field]').forEach((wrap) => {
+    const input = document.getElementById(wrap.dataset.field);
+    const filled = input && parseNumeroInput(input.value) > 0;
+    wrap.classList.toggle('input-filled', filled);
+  });
+}
+
+/** Animazione leggera sui KPI al cambio valore */
+function animareKpi() {
+  document.querySelectorAll('.kpi-value').forEach((el) => {
+    el.classList.remove('kpi-pulse');
+    void el.offsetWidth;
+    el.classList.add('kpi-pulse');
+  });
+}
+
+/** Badge verdetto dinamico */
+function aggiornaBadgeVerdetto(colore, payback) {
+  const badge = document.getElementById('out-verdict-badge');
+  if (!badge) return;
+  const badges = {
+    green:  { text: '✓ Investimento conveniente', cls: 'bg-green-600 text-white' },
+    orange: { text: '⚠ Da valutare con attenzione', cls: 'bg-orange-500 text-white' },
+    red:    { text: '✗ Payback lungo — rivedi i parametri', cls: 'bg-red-600 text-white' },
+  };
+  const b = badges[colore] || badges.orange;
+  badge.classList.remove('hidden');
+  if (!payback.reached || payback.years > 50) {
+    badge.textContent = '✗ Payback non raggiunto';
+    badge.className = 'inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide mb-4 bg-red-600 text-white';
+    return;
+  }
+  badge.textContent = b.text;
+  badge.className = `inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide mb-4 shadow-sm ${b.cls}`;
 }
 
 /** Costo Reale Energia = Spesa / Consumo (€/kWh) */
@@ -335,6 +472,7 @@ function calcolaIndiceCopertura(produzione, consumo) {
 
 /** Commento testuale sul rapporto produzione/consumo */
 function commentoCopertura(produzione, consumo) {
+  if (consumo <= 0 && produzione > 0) return 'Inserisci il consumo annuo al Passo 1 per calcolare copertura e autoconsumo';
   if (consumo <= 0) return '';
   const ratio = produzione / consumo;
   if (ratio >= 2.8) return 'Produce quasi il TRIPLO dei consumi';
@@ -508,7 +646,11 @@ function aggiornaUI() {
       : 'Payback oltre 50 anni — rivedi i parametri');
 
   const box = document.getElementById('verdict-box');
-  box.className = `rounded-2xl p-6 text-center border-2 transition-colors ${COLORI[r.colore].box}`;
+  box.className = `rounded-2xl p-8 text-center border-2 transition-all shadow-lg ${COLORI[r.colore].box}`;
+
+  aggiornaBadgeVerdetto(r.colore, r.payback);
+  aggiornaStatoInput();
+  animareKpi();
 
   setText('out-messaggio-bolletta',
     `Rispetto al continuare a pagare la bolletta elettrica, questo impianto ` +
@@ -522,7 +664,11 @@ function aggiornaUI() {
 
   setText('out-scenario-label', SCENARIO_LABELS[scenarioFactor]);
 
-  aggiornaGrafico(r);
+  try {
+    aggiornaGrafico(r);
+  } catch (e) {
+    console.warn('Grafico payback non disponibile:', e);
+  }
 }
 
 /** Grafico Chart.js payback cumulativo */
@@ -574,7 +720,7 @@ function aggiornaGrafico(r) {
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16 } },
+        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { family: 'Poppins' } } },
         tooltip: {
           callbacks: {
             label(ctx) {
@@ -585,10 +731,10 @@ function aggiornaGrafico(r) {
         },
       },
       scales: {
-        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { maxTicksLimit: 16, font: { size: 11 } } },
+        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { maxTicksLimit: 16, font: { size: 11, family: 'Poppins' } } },
         y: {
           grid: { color: 'rgba(0,0,0,0.04)' },
-          ticks: { callback: (v) => fmt0(v) + ' €', font: { size: 11 } },
+          ticks: { callback: (v) => fmt0(v) + ' €', font: { size: 11, family: 'Poppins' } },
         },
       },
     },
@@ -598,11 +744,11 @@ function aggiornaGrafico(r) {
 /** Carica dati reali predefiniti */
 function caricaDatiReali() {
   document.getElementById('consumo').value       = DATI_REALI.consumo;
-  document.getElementById('spesa').value         = DATI_REALI.spesa;
-  document.getElementById('irraggiamento').value = DATI_REALI.irraggiamento;
-  document.getElementById('kwp').value           = DATI_REALI.kwp;
-  document.getElementById('batteria').value      = DATI_REALI.batteria;
-  document.getElementById('costo').value         = DATI_REALI.costo;
+  document.getElementById('spesa').value         = fmt2(DATI_REALI.spesa);
+  document.getElementById('irraggiamento').value = String(DATI_REALI.irraggiamento);
+  document.getElementById('kwp').value           = fmt2(DATI_REALI.kwp);
+  document.getElementById('batteria').value      = fmt2(DATI_REALI.batteria);
+  document.getElementById('costo').value         = String(DATI_REALI.costo);
   aggiornaUI();
 }
 
@@ -765,14 +911,14 @@ function applicaDatiBolletta(dati) {
     compilati++;
   }
   if (dati.spesa) {
-    document.getElementById('spesa').value = Math.round(dati.spesa * 100) / 100;
+    document.getElementById('spesa').value = fmt2(dati.spesa);
     compilati++;
   }
 
   // Irraggiamento: default ENEA se non presente in bolletta
   const irrEl = document.getElementById('irraggiamento');
-  if (!irrEl.value) {
-    irrEl.value = DATI_REALI.irraggiamento;
+  if (!parseNumeroInput(irrEl.value)) {
+    irrEl.value = '1400';
     dati.dettagli.push('Irraggiamento: default ENEA 1.400 kWh/kWp');
   }
 
@@ -847,9 +993,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Input reattivi
+  // Input reattivi — input, change e blur per aggiornamento immediato
   ['consumo', 'spesa', 'irraggiamento', 'kwp', 'batteria', 'costo'].forEach((id) => {
-    document.getElementById(id).addEventListener('input', aggiornaUI);
+    const el = document.getElementById(id);
+    ['input', 'change', 'blur'].forEach((evt) => el.addEventListener(evt, aggiornaUI));
   });
 
   document.getElementById('input-fattura').addEventListener('change', gestisciCaricamentoFattura);
