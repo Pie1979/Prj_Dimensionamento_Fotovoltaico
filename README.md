@@ -1,4 +1,4 @@
-# Simulatore FV + Batteria – Analisi di Convenienza 2026
+# Simulazione rendimento fotovoltaico
 
 Strumento web self-contained per la simulazione di impianti fotovoltaici residenziali, con calcoli trasparenti organizzati in 4 passi.
 
