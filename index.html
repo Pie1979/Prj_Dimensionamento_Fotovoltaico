@@ -142,20 +142,20 @@
       </div>
       <div class="p-6 space-y-5">
         <p class="text-sm text-slate-600 leading-relaxed">Partiamo dalla tua situazione attuale: quanta energia consumi e quanto paghi ogni anno. Questi due numeri servono a capire quanto costa oggi ogni kWh che usi in casa.</p>
-        <div class="grid md:grid-cols-2 gap-4">
-          <label class="block">
+        <div class="grid md:grid-cols-2 gap-4 items-stretch">
+          <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Consumo Annuo Corrente</span>
-            <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanti kWh consumi in un anno intero. Lo trovi in bolletta come "consumo annuo" oppure sommando i consumi dei periodi fatturati.</p>
-            <div class="input-wrap mt-1 flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400" data-field="consumo">
+            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[3.5rem] leading-relaxed">Quanti kWh consumi in un anno intero. Lo trovi in bolletta come "consumo annuo" oppure sommando i consumi dei periodi fatturati.</p>
+            <div class="input-wrap flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400" data-field="consumo">
               <input type="number" id="consumo" placeholder="2301" min="0" step="1"
                 class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">kWh</span>
             </div>
           </label>
-          <label class="block">
+          <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Spesa Annua Corrente</span>
-            <p class="text-xs text-slate-400 mt-0.5 mb-1">Quanto spendi in un anno per l'elettricità (tasse incluse). Se hai solo la bolletta bimestrale, moltiplica l'importo per 6.</p>
-            <div class="input-wrap mt-1 flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400" data-field="spesa">
+            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[3.5rem] leading-relaxed">Quanto spendi in un anno per l'elettricità (tasse incluse). Se hai solo la bolletta bimestrale, moltiplica l'importo per 6.</p>
+            <div class="input-wrap flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400" data-field="spesa">
               <input type="text" inputmode="decimal" id="spesa" placeholder="892,92"
                 class="flex-1 px-3 py-2.5 text-lg font-semibold tabular-nums outline-none bg-white">
               <span class="flex items-center px-3 bg-slate-50 text-sm text-slate-500 border-l border-slate-300">€</span>
