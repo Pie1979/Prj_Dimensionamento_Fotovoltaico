@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SunSize – Il dimensionamento fotovoltaico basato sui dati</title>
-  <meta name="description" content="SunSize: dimensiona il tuo impianto fotovoltaico partendo dalla bolletta. Calcoli trasparenti in 4 passi.">
+  <title>SunSize – Il dimensionamento del fotovoltaico basato sui dati</title>
+  <meta name="description" content="SunSize: il dimensionamento del fotovoltaico basato sui dati. Calcoli trasparenti in 4 passi partendo dalla tua bolletta.">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -138,8 +138,43 @@
       letter-spacing: -0.03em;
       text-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
     }
+    .hero-tagline {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      max-width: 22rem;
+    }
+    .hero-rule {
+      width: 2.5rem;
+      height: 2px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.35);
+    }
+    .hero-rule--soft {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .hero-eyebrow {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.72);
+    }
     .hero-subtitle {
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.45;
       letter-spacing: 0.01em;
+      color: rgba(255, 255, 255, 0.95);
+    }
+    @media (min-width: 768px) {
+      .hero-subtitle { font-size: 1.125rem; }
+    }
+    .hero-subtitle-accent {
+      font-weight: 700;
+      color: #fef3c7;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
@@ -159,11 +194,13 @@
         <h1 class="hero-wordmark text-4xl md:text-5xl font-extrabold leading-none text-center">
           <span class="text-amber-100">Sun</span><span class="text-white">Size</span>
         </h1>
-        <div class="flex flex-col items-center gap-2 max-w-md">
-          <div class="w-10 h-0.5 rounded-full bg-white/35"></div>
-          <p class="hero-subtitle text-white/90 text-sm md:text-base font-medium leading-relaxed text-center">
-            Il dimensionamento fotovoltaico basato sui dati
+        <div class="hero-tagline">
+          <div class="hero-rule"></div>
+          <p class="hero-eyebrow">Il dimensionamento del fotovoltaico</p>
+          <p class="hero-subtitle text-center">
+            <span class="hero-subtitle-accent">basato sui dati</span>
           </p>
+          <div class="hero-rule hero-rule--soft"></div>
         </div>
       </div>
     </header>
