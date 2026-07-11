@@ -46,7 +46,78 @@
     .input-wrap.input-filled { border-color: #34d399 !important; background: #f0fdf4; box-shadow: 0 0 0 3px #34d39922; }
     .btn-fattura { background: linear-gradient(135deg, #0d9488, #0369a1); transition: transform 0.2s, box-shadow 0.2s; }
     .btn-fattura:hover { transform: translateY(-2px); box-shadow: 0 8px 24px #0d948844; }
-    .step-line { height: 3px; flex: 1; background: #e2e8f0; border-radius: 99px; }
+    .step-line { height: 3px; flex: 1; background: linear-gradient(90deg, #e2e8f0, #cbd5e1, #e2e8f0); border-radius: 99px; margin-top: 1.25rem; }
+    .stepper-node {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+      flex-shrink: 0;
+    }
+    .stepper-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-header {
+      text-align: center;
+      padding: 1.75rem 1.25rem 1.5rem;
+    }
+    @media (min-width: 640px) {
+      .step-header { padding: 2rem 1.5rem 1.75rem; }
+    }
+    .step-badge {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+      margin-bottom: 0.5rem;
+    }
+    .step-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 0.15rem;
+    }
+    .step-title {
+      font-size: 1.125rem;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+    @media (min-width: 640px) {
+      .step-title { font-size: 1.25rem; }
+    }
+    .step-rule {
+      width: 2.5rem;
+      height: 2px;
+      border-radius: 99px;
+      margin: 0.75rem auto;
+    }
+    .step-intro {
+      max-width: 34rem;
+      margin: 0 auto;
+      font-size: 0.875rem;
+      line-height: 1.65;
+    }
     .footer-logo {
       display: block;
       height: 1.75rem;
@@ -98,26 +169,27 @@
     </header>
 
     <!-- STEPPER -->
-    <nav class="bg-white/80 backdrop-blur rounded-2xl shadow-sm border border-white p-3 sm:p-4" aria-label="Progresso analisi">
-      <div class="flex items-center gap-2">
-        <div class="flex flex-col items-center gap-1 min-w-0 flex-1">
-          <div class="w-8 h-8 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center shadow">1</div>
-          <span class="text-[10px] font-semibold text-blue-600 text-center leading-tight">Bolletta</span>
+    <nav class="bg-white/85 backdrop-blur rounded-2xl shadow-sm border border-white p-4 sm:p-5" aria-label="Progresso analisi">
+      <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 text-center mb-4">Il percorso in 4 passi</p>
+      <div class="flex items-start gap-1.5 sm:gap-2">
+        <div class="flex flex-col items-center gap-1.5 min-w-0 flex-1">
+          <div class="stepper-node bg-blue-500">1</div>
+          <span class="stepper-label text-blue-600">Bolletta</span>
         </div>
-        <div class="step-line active"></div>
-        <div class="flex flex-col items-center gap-1 min-w-0 flex-1">
-          <div class="w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center shadow">2</div>
-          <span class="text-[10px] font-semibold text-brand-700 text-center leading-tight">Dimensionamento</span>
+        <div class="step-line"></div>
+        <div class="flex flex-col items-center gap-1.5 min-w-0 flex-1">
+          <div class="stepper-node bg-brand-600">2</div>
+          <span class="stepper-label text-brand-700">Dimensionamento</span>
         </div>
-        <div class="step-line active"></div>
-        <div class="flex flex-col items-center gap-1 min-w-0 flex-1">
-          <div class="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shadow">3</div>
-          <span class="text-[10px] font-semibold text-emerald-600 text-center leading-tight">Economia</span>
+        <div class="step-line"></div>
+        <div class="flex flex-col items-center gap-1.5 min-w-0 flex-1">
+          <div class="stepper-node bg-emerald-500">3</div>
+          <span class="stepper-label text-emerald-600">Economia</span>
         </div>
-        <div class="step-line active"></div>
-        <div class="flex flex-col items-center gap-1 min-w-0 flex-1">
-          <div class="w-8 h-8 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center shadow">4</div>
-          <span class="text-[10px] font-semibold text-amber-600 text-center leading-tight">Verdetto</span>
+        <div class="step-line"></div>
+        <div class="flex flex-col items-center gap-1.5 min-w-0 flex-1">
+          <div class="stepper-node bg-amber-500">4</div>
+          <span class="stepper-label text-amber-600">Verdetto</span>
         </div>
       </div>
     </nav>
@@ -152,12 +224,15 @@
 
     <!-- PASSO 1 -->
     <section id="passo-1" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
-      <div class="bg-gradient-to-r from-blue-50 to-sky-50 border-b border-blue-100 px-4 sm:px-6 py-4 flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-center sm:text-left">
-        <span class="bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide shadow-sm shrink-0">Passo 1</span>
-        <h2 class="text-base sm:text-lg font-bold text-blue-900 min-w-0">Identikit Bolletta</h2>
-      </div>
+      <header class="step-header bg-gradient-to-b from-blue-50 via-sky-50/80 to-white border-b border-blue-100/70">
+        <div class="step-badge bg-gradient-to-br from-blue-400 to-blue-600">1</div>
+        <p class="step-tag text-blue-500">Passo 1</p>
+        <h2 class="step-title text-blue-900">Identikit Bolletta</h2>
+        <div class="step-rule bg-blue-400/50"></div>
+        <p class="step-intro text-slate-600">Partiamo dalla tua situazione attuale: quanta energia consumi e quanto paghi ogni anno. Questi due numeri servono a capire quanto costa oggi ogni kWh che usi in casa.</p>
+        <div class="step-rule bg-blue-300/40"></div>
+      </header>
       <div class="p-4 sm:p-6 space-y-5">
-        <p class="text-sm text-slate-600 leading-relaxed">Partiamo dalla tua situazione attuale: quanta energia consumi e quanto paghi ogni anno. Questi due numeri servono a capire quanto costa oggi ogni kWh che usi in casa.</p>
         <div class="grid md:grid-cols-2 gap-4 items-stretch">
           <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Consumo Annuo Corrente</span>
@@ -191,12 +266,15 @@
 
     <!-- PASSO 2 -->
     <section id="passo-2" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
-      <div class="bg-gradient-to-r from-brand-50 to-teal-50 border-b border-brand-100 px-4 sm:px-6 py-4 flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-center sm:text-left">
-        <span class="bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide shadow-sm shrink-0">Passo 2</span>
-        <h2 class="text-base sm:text-lg font-bold text-brand-900 min-w-0">Il Dimensionamento &amp; Sovrapproduzione</h2>
-      </div>
+      <header class="step-header bg-gradient-to-b from-brand-50 via-teal-50/80 to-white border-b border-brand-100/70">
+        <div class="step-badge bg-gradient-to-br from-brand-500 to-teal-700">2</div>
+        <p class="step-tag text-brand-600">Passo 2</p>
+        <h2 class="step-title text-brand-900">Il Dimensionamento &amp; Sovrapproduzione</h2>
+        <div class="step-rule bg-brand-400/50"></div>
+        <p class="step-intro text-slate-600">Definiamo l'impianto e calcoliamo quanta energia produce, quanta usi direttamente e quanta vendi in rete. Così capisci se l'impianto è sovradimensionato rispetto ai tuoi consumi.</p>
+        <div class="step-rule bg-brand-300/40"></div>
+      </header>
       <div class="p-4 sm:p-6 space-y-5">
-        <p class="text-sm text-slate-600 leading-relaxed">Definiamo l'impianto e calcoliamo quanta energia produce, quanta usi direttamente e quanta vendi in rete. Così capisci se l'impianto è sovradimensionato rispetto ai tuoi consumi.</p>
         <div class="grid md:grid-cols-3 gap-4 items-stretch">
           <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Irraggiamento Locale</span>
@@ -273,12 +351,15 @@
 
     <!-- PASSO 3 -->
     <section id="passo-3" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
-      <div class="bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100 px-4 sm:px-6 py-4 flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-center sm:text-left">
-        <span class="bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide shadow-sm shrink-0">Passo 3</span>
-        <h2 class="text-base sm:text-lg font-bold text-emerald-900 min-w-0">La Simulazione Economica</h2>
-      </div>
-      <div class="p-4 sm:p-6 space-y-4">
-        <p class="text-sm text-slate-600 leading-relaxed">Traduciamo l'energia in soldi: quanto risparmi in bolletta, quanto incassi dal GSE e quanto recuperi con la detrazione fiscale. La somma è il tuo guadagno netto ogni anno.</p>
+      <header class="step-header bg-gradient-to-b from-emerald-50 via-green-50/80 to-white border-b border-emerald-100/70">
+        <div class="step-badge bg-gradient-to-br from-emerald-400 to-emerald-600">3</div>
+        <p class="step-tag text-emerald-600">Passo 3</p>
+        <h2 class="step-title text-emerald-900">La Simulazione Economica</h2>
+        <div class="step-rule bg-emerald-400/50"></div>
+        <p class="step-intro text-slate-600">Traduciamo l'energia in soldi: quanto risparmi in bolletta, quanto incassi dal GSE e quanto recuperi con la detrazione fiscale. La somma è il tuo guadagno netto ogni anno.</p>
+        <div class="step-rule bg-emerald-300/40"></div>
+      </header>
+      <div class="p-4 sm:p-6 space-y-5">
         <div class="grid sm:grid-cols-2 gap-3">
           <div class="border border-slate-200 border-l-4 border-l-emerald-400 bg-white rounded-xl p-4 shadow-sm">
             <div class="flex items-center gap-2 mb-1">
@@ -322,12 +403,15 @@
 
     <!-- PASSO 4 -->
     <section id="passo-4" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
-      <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-100 px-4 sm:px-6 py-4 flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 text-center sm:text-left">
-        <span class="bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide shadow-sm shrink-0">Passo 4</span>
-        <h2 class="text-base sm:text-lg font-bold text-amber-900 min-w-0">Il Verdetto Finale</h2>
-      </div>
-      <div class="p-4 sm:p-6 space-y-6">
-        <p class="text-sm text-slate-600 leading-relaxed">Confrontiamo quanto spendi per l'impianto con quanto risparmi ogni anno. Il tempo di rientro ti dice in quanti anni l'investimento si ripaga da solo.</p>
+      <header class="step-header bg-gradient-to-b from-amber-50 via-yellow-50/80 to-white border-b border-amber-100/70">
+        <div class="step-badge bg-gradient-to-br from-amber-400 to-amber-600">4</div>
+        <p class="step-tag text-amber-600">Passo 4</p>
+        <h2 class="step-title text-amber-900">Il Verdetto Finale</h2>
+        <div class="step-rule bg-amber-400/50"></div>
+        <p class="step-intro text-slate-600">Confrontiamo quanto spendi per l'impianto con quanto risparmi ogni anno. Il tempo di rientro ti dice in quanti anni l'investimento si ripaga da solo.</p>
+        <div class="step-rule bg-amber-300/40"></div>
+      </header>
+      <div class="p-4 sm:p-6 space-y-5">
         <div class="grid md:grid-cols-2 gap-4">
           <label class="block">
             <span class="text-sm font-medium text-slate-600">Prezzo Chiavi in Mano</span>
