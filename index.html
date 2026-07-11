@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulazione rendimento fotovoltaico</title>
+  <title>SunSize – Il dimensionamento fotovoltaico basato sui dati</title>
+  <meta name="description" content="SunSize: dimensiona il tuo impianto fotovoltaico partendo dalla bolletta. Calcoli trasparenti in 4 passi.">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -59,6 +60,13 @@
       transform: scale(1.03);
       filter: hue-rotate(-14deg) saturate(0.95) brightness(1);
     }
+    .hero-wordmark {
+      letter-spacing: -0.03em;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+    }
+    .hero-subtitle {
+      letter-spacing: 0.01em;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -69,15 +77,23 @@
   <div class="app-shell max-w-4xl mx-auto px-4 py-8 space-y-6">
 
     <!-- HERO -->
-    <header class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-brand-500 to-teal-700 p-8 text-white shadow-xl shadow-brand-600/20 text-center">
+    <header class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-brand-500 to-teal-700 px-8 py-10 text-white shadow-xl shadow-brand-600/20 text-center">
       <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
       <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-amber-300/20 rounded-full blur-xl"></div>
-      <div class="relative flex flex-col items-center gap-3">
-        <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-3xl shadow-lg">☀️</div>
-        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">
-          Simulazione rendimento fotovoltaico
-        </h1>
-        <p class="text-white/90 text-sm md:text-base max-w-lg">Scopri in 4 passi se l'impianto conviene — calcoli trasparenti, ogni numero è tracciabile.</p>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative flex flex-col items-center gap-4">
+        <div class="flex items-center justify-center gap-3.5">
+          <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl md:text-3xl shadow-lg ring-1 ring-white/25">☀️</div>
+          <h1 class="hero-wordmark text-4xl md:text-5xl font-extrabold leading-none">
+            <span class="text-amber-100">Sun</span><span class="text-white">Size</span>
+          </h1>
+        </div>
+        <div class="flex flex-col items-center gap-2 max-w-md">
+          <div class="w-10 h-0.5 rounded-full bg-white/35"></div>
+          <p class="hero-subtitle text-white/90 text-sm md:text-base font-medium leading-relaxed">
+            Il dimensionamento fotovoltaico basato sui dati
+          </p>
+        </div>
       </div>
     </header>
 

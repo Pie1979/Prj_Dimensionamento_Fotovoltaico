@@ -1,4 +1,6 @@
-# Simulazione rendimento fotovoltaico
+# SunSize
+
+**Il dimensionamento fotovoltaico basato sui dati**
 
 Strumento web self-contained per la simulazione di impianti fotovoltaici residenziali, con calcoli trasparenti organizzati in 4 passi.
 
