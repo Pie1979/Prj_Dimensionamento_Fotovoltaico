@@ -267,6 +267,46 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .payback-kpi {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.875rem;
+      padding: 0.625rem 0.5rem;
+      text-align: center;
+    }
+    .payback-kpi-label {
+      display: block;
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      line-height: 1.2;
+      margin-bottom: 0.25rem;
+    }
+    .payback-kpi-value {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+    }
+    @media (min-width: 640px) {
+      .payback-kpi-value { font-size: 0.9375rem; }
+    }
+    .payback-compare {
+      border-radius: 0.875rem;
+      padding: 0.875rem 1rem;
+      border: 1px solid #e2e8f0;
+    }
+    .payback-compare--sans {
+      background: #f8fafc;
+    }
+    .payback-compare--con {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border-color: #bbf7d0;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -600,13 +640,40 @@
           <p class="text-sm" id="out-payback-detail">—</p>
         </div>
 
-        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
-          <p class="text-sm font-semibold text-slate-700 mb-1">Grafico Payback — cumulativo 15 anni</p>
-          <p class="text-xs text-slate-500 mb-3 leading-relaxed">La linea colorata mostra il saldo del tuo investimento nel tempo. Quando arriva a zero, l'impianto è ripagato. La linea grigia è quanto avresti speso in bolletta senza fotovoltaico.</p>
-          <div class="relative h-72">
+        <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200">
+          <p class="text-sm font-semibold text-slate-700 mb-1">Il tuo ritorno sull'investimento</p>
+          <p class="text-xs text-slate-500 mb-4 leading-relaxed" id="out-chart-guida">In quanti anni recuperi l'investimento netto?</p>
+
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <div class="payback-kpi">
+              <span class="payback-kpi-label">Investito</span>
+              <span class="payback-kpi-value" id="out-kpi-investito">—</span>
+            </div>
+            <div class="payback-kpi">
+              <span class="payback-kpi-label">Rientro</span>
+              <span class="payback-kpi-value text-brand-700" id="out-kpi-rientro">—</span>
+            </div>
+            <div class="payback-kpi">
+              <span class="payback-kpi-label">Guadagno 10 anni</span>
+              <span class="payback-kpi-value text-emerald-700" id="out-kpi-guadagno">—</span>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-500 mb-2 leading-relaxed">La curva mostra quanto ti resta in tasca ogni anno. Quando tocca la linea del pareggio, l'impianto è ripagato.</p>
+          <div class="relative h-80 sm:h-72">
             <canvas id="payback-chart"></canvas>
           </div>
-          <p class="mt-4 text-sm font-medium text-slate-700 leading-relaxed" id="out-messaggio-bolletta">—</p>
+
+          <div class="grid sm:grid-cols-2 gap-3 mt-4">
+            <div class="payback-compare payback-compare--sans">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Senza fotovoltaico</p>
+              <p class="text-sm text-slate-600 leading-relaxed" id="out-senza-fv">—</p>
+            </div>
+            <div class="payback-compare payback-compare--con">
+              <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600 mb-1">Con fotovoltaico</p>
+              <p class="text-sm text-slate-700 leading-relaxed" id="out-con-fv">—</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -931,15 +998,25 @@ function aggiornaUI() {
   aggiornaStatoInput();
   animareKpi();
 
-  setText('out-messaggio-bolletta',
-    `Rispetto al continuare a pagare la bolletta elettrica, questo impianto ` +
-    (r.payback.reached
-      ? `si ripaga in ${formatPayback(r.payback.years)}. ` +
-        `In ${FISCAL.ANNI} anni avresti speso ${eur(r.spesa * FISCAL.ANNI)} in bolletta senza alcun ritorno, ` +
-        `mentre con il fotovoltaico generi un beneficio cumulativo di ${eur(r.beneficioTotale10 * FISCAL.ANNI)} ` +
-        `(inclusa detrazione) nei primi ${FISCAL.ANNI} anni.`
-      : `non raggiunge il pareggio nei tempi previsti. Continuare a pagare ${eur(r.spesa)}/anno non genera valore patrimoniale.`)
-  );
+  const saldo10 = r.serie.saldoInvestimento[Math.min(FISCAL.ANNI, ANNI_GRAFICO)];
+  const spesa10 = r.spesa * FISCAL.ANNI;
+
+  setText('out-chart-guida',
+    r.investimentoNetto > 0
+      ? `In quanti anni recuperi i ${eur(r.investimentoNetto)} investiti di tasca tua?`
+      : 'In quanti anni recuperi l\'investimento netto?');
+  setText('out-kpi-investito', eur(r.investimentoNetto));
+  setText('out-kpi-rientro', r.payback.reached ? formatPayback(r.payback.years) : 'Oltre 50 anni');
+  setText('out-kpi-guadagno',
+    saldo10 >= 0 ? `+${fmt2(saldo10)} €` : `${fmt2(saldo10)} €`);
+
+  setText('out-senza-fv',
+    `In ${FISCAL.ANNI} anni spendi ${eur(spesa10)} in bolletta elettrica, senza recuperare nulla.`);
+  setText('out-con-fv',
+    r.payback.reached
+      ? `In ${FISCAL.ANNI} anni il tuo saldo netto è ${saldo10 >= 0 ? '+' : ''}${eur(saldo10)} ` +
+        `(rientro in ${formatPayback(r.payback.years)}).`
+      : `Il pareggio non viene raggiunto entro 50 anni con i parametri attuali.`);
 
   setText('out-scenario-label', SCENARIO_LABELS[scenarioFactor]);
 
@@ -950,18 +1027,87 @@ function aggiornaUI() {
   }
 }
 
-/** Grafico Chart.js payback cumulativo */
+/** Plugin Chart.js: linea del pareggio (y = 0) */
+const zeroLinePlugin = {
+  id: 'zeroLine',
+  afterDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+    const yZero = scales.y.getPixelForValue(0);
+    if (yZero < chartArea.top || yZero > chartArea.bottom) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(15, 23, 42, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(chartArea.left, yZero);
+    ctx.lineTo(chartArea.right, yZero);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.5)';
+    ctx.font = '600 10px Poppins, system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Pareggio (0 €)', chartArea.left + 6, yZero - 6);
+    ctx.restore();
+  },
+};
+
+/** Plugin Chart.js: marker anno di payback */
+function creaPaybackMarkerPlugin(paybackIdx, paybackLabel) {
+  return {
+    id: 'paybackMarker',
+    afterDraw(chart) {
+      if (paybackIdx == null || paybackIdx <= 0) return;
+      const { ctx, chartArea, scales } = chart;
+      const x = scales.x.getPixelForValue(paybackIdx);
+      if (x < chartArea.left || x > chartArea.right) return;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(13, 148, 136, 0.85)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x, chartArea.top);
+      ctx.lineTo(x, chartArea.bottom);
+      ctx.stroke();
+      const label = paybackLabel || 'Ripagato!';
+      ctx.font = '700 11px Poppins, system-ui, sans-serif';
+      const tw = ctx.measureText(label).width;
+      const boxW = tw + 16;
+      const boxH = 22;
+      let boxX = x - boxW / 2;
+      boxX = Math.max(chartArea.left + 4, Math.min(boxX, chartArea.right - boxW - 4));
+      const boxY = chartArea.top + 6;
+      ctx.fillStyle = '#0d9488';
+      if (typeof ctx.roundRect === 'function') {
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 6);
+        ctx.fill();
+      } else {
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+      }
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, boxX + boxW / 2, boxY + boxH / 2);
+      ctx.restore();
+    },
+  };
+}
+
+/** Grafico Chart.js payback — saldo netto con zone colore e marker pareggio */
 function aggiornaGrafico(r) {
   const canvas = document.getElementById('payback-chart');
   if (!canvas || typeof Chart === 'undefined') return;
 
-  const c = COLORI[r.colore];
-  const { labels, saldoInvestimento, bollettaCumulativa } = r.serie;
+  const { labels, saldoInvestimento } = r.serie;
   const paybackIdx = r.payback.reached
     ? Math.min(Math.ceil(r.payback.years), ANNI_GRAFICO)
     : null;
+  const paybackLabel = r.payback.reached
+    ? `Ripagato · ${formatPayback(r.payback.years)}`
+    : null;
 
   if (paybackChart) paybackChart.destroy();
+
+  const isMobile = window.innerWidth < 640;
 
   paybackChart = new Chart(canvas, {
     type: 'line',
@@ -969,28 +1115,25 @@ function aggiornaGrafico(r) {
       labels,
       datasets: [
         {
-          label: 'Bolletta cumulativa (senza FV)',
-          data: bollettaCumulativa,
-          borderColor: '#94a3b8',
-          backgroundColor: 'rgba(148,163,184,0.08)',
-          borderDash: [6, 4],
-          borderWidth: 2,
-          fill: true,
-          tension: 0.15,
-          pointRadius: 0,
-        },
-        {
-          label: 'Saldo investimento (con FV)',
+          label: 'Quanto ti resta in tasca',
           data: saldoInvestimento,
-          borderColor: c.border,
-          backgroundColor: c.bg,
           borderWidth: 3,
-          fill: true,
-          tension: 0.15,
-          pointRadius: saldoInvestimento.map((_, i) => i === paybackIdx ? 7 : 0),
-          pointBackgroundColor: saldoInvestimento.map((_, i) => i === paybackIdx ? c.border : 'transparent'),
+          fill: 'origin',
+          tension: 0.2,
+          pointRadius: saldoInvestimento.map((_, i) => (i === paybackIdx ? 8 : i === 0 || i === ANNI_GRAFICO ? 4 : 0)),
+          pointBackgroundColor: saldoInvestimento.map((_, i) => (i === paybackIdx ? '#0d9488' : '#16a34a')),
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
+          segment: {
+            borderColor(ctx) {
+              const y = ctx.p1.parsed.y;
+              return y < 0 ? '#ea580c' : '#16a34a';
+            },
+            backgroundColor(ctx) {
+              const y = ctx.p1.parsed.y;
+              return y < 0 ? 'rgba(234, 88, 12, 0.14)' : 'rgba(22, 163, 74, 0.14)';
+            },
+          },
         },
       ],
     },
@@ -999,24 +1142,38 @@ function aggiornaGrafico(r) {
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16, font: { family: 'Poppins' } } },
+        legend: {
+          position: 'bottom',
+          labels: { usePointStyle: true, padding: 12, font: { family: 'Poppins', size: 11 } },
+        },
         tooltip: {
           callbacks: {
+            title(items) {
+              return items[0]?.label ?? '';
+            },
             label(ctx) {
               const v = ctx.parsed.y;
-              return `${ctx.dataset.label}: ${v >= 0 ? '+' : ''}${fmt2(v)} €`;
+              const stato = v >= 0 ? 'In guadagno' : 'In recupero';
+              return `${stato}: ${v >= 0 ? '+' : ''}${fmt2(v)} €`;
             },
           },
         },
       },
       scales: {
-        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { maxTicksLimit: 16, font: { size: 11, family: 'Poppins' } } },
+        x: {
+          grid: { display: false },
+          ticks: {
+            maxTicksLimit: isMobile ? 6 : 8,
+            font: { size: 10, family: 'Poppins' },
+          },
+        },
         y: {
-          grid: { color: 'rgba(0,0,0,0.04)' },
-          ticks: { callback: (v) => fmt0(v) + ' €', font: { size: 11, family: 'Poppins' } },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { callback: (v) => fmt0(v) + ' €', font: { size: 10, family: 'Poppins' } },
         },
       },
     },
+    plugins: [zeroLinePlugin, creaPaybackMarkerPlugin(paybackIdx, paybackLabel)],
   });
 }
 
