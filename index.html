@@ -267,6 +267,9 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    @media (min-width: 768px) {
+      .sticky-step-label { max-width: none; }
+    }
     .payback-kpi {
       background: #fff;
       border: 1px solid #e2e8f0;
@@ -314,13 +317,13 @@
 </head>
 <body class="text-slate-900 font-sans antialiased min-h-screen">
 
-  <!-- Barra fissa mobile: logo + passo corrente -->
-  <div id="sticky-bar" class="sticky-bar fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm md:hidden" aria-hidden="true">
-    <div class="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
-      <span class="text-sm font-extrabold tracking-tight shrink-0">
+  <!-- Barra fissa: logo + passo corrente (mobile e desktop) -->
+  <div id="sticky-bar" class="sticky-bar fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm" aria-hidden="true">
+    <div class="max-w-4xl mx-auto px-4 sm:px-4 py-2.5 md:py-3 flex items-center justify-between gap-3">
+      <span class="text-sm md:text-base font-extrabold tracking-tight shrink-0">
         <span class="text-amber-500">Sun</span><span class="text-brand-700">Size</span>
       </span>
-      <span id="sticky-step-label" class="sticky-step-label text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Passo 1</span>
+      <span id="sticky-step-label" class="sticky-step-label text-xs md:text-sm font-semibold text-blue-600 bg-blue-50 px-2.5 md:px-3 py-1 rounded-full">Passo 1</span>
     </div>
   </div>
 
@@ -1492,7 +1495,7 @@ async function gestisciCaricamentoFattura(event) {
   }
 }
 
-/** Barra fissa mobile: logo SunSize + passo in visualizzazione */
+/** Barra fissa: logo SunSize + passo in visualizzazione */
 function initStickyBar() {
   const stickyBar = document.getElementById('sticky-bar');
   const stickyLabel = document.getElementById('sticky-step-label');
@@ -1514,7 +1517,7 @@ function initStickyBar() {
     const cfg = STEP_SECTIONS.find((s) => s.id === id);
     if (!cfg) return;
     stickyLabel.textContent = cfg.label;
-    stickyLabel.className = `sticky-step-label text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.color}`;
+    stickyLabel.className = `sticky-step-label text-xs md:text-sm font-semibold px-2.5 md:px-3 py-1 rounded-full ${cfg.color}`;
   }
 
   const observer = new IntersectionObserver((entries) => {
