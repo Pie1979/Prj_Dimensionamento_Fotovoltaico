@@ -1,4 +1,8 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/simulator", "destination": "/legacy/index.html" },
+    { "source": "/simulator/:path*", "destination": "/legacy/:path*" }
+  ]
 }
