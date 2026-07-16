@@ -1,6 +1,7 @@
 'use client';
 
 import { Calculator } from 'lucide-react';
+import { NumField } from '@/components/num-field';
 import { ScenarioSelector } from '@/components/scenario-selector';
 import { eur, fmt3, kwh } from '@/lib/format';
 import type { SimInput } from '@/lib/types';
@@ -13,43 +14,6 @@ type PlantStepProps = {
   onCalculate: () => void;
   canCalculate: boolean;
 };
-
-function NumField({
-  id,
-  label,
-  hint,
-  placeholder,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  hint?: string;
-  placeholder: string;
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <label htmlFor={id} className="text-sm font-medium text-slate-700">
-        {label}
-      </label>
-      <input
-        id={id}
-        type="text"
-        inputMode="decimal"
-        placeholder={placeholder}
-        value={value > 0 ? String(value).replace('.', ',') : ''}
-        onChange={(e) => {
-          const raw = e.target.value.replace(/\s/g, '').replace(',', '.');
-          onChange(parseFloat(raw) || 0);
-        }}
-        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base tabular-nums outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
-      />
-      {hint && <p className="text-xs text-slate-500">{hint}</p>}
-    </div>
-  );
-}
 
 export function PlantStep({ input, manualMode, onChange, onCalculate, canCalculate }: PlantStepProps) {
   const costoEnergia = input.consumoKwh > 0 ? input.spesaAnnua / input.consumoKwh : 0;

@@ -9,6 +9,15 @@ export type SimInput = {
 
 export type PaybackColor = 'green' | 'orange' | 'red';
 
+export type PaybackSerie = {
+  labels: string[];
+  saldoInvestimento: number[];
+  bollettaCumulativa: number[];
+  cumRisparmio: number[];
+  cumGse: number[];
+  cumDetrazione: number[];
+};
+
 export type SimResult = {
   costoEnergia: number;
   produzioneLorda: number;
@@ -25,6 +34,7 @@ export type SimResult = {
   payback: { years: number; reached: boolean };
   colore: PaybackColor;
   saldo10: number;
+  serie: PaybackSerie;
 };
 
 export const DEFAULT_INPUT: SimInput = {

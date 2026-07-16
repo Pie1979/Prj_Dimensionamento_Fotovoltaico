@@ -1,8 +1,8 @@
-import type { PaybackColor, SimInput, SimResult } from '@/lib/types';
+import type { PaybackColor, PaybackSerie, SimInput, SimResult } from '@/lib/types';
 
 const FISCAL = { DETRAZIONE: 0.5, ANNI: 10 };
 const PREZZO_GSE = 0.09;
-const ANNI_GRAFICO = 15;
+export const ANNI_GRAFICO = 15;
 
 function calcolaBeneficioTotale(
   risparmio: number,
@@ -41,6 +41,50 @@ function colorePayback(years: number): PaybackColor {
   return 'red';
 }
 
+export function generaSeriePayback(
+  investimentoNetto: number,
+  risparmio: number,
+  ricavoGse: number,
+  quotaDetrazione: number,
+  spesaAnnua: number,
+): PaybackSerie {
+  const labels: string[] = [];
+  const saldoInvestimento: number[] = [];
+  const cumRisparmio: number[] = [];
+  const cumGse: number[] = [];
+  const cumDetrazione: number[] = [];
+  const bollettaCumulativa: number[] = [];
+  let saldo = -investimentoNetto;
+  let cumBolletta = 0;
+  let cR = 0;
+  let cG = 0;
+  let cD = 0;
+
+  for (let y = 0; y <= ANNI_GRAFICO; y++) {
+    labels.push(`Anno ${y}`);
+    if (y === 0) {
+      saldoInvestimento.push(-investimentoNetto);
+      cumRisparmio.push(0);
+      cumGse.push(0);
+      cumDetrazione.push(0);
+      bollettaCumulativa.push(0);
+      continue;
+    }
+    cumBolletta += spesaAnnua;
+    bollettaCumulativa.push(cumBolletta);
+    cR += risparmio;
+    cG += ricavoGse;
+    if (y <= FISCAL.ANNI) cD += quotaDetrazione;
+    cumRisparmio.push(cR);
+    cumGse.push(cG);
+    cumDetrazione.push(cD);
+    saldo += calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, y);
+    saldoInvestimento.push(saldo);
+  }
+
+  return { labels, saldoInvestimento, bollettaCumulativa, cumRisparmio, cumGse, cumDetrazione };
+}
+
 export function calcolaSimulazione(input: SimInput): SimResult {
   const { consumoKwh: consumo, spesaAnnua: spesa, irraggiamento, kwp, costoImpianto: costo, scenario } =
     input;
@@ -60,10 +104,9 @@ export function calcolaSimulazione(input: SimInput): SimResult {
   const payback = calcolaPayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione);
   const colore = colorePayback(payback.years);
 
-  let saldo = -investimentoNetto;
-  for (let y = 1; y <= Math.min(FISCAL.ANNI, ANNI_GRAFICO); y++) {
-    saldo += calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, y);
-  }
+  const serie = generaSeriePayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione, spesa);
+  const idx10 = Math.min(FISCAL.ANNI, ANNI_GRAFICO);
+  const saldo = serie.saldoInvestimento[idx10];
 
   return {
     costoEnergia,
@@ -81,6 +124,7 @@ export function calcolaSimulazione(input: SimInput): SimResult {
     payback,
     colore,
     saldo10: saldo,
+    serie,
   };
 }
 
