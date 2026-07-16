@@ -1,29 +1,54 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { HeroBanner } from '@/components/hero-banner';
+import { PlantStep } from '@/components/plant-step';
+import { ResultsStep } from '@/components/results-step';
+import { StepProgress } from '@/components/step-progress';
 import { UploadStep } from '@/components/upload-step';
 import type { UploadState } from '@/components/bill-upload-dropzone';
-
-type SimInput = {
-  consumoKwh: number;
-  spesaAnnua: number;
-  scenario: number;
-};
+import { calcolaSimulazione } from '@/lib/solar-calc';
+import { DEFAULT_INPUT, type SimInput } from '@/lib/types';
 
 export default function HomePage() {
   const [showHero, setShowHero] = useState(true);
   const [step, setStep] = useState(1);
-  const [input, setInput] = useState<SimInput>({
-    consumoKwh: 0,
-    spesaAnnua: 0,
-    scenario: 1,
-  });
+  const [manualMode, setManualMode] = useState(false);
+  const [input, setInput] = useState<SimInput>({ ...DEFAULT_INPUT });
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [uploadError, setUploadError] = useState<string>();
   const [fileName, setFileName] = useState<string>();
 
-  const canContinue = input.consumoKwh > 0 && input.spesaAnnua > 0 && uploadState !== 'loading';
+  const canContinue =
+    input.consumoKwh > 0 && input.spesaAnnua > 0 && uploadState !== 'loading';
+
+  const canCalculate =
+    input.consumoKwh > 0 &&
+    input.spesaAnnua > 0 &&
+    input.kwp > 0 &&
+    input.costoImpianto > 0 &&
+    input.irraggiamento > 0;
+
+  const result = useMemo(() => calcolaSimulazione(input), [input]);
+
+  const patchInput = useCallback((patch: Partial<SimInput>) => {
+    setInput((prev) => ({ ...prev, ...patch }));
+  }, []);
+
+  const scrollTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const handleRestart = useCallback(() => {
+    setInput({ ...DEFAULT_INPUT });
+    setStep(1);
+    setShowHero(true);
+    setManualMode(false);
+    setUploadState('idle');
+    setUploadError(undefined);
+    setFileName(undefined);
+    scrollTop();
+  }, [scrollTop]);
 
   const handleFile = useCallback((file: File) => {
     if ((file as File & { __tooLarge?: boolean }).__tooLarge) {
@@ -34,7 +59,6 @@ export default function HomePage() {
     setFileName(file.name);
     setUploadState('loading');
     setUploadError(undefined);
-    // Analisi bolletta: integrazione OCR come in produzione
     setTimeout(() => {
       setUploadState('success');
       setInput((prev) => ({
@@ -47,28 +71,43 @@ export default function HomePage() {
 
   const handleManualEntry = useCallback(() => {
     setShowHero(false);
+    setManualMode(true);
     setUploadState('idle');
     setUploadError(undefined);
     setFileName(undefined);
     setStep(2);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+    scrollTop();
+  }, [scrollTop]);
 
   const handleContinue = useCallback(() => {
     if (!canContinue) return;
     setShowHero(false);
+    setManualMode(false);
     setStep(2);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [canContinue]);
+    scrollTop();
+  }, [canContinue, scrollTop]);
+
+  const handleCalculate = useCallback(() => {
+    if (!canCalculate) return;
+    setStep(3);
+    scrollTop();
+  }, [canCalculate, scrollTop]);
 
   return (
     <main className="min-h-screen bg-[#F8FAFC]">
       <div className="mx-auto max-w-3xl px-4 pb-8 pt-6 md:pt-10">
         <header className="mb-6 flex items-center justify-between">
-          <span className="text-lg font-bold tracking-tight">
-            <span className="text-[#F59E0B]">Sun</span>
-            <span className="text-[#0F766E]">Size</span>
-          </span>
+          <button
+            type="button"
+            onClick={step > 1 ? handleRestart : undefined}
+            className={step > 1 ? 'text-left transition-opacity hover:opacity-80' : 'text-left'}
+            aria-label={step > 1 ? 'Torna alla home SunSize' : 'SunSize'}
+          >
+            <span className="text-lg font-bold tracking-tight">
+              <span className="text-[#F59E0B]">Sun</span>
+              <span className="text-[#0F766E]">Size</span>
+            </span>
+          </button>
           <span className="text-xs text-slate-500">by PCODING Software</span>
         </header>
 
@@ -78,11 +117,13 @@ export default function HomePage() {
           </div>
         )}
 
+        {(step > 1 || !showHero) && <StepProgress current={step} className="-mx-4 mb-6" />}
+
         <div>
           {step === 1 && (
             <UploadStep
               scenario={input.scenario}
-              onScenarioChange={(scenario) => setInput((p) => ({ ...p, scenario }))}
+              onScenarioChange={(scenario) => patchInput({ scenario })}
               uploadState={uploadState}
               uploadError={uploadError}
               fileName={fileName}
@@ -94,25 +135,34 @@ export default function HomePage() {
           )}
 
           {step === 2 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-              <p className="text-sm text-slate-600">
-                Passo impianto in arrivo nel prossimo aggiornamento. Nel frattempo usa il simulatore
-                completo.
-              </p>
-              <a
-                href="/legacy/index.html"
-                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-[#0F766E] px-6 text-sm font-semibold text-white hover:bg-[#0D9488]"
-              >
-                Apri simulatore completo
-              </a>
+            <>
+              <PlantStep
+                input={input}
+                manualMode={manualMode}
+                onChange={patchInput}
+                onCalculate={handleCalculate}
+                canCalculate={canCalculate}
+              />
               <button
                 type="button"
-                onClick={() => setStep(1)}
-                className="mt-3 block w-full text-sm font-medium text-[#0F766E] underline-offset-2 hover:underline"
+                onClick={() => {
+                  setStep(1);
+                  scrollTop();
+                }}
+                className="mt-6 text-sm font-medium text-[#0F766E] underline-offset-2 hover:underline"
               >
                 ← Torna alla bolletta
               </button>
-            </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <ResultsStep
+              input={input}
+              result={result}
+              onScenarioChange={(scenario) => patchInput({ scenario })}
+              onRestart={handleRestart}
+            />
           )}
         </div>
 

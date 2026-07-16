@@ -1,0 +1,106 @@
+import type { PaybackColor, SimInput, SimResult } from '@/lib/types';
+
+const FISCAL = { DETRAZIONE: 0.5, ANNI: 10 };
+const PREZZO_GSE = 0.09;
+const ANNI_GRAFICO = 15;
+
+function calcolaBeneficioTotale(
+  risparmio: number,
+  ricavoGse: number,
+  quotaDetrazione: number,
+  anno: number,
+) {
+  const base = risparmio + ricavoGse;
+  return anno <= FISCAL.ANNI ? base + quotaDetrazione : base;
+}
+
+function calcolaPayback(
+  investimentoNetto: number,
+  risparmio: number,
+  ricavoGse: number,
+  quotaDetrazione: number,
+) {
+  if (investimentoNetto <= 0) return { years: 0, reached: true };
+
+  let cumulativo = -investimentoNetto;
+  for (let anno = 1; anno <= 50; anno++) {
+    const beneficio = calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, anno);
+    const precedente = cumulativo;
+    cumulativo += beneficio;
+    if (cumulativo >= 0) {
+      const frazione = beneficio > 0 ? -precedente / beneficio : 1;
+      return { years: anno - 1 + frazione, reached: true };
+    }
+  }
+  return { years: 51, reached: false };
+}
+
+function colorePayback(years: number): PaybackColor {
+  if (years <= 3) return 'green';
+  if (years <= 5) return 'orange';
+  return 'red';
+}
+
+export function calcolaSimulazione(input: SimInput): SimResult {
+  const { consumoKwh: consumo, spesaAnnua: spesa, irraggiamento, kwp, costoImpianto: costo, scenario } =
+    input;
+
+  const costoEnergia = consumo > 0 ? spesa / consumo : 0;
+  const produzioneLorda = kwp * irraggiamento * scenario;
+  const autoconsumo = Math.min(produzioneLorda, consumo);
+  const sovrapproduzione = Math.max(0, produzioneLorda - consumo);
+  const indiceCopertura = consumo > 0 ? (produzioneLorda / consumo) * 100 : 0;
+  const risparmio = autoconsumo * costoEnergia;
+  const ricavoGse = sovrapproduzione * PREZZO_GSE;
+  const investimentoNetto = costo * FISCAL.DETRAZIONE;
+  const detrazioneTotale = costo * FISCAL.DETRAZIONE;
+  const quotaDetrazione = (costo * FISCAL.DETRAZIONE) / FISCAL.ANNI;
+  const beneficioOperativo = risparmio + ricavoGse;
+  const beneficioTotale10 = beneficioOperativo + quotaDetrazione;
+  const payback = calcolaPayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione);
+  const colore = colorePayback(payback.years);
+
+  let saldo = -investimentoNetto;
+  for (let y = 1; y <= Math.min(FISCAL.ANNI, ANNI_GRAFICO); y++) {
+    saldo += calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, y);
+  }
+
+  return {
+    costoEnergia,
+    produzioneLorda,
+    autoconsumo,
+    sovrapproduzione,
+    indiceCopertura,
+    risparmio,
+    ricavoGse,
+    investimentoNetto,
+    detrazioneTotale,
+    quotaDetrazione,
+    beneficioOperativo,
+    beneficioTotale10,
+    payback,
+    colore,
+    saldo10: saldo,
+  };
+}
+
+export const VERDICT_STYLES: Record<
+  PaybackColor,
+  { box: string; badge: string; label: string }
+> = {
+  green: {
+    box: 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700',
+    badge: 'bg-emerald-600 text-white',
+    label: 'Investimento conveniente',
+  },
+  orange: {
+    box: 'border-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 text-amber-800',
+    badge: 'bg-amber-500 text-white',
+    label: 'Da valutare con attenzione',
+  },
+  red: {
+    box: 'border-red-400 bg-gradient-to-br from-red-50 to-rose-50 text-red-700',
+    badge: 'bg-red-600 text-white',
+    label: 'Payback lungo — rivedi i parametri',
+  },
+};
