@@ -22,7 +22,26 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    html { overflow-x: hidden; }
+    :root {
+      --sticky-h: 3rem;
+      --block-pad-y: 1.25rem;
+      --block-gap: 0;
+    }
+    @media (min-width: 768px) {
+      :root {
+        --sticky-h: 3.25rem;
+        --block-pad-y: 1.5rem;
+      }
+    }
+    html {
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      scroll-padding-top: var(--sticky-h);
+      scroll-snap-type: y proximity;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; scroll-snap-type: none; }
+    }
     body {
       background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 40%, #fffbeb 100%);
       background-attachment: fixed;
@@ -37,7 +56,32 @@
       pointer-events: none;
       z-index: 0;
     }
-    .app-shell { position: relative; z-index: 1; }
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--block-gap);
+    }
+    .view-block {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      scroll-margin-top: calc(var(--sticky-h) + 0.5rem);
+      min-height: calc(100dvh - var(--sticky-h) - var(--block-pad-y) * 2);
+      box-sizing: border-box;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .view-block { scroll-snap-align: none; scroll-snap-stop: normal; }
+    }
+    .view-block--center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .view-block--compact {
+      min-height: auto;
+      scroll-snap-stop: normal;
+    }
     .kpi-value { transition: opacity 0.25s ease, transform 0.25s ease; }
     .kpi-value.kpi-pulse { animation: kpiPulse 0.45s ease; }
     @keyframes kpiPulse {
@@ -323,11 +367,14 @@
       <span class="text-sm md:text-base font-extrabold tracking-tight shrink-0">
         <span class="text-amber-500">Sun</span><span class="text-brand-700">Size</span>
       </span>
-      <span id="sticky-step-label" class="sticky-step-label text-xs md:text-sm font-semibold text-blue-600 bg-blue-50 px-2.5 md:px-3 py-1 rounded-full">Passo 1</span>
+      <span id="sticky-step-label" class="sticky-step-label text-xs md:text-sm font-semibold text-slate-600 bg-slate-100 px-2.5 md:px-3 py-1 rounded-full">Inizio</span>
     </div>
   </div>
 
-  <div class="app-shell max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-5 sm:space-y-6">
+  <div class="app-shell max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+
+    <!-- INTRO: hero, stepper, scenario, upload -->
+    <div id="intro" class="view-block view-block--center space-y-5 sm:space-y-6">
 
     <!-- HERO -->
     <header id="hero" class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-brand-500 to-teal-700 px-6 py-8 md:px-8 md:py-10 text-white shadow-xl shadow-brand-600/20 text-center">
@@ -403,8 +450,10 @@
       <p id="fattura-status" class="text-xs text-slate-500 text-center max-w-md hidden"></p>
     </div>
 
+    </div><!-- /intro -->
+
     <!-- PASSO 1 -->
-    <section id="passo-1" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
+    <section id="passo-1" class="view-block view-block--tall bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
       <header class="step-header bg-gradient-to-b from-blue-50 via-sky-50/80 to-white border-b border-blue-100/70">
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-blue-400 to-blue-600">1</div>
@@ -451,7 +500,7 @@
     </section>
 
     <!-- PASSO 2 -->
-    <section id="passo-2" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
+    <section id="passo-2" class="view-block view-block--tall bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
       <header class="step-header bg-gradient-to-b from-brand-50 via-teal-50/80 to-white border-b border-brand-100/70">
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-brand-500 to-teal-700">2</div>
@@ -541,7 +590,7 @@
     </section>
 
     <!-- PASSO 3 -->
-    <section id="passo-3" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
+    <section id="passo-3" class="view-block view-block--tall bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
       <header class="step-header bg-gradient-to-b from-emerald-50 via-green-50/80 to-white border-b border-emerald-100/70">
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-emerald-400 to-emerald-600">3</div>
@@ -598,7 +647,7 @@
     </section>
 
     <!-- PASSO 4 -->
-    <section id="passo-4" class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
+    <section id="passo-4" class="view-block view-block--tall bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
       <header class="step-header bg-gradient-to-b from-amber-50 via-yellow-50/80 to-white border-b border-amber-100/70">
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-amber-400 to-amber-600">4</div>
@@ -700,7 +749,7 @@
       </div>
     </section>
 
-    <footer class="bg-white/70 backdrop-blur rounded-2xl border border-white/80 px-4 sm:px-6 py-5 shadow-sm text-center">
+    <footer class="view-block view-block--compact view-block--center bg-white/70 backdrop-blur rounded-2xl border border-white/80 px-4 sm:px-6 py-5 shadow-sm text-center">
       <p class="text-xs text-slate-400">
         Scenario attivo: <strong id="out-scenario-label" class="text-brand-600">Produzione Reale (100%)</strong>
       </p>
@@ -1503,13 +1552,14 @@ function initStickyBar() {
   if (!stickyBar || !stickyLabel || !hero) return;
 
   const STEP_SECTIONS = [
+    { id: 'intro', label: 'Inizio', color: 'text-slate-600 bg-slate-100' },
     { id: 'passo-1', label: 'Passo 1', color: 'text-blue-600 bg-blue-50' },
     { id: 'passo-2', label: 'Passo 2', color: 'text-brand-600 bg-brand-50' },
     { id: 'passo-3', label: 'Passo 3', color: 'text-emerald-600 bg-emerald-50' },
     { id: 'passo-4', label: 'Passo 4', color: 'text-amber-600 bg-amber-50' },
   ];
 
-  let activeStepId = 'passo-1';
+  let activeStepId = 'intro';
 
   function setActiveStep(id) {
     if (activeStepId === id) return;
@@ -1520,11 +1570,23 @@ function initStickyBar() {
     stickyLabel.className = `sticky-step-label text-xs md:text-sm font-semibold px-2.5 md:px-3 py-1 rounded-full ${cfg.color}`;
   }
 
+  function resolveActiveStep() {
+    const stickyOffset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-h')) || 48;
+    const anchor = window.scrollY + stickyOffset + 32;
+    let current = 'intro';
+    STEP_SECTIONS.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el && el.offsetTop <= anchor) current = id;
+    });
+    setActiveStep(current);
+  }
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) setActiveStep(entry.target.id);
     });
-  }, { rootMargin: '-35% 0px -50% 0px', threshold: 0 });
+    resolveActiveStep();
+  }, { rootMargin: '-42% 0px -48% 0px', threshold: 0 });
 
   STEP_SECTIONS.forEach(({ id }) => {
     const el = document.getElementById(id);
@@ -1532,9 +1594,10 @@ function initStickyBar() {
   });
 
   function updateStickyVisibility() {
-    const show = window.scrollY > hero.offsetHeight * 0.55;
+    const show = window.scrollY > hero.offsetHeight * 0.45;
     stickyBar.classList.toggle('visible', show);
     stickyBar.setAttribute('aria-hidden', show ? 'false' : 'true');
+    resolveActiveStep();
   }
 
   window.addEventListener('scroll', updateStickyVisibility, { passive: true });
