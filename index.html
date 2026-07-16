@@ -659,7 +659,26 @@
             </div>
           </div>
 
-          <p class="text-xs text-slate-500 mb-2 leading-relaxed">La curva mostra quanto ti resta in tasca ogni anno. Quando tocca la linea del pareggio, l'impianto è ripagato.</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+            <div class="rounded-lg bg-emerald-50 px-2 py-1.5 border border-emerald-100 text-center">
+              <span class="block text-[10px] font-semibold uppercase tracking-wide text-emerald-600">Bolletta</span>
+              <span class="block text-xs font-bold text-emerald-800 tabular-nums mt-0.5" id="out-br-risparmio">—</span>
+            </div>
+            <div class="rounded-lg bg-sky-50 px-2 py-1.5 border border-sky-100 text-center">
+              <span class="block text-[10px] font-semibold uppercase tracking-wide text-sky-600">GSE</span>
+              <span class="block text-xs font-bold text-sky-800 tabular-nums mt-0.5" id="out-br-gse">—</span>
+            </div>
+            <div class="rounded-lg bg-amber-50 px-2 py-1.5 border border-amber-100 text-center">
+              <span class="block text-[10px] font-semibold uppercase tracking-wide text-amber-600">Detrazione</span>
+              <span class="block text-xs font-bold text-amber-800 tabular-nums mt-0.5" id="out-br-detrazione">—</span>
+            </div>
+            <div class="rounded-lg bg-slate-100 px-2 py-1.5 border border-slate-200 text-center">
+              <span class="block text-[10px] font-semibold uppercase tracking-wide text-slate-500">Investito</span>
+              <span class="block text-xs font-bold text-slate-700 tabular-nums mt-0.5" id="out-br-investito">—</span>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-500 mb-2 leading-relaxed">Le aree colorate mostrano da dove arriva il guadagno (bolletta, GSE, detrazione). La linea scura è il saldo netto: quando tocca il pareggio, l'impianto è ripagato.</p>
           <div class="relative h-80 sm:h-72">
             <canvas id="payback-chart"></canvas>
           </div>
@@ -901,24 +920,38 @@ const COLORI = {
 function generaSeriePayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione, spesaAnnua) {
   const labels = [];
   const saldoInvestimento = [];
+  const cumRisparmio = [];
+  const cumGse = [];
+  const cumDetrazione = [];
   const bollettaCumulativa = [];
   let saldo = -investimentoNetto;
   let cumBolletta = 0;
+  let cR = 0;
+  let cG = 0;
+  let cD = 0;
 
   for (let y = 0; y <= ANNI_GRAFICO; y++) {
     labels.push(`Anno ${y}`);
     if (y === 0) {
       saldoInvestimento.push(-investimentoNetto);
+      cumRisparmio.push(0);
+      cumGse.push(0);
+      cumDetrazione.push(0);
       bollettaCumulativa.push(0);
       continue;
     }
     cumBolletta += spesaAnnua;
     bollettaCumulativa.push(cumBolletta);
-    const beneficio = calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, y);
-    saldo += beneficio;
+    cR += risparmio;
+    cG += ricavoGse;
+    if (y <= FISCAL.ANNI) cD += quotaDetrazione;
+    cumRisparmio.push(cR);
+    cumGse.push(cG);
+    cumDetrazione.push(cD);
+    saldo += calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, y);
     saldoInvestimento.push(saldo);
   }
-  return { labels, saldoInvestimento, bollettaCumulativa };
+  return { labels, saldoInvestimento, bollettaCumulativa, cumRisparmio, cumGse, cumDetrazione };
 }
 
 /** Calcolo completo — orchestratore principale */
@@ -1000,6 +1033,7 @@ function aggiornaUI() {
 
   const saldo10 = r.serie.saldoInvestimento[Math.min(FISCAL.ANNI, ANNI_GRAFICO)];
   const spesa10 = r.spesa * FISCAL.ANNI;
+  const idx10 = Math.min(FISCAL.ANNI, ANNI_GRAFICO);
 
   setText('out-chart-guida',
     r.investimentoNetto > 0
@@ -1009,6 +1043,11 @@ function aggiornaUI() {
   setText('out-kpi-rientro', r.payback.reached ? formatPayback(r.payback.years) : 'Oltre 50 anni');
   setText('out-kpi-guadagno',
     saldo10 >= 0 ? `+${fmt2(saldo10)} €` : `${fmt2(saldo10)} €`);
+
+  setText('out-br-risparmio', `+${eur(r.serie.cumRisparmio[idx10])}`);
+  setText('out-br-gse', `+${eur(r.serie.cumGse[idx10])}`);
+  setText('out-br-detrazione', `+${eur(r.serie.cumDetrazione[idx10])}`);
+  setText('out-br-investito', `−${eur(r.investimentoNetto)}`);
 
   setText('out-senza-fv',
     `In ${FISCAL.ANNI} anni spendi ${eur(spesa10)} in bolletta elettrica, senza recuperare nulla.`);
@@ -1092,12 +1131,12 @@ function creaPaybackMarkerPlugin(paybackIdx, paybackLabel) {
   };
 }
 
-/** Grafico Chart.js payback — saldo netto con zone colore e marker pareggio */
+/** Grafico Chart.js payback — voci guadagno impilate + saldo netto */
 function aggiornaGrafico(r) {
   const canvas = document.getElementById('payback-chart');
   if (!canvas || typeof Chart === 'undefined') return;
 
-  const { labels, saldoInvestimento } = r.serie;
+  const { labels, saldoInvestimento, cumRisparmio, cumGse, cumDetrazione } = r.serie;
   const paybackIdx = r.payback.reached
     ? Math.min(Math.ceil(r.payback.years), ANNI_GRAFICO)
     : null;
@@ -1115,25 +1154,54 @@ function aggiornaGrafico(r) {
       labels,
       datasets: [
         {
-          label: 'Quanto ti resta in tasca',
+          label: 'Risparmio bolletta',
+          data: cumRisparmio,
+          stack: 'benefici',
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.42)',
+          borderWidth: 1,
+          fill: true,
+          tension: 0.2,
+          pointRadius: 0,
+          order: 3,
+        },
+        {
+          label: 'Ricavo GSE',
+          data: cumGse,
+          stack: 'benefici',
+          borderColor: '#0ea5e9',
+          backgroundColor: 'rgba(14, 165, 233, 0.38)',
+          borderWidth: 1,
+          fill: true,
+          tension: 0.2,
+          pointRadius: 0,
+          order: 3,
+        },
+        {
+          label: 'Detrazione fiscale',
+          data: cumDetrazione,
+          stack: 'benefici',
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.38)',
+          borderWidth: 1,
+          fill: true,
+          tension: 0.2,
+          pointRadius: 0,
+          order: 3,
+        },
+        {
+          label: 'Saldo netto',
           data: saldoInvestimento,
+          borderColor: '#0f766e',
+          backgroundColor: 'transparent',
           borderWidth: 3,
-          fill: 'origin',
+          fill: false,
           tension: 0.2,
           pointRadius: saldoInvestimento.map((_, i) => (i === paybackIdx ? 8 : i === 0 || i === ANNI_GRAFICO ? 4 : 0)),
-          pointBackgroundColor: saldoInvestimento.map((_, i) => (i === paybackIdx ? '#0d9488' : '#16a34a')),
+          pointBackgroundColor: saldoInvestimento.map((_, i) => (i === paybackIdx ? '#0d9488' : '#0f766e')),
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
-          segment: {
-            borderColor(ctx) {
-              const y = ctx.p1.parsed.y;
-              return y < 0 ? '#ea580c' : '#16a34a';
-            },
-            backgroundColor(ctx) {
-              const y = ctx.p1.parsed.y;
-              return y < 0 ? 'rgba(234, 88, 12, 0.14)' : 'rgba(22, 163, 74, 0.14)';
-            },
-          },
+          order: 1,
         },
       ],
     },
@@ -1144,7 +1212,12 @@ function aggiornaGrafico(r) {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { usePointStyle: true, padding: 12, font: { family: 'Poppins', size: 11 } },
+          labels: {
+            usePointStyle: true,
+            padding: 10,
+            font: { family: 'Poppins', size: isMobile ? 9 : 10 },
+            boxWidth: 8,
+          },
         },
         tooltip: {
           callbacks: {
@@ -1153,14 +1226,19 @@ function aggiornaGrafico(r) {
             },
             label(ctx) {
               const v = ctx.parsed.y;
-              const stato = v >= 0 ? 'In guadagno' : 'In recupero';
-              return `${stato}: ${v >= 0 ? '+' : ''}${fmt2(v)} €`;
+              return `${ctx.dataset.label}: ${v >= 0 ? '+' : ''}${fmt2(v)} €`;
+            },
+            footer(items) {
+              const idx = items[0]?.dataIndex ?? 0;
+              const saldo = saldoInvestimento[idx];
+              return `Saldo netto: ${saldo >= 0 ? '+' : ''}${fmt2(saldo)} €`;
             },
           },
         },
       },
       scales: {
         x: {
+          stacked: true,
           grid: { display: false },
           ticks: {
             maxTicksLimit: isMobile ? 6 : 8,
@@ -1168,6 +1246,7 @@ function aggiornaGrafico(r) {
           },
         },
         y: {
+          stacked: true,
           grid: { color: 'rgba(0,0,0,0.05)' },
           ticks: { callback: (v) => fmt0(v) + ' €', font: { size: 10, family: 'Poppins' } },
         },
