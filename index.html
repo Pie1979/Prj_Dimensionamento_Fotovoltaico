@@ -82,56 +82,6 @@
       min-height: auto;
       scroll-snap-stop: normal;
     }
-    .intro-group {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-    @media (min-width: 640px) {
-      .intro-group { gap: 1.5rem; }
-    }
-    @media (min-width: 1024px) {
-      html { scroll-snap-type: y mandatory; }
-      .intro-group {
-        display: contents;
-        gap: 0;
-      }
-      .intro-panel {
-        scroll-snap-align: start;
-        scroll-snap-stop: always;
-        scroll-margin-top: calc(var(--sticky-h) + 0.5rem);
-        height: calc(100dvh - var(--sticky-h));
-        min-height: calc(100dvh - var(--sticky-h));
-        overflow-y: auto;
-        overscroll-behavior-y: auto;
-        box-sizing: border-box;
-        -webkit-overflow-scrolling: touch;
-      }
-      .intro-panel--center {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-      .view-block {
-        height: calc(100dvh - var(--sticky-h));
-        min-height: calc(100dvh - var(--sticky-h));
-        max-height: calc(100dvh - var(--sticky-h));
-        overflow-y: auto;
-        overflow-x: hidden;
-        overscroll-behavior-y: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      .view-block--compact {
-        height: auto;
-        min-height: auto;
-        max-height: none;
-        overflow: visible;
-      }
-      .app-shell {
-        padding-top: 0;
-        padding-bottom: 0;
-      }
-    }
     .kpi-value { transition: opacity 0.25s ease, transform 0.25s ease; }
     .kpi-value.kpi-pulse { animation: kpiPulse 0.45s ease; }
     @keyframes kpiPulse {
@@ -421,13 +371,13 @@
     </div>
   </div>
 
-  <div class="app-shell max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-0">
+  <div class="app-shell max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
 
-    <!-- INTRO: raggruppato su mobile, pannelli separati su desktop -->
-    <div id="intro" class="intro-group view-block view-block--center">
+    <!-- INTRO: hero, stepper, scenario, upload -->
+    <div id="intro" class="view-block view-block--center space-y-5 sm:space-y-6">
 
     <!-- HERO -->
-    <header id="hero" class="intro-panel intro-panel--center relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-brand-500 to-teal-700 px-6 py-8 md:px-8 md:py-10 text-white shadow-xl shadow-brand-600/20 text-center">
+    <header id="hero" class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-brand-500 to-teal-700 px-6 py-8 md:px-8 md:py-10 text-white shadow-xl shadow-brand-600/20 text-center">
       <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
       <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-amber-300/20 rounded-full blur-xl"></div>
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -447,7 +397,7 @@
     </header>
 
     <!-- STEPPER -->
-    <nav id="stepper-nav" class="intro-panel intro-panel--center bg-white/85 backdrop-blur rounded-2xl shadow-sm border border-white p-4 sm:p-5" aria-label="Progresso analisi">
+    <nav class="bg-white/85 backdrop-blur rounded-2xl shadow-sm border border-white p-4 sm:p-5" aria-label="Progresso analisi">
       <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 text-center mb-4">Il percorso in 4 passi</p>
       <div class="flex items-center gap-1 sm:gap-2">
         <div class="flex flex-col items-center gap-1.5 min-w-0 flex-1">
@@ -473,7 +423,7 @@
     </nav>
 
     <!-- SELEZTORE SCENARIO -->
-    <div id="scenario-block" class="intro-panel intro-panel--center bg-white/90 backdrop-blur rounded-2xl shadow-md border border-white p-4 sm:p-5">
+    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-md border border-white p-4 sm:p-5">
       <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 text-center">Scenario di produzione</p>
       <div class="grid grid-cols-3 gap-2" role="group" aria-label="Seleziona scenario">
         <button type="button" data-scenario="1" class="scenario-btn active-scenario rounded-xl py-3 px-2 text-sm font-semibold transition-all border-2 border-brand-600 bg-brand-600 text-white shadow-md">
@@ -490,7 +440,7 @@
     </div>
 
     <!-- CARICA FATTURA -->
-    <div id="upload-block" class="intro-panel intro-panel--center flex flex-col items-center gap-2">
+    <div class="flex flex-col items-center gap-2">
       <input type="file" id="input-fattura" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,application/pdf,image/*,text/plain" class="hidden">
       <label for="input-fattura" id="btn-fattura" class="btn-fattura inline-flex items-center gap-3 px-6 py-3 text-white text-sm font-semibold rounded-2xl shadow-lg cursor-pointer">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
@@ -503,7 +453,7 @@
     </div><!-- /intro -->
 
     <!-- PASSO 1 -->
-    <section id="passo-1" class="view-block bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden lg:overflow-x-hidden lg:overflow-y-auto">
+    <section id="passo-1" class="view-block bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
       <header class="step-header bg-gradient-to-b from-blue-50 via-sky-50/80 to-white border-b border-blue-100/70">
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-blue-400 to-blue-600">1</div>
@@ -550,7 +500,7 @@
     </section>
 
     <!-- PASSO 2 -->
-    <section id="passo-2" class="view-block bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden lg:overflow-x-hidden lg:overflow-y-auto">
+    <section id="passo-2" class="view-block bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
       <header class="step-header bg-gradient-to-b from-brand-50 via-teal-50/80 to-white border-b border-brand-100/70">
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-brand-500 to-teal-700">2</div>
@@ -640,7 +590,7 @@
     </section>
 
     <!-- PASSO 3 -->
-    <section id="passo-3" class="view-block bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden lg:overflow-x-hidden lg:overflow-y-auto">
+    <section id="passo-3" class="view-block bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
       <header class="step-header bg-gradient-to-b from-emerald-50 via-green-50/80 to-white border-b border-emerald-100/70">
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-emerald-400 to-emerald-600">3</div>
@@ -697,7 +647,7 @@
     </section>
 
     <!-- PASSO 4 -->
-    <section id="passo-4" class="view-block bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden lg:overflow-x-hidden lg:overflow-y-auto">
+    <section id="passo-4" class="view-block bg-white/95 backdrop-blur rounded-2xl shadow-md border border-white overflow-hidden">
       <header class="step-header bg-gradient-to-b from-amber-50 via-yellow-50/80 to-white border-b border-amber-100/70">
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-amber-400 to-amber-600">4</div>
@@ -1601,33 +1551,20 @@ function initStickyBar() {
   const hero = document.getElementById('hero');
   if (!stickyBar || !stickyLabel || !hero) return;
 
-  const INTRO_STYLE = { label: 'Inizio', color: 'text-slate-600 bg-slate-100' };
-  const PASSO_SECTIONS = [
+  const STEP_SECTIONS = [
+    { id: 'intro', label: 'Inizio', color: 'text-slate-600 bg-slate-100' },
     { id: 'passo-1', label: 'Passo 1', color: 'text-blue-600 bg-blue-50' },
     { id: 'passo-2', label: 'Passo 2', color: 'text-brand-600 bg-brand-50' },
     { id: 'passo-3', label: 'Passo 3', color: 'text-emerald-600 bg-emerald-50' },
     { id: 'passo-4', label: 'Passo 4', color: 'text-amber-600 bg-amber-50' },
   ];
-  const DESKTOP_INTRO_IDS = ['hero', 'stepper-nav', 'scenario-block', 'upload-block'];
-  const desktopMq = window.matchMedia('(min-width: 1024px)');
 
   let activeStepId = 'intro';
-  let stepObserver = null;
-
-  function getStepSections() {
-    if (desktopMq.matches) {
-      return [
-        ...DESKTOP_INTRO_IDS.map((id) => ({ id, ...INTRO_STYLE })),
-        ...PASSO_SECTIONS,
-      ];
-    }
-    return [{ id: 'intro', ...INTRO_STYLE }, ...PASSO_SECTIONS];
-  }
 
   function setActiveStep(id) {
     if (activeStepId === id) return;
     activeStepId = id;
-    const cfg = getStepSections().find((s) => s.id === id);
+    const cfg = STEP_SECTIONS.find((s) => s.id === id);
     if (!cfg) return;
     stickyLabel.textContent = cfg.label;
     stickyLabel.className = `sticky-step-label text-xs md:text-sm font-semibold px-2.5 md:px-3 py-1 rounded-full ${cfg.color}`;
@@ -1636,30 +1573,25 @@ function initStickyBar() {
   function resolveActiveStep() {
     const stickyOffset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-h')) || 48;
     const anchor = window.scrollY + stickyOffset + 32;
-    const sections = getStepSections();
-    let current = sections[0]?.id || 'intro';
-    sections.forEach(({ id }) => {
+    let current = 'intro';
+    STEP_SECTIONS.forEach(({ id }) => {
       const el = document.getElementById(id);
       if (el && el.offsetTop <= anchor) current = id;
     });
     setActiveStep(current);
   }
 
-  function bindStepObserver() {
-    if (stepObserver) stepObserver.disconnect();
-    stepObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) setActiveStep(entry.target.id);
-      });
-      resolveActiveStep();
-    }, { rootMargin: desktopMq.matches ? '-46% 0px -46% 0px' : '-42% 0px -48% 0px', threshold: 0 });
-
-    getStepSections().forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (el) stepObserver.observe(el);
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) setActiveStep(entry.target.id);
     });
     resolveActiveStep();
-  }
+  }, { rootMargin: '-42% 0px -48% 0px', threshold: 0 });
+
+  STEP_SECTIONS.forEach(({ id }) => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
 
   function updateStickyVisibility() {
     const show = window.scrollY > hero.offsetHeight * 0.45;
@@ -1668,8 +1600,6 @@ function initStickyBar() {
     resolveActiveStep();
   }
 
-  desktopMq.addEventListener('change', bindStepObserver);
-  bindStepObserver();
   window.addEventListener('scroll', updateStickyVisibility, { passive: true });
   updateStickyVisibility();
 }
