@@ -1,11 +1,15 @@
 import type { NextConfig } from 'next';
 
-const repoBase = process.env.GITHUB_PAGES === 'true' ? '/Prj_Dimensionamento_Fotovoltaico' : '';
+/** Export statico solo per GitHub Pages (workflow CI). Su Vercel usa build Next.js standard. */
+const isGithubPages = process.env.GITHUB_PAGES === 'true';
+const repoBase = '/Prj_Dimensionamento_Fotovoltaico';
 
-const nextConfig: NextConfig = {
-  output: 'export',
-  basePath: repoBase,
-  assetPrefix: repoBase ? `${repoBase}/` : undefined,
-};
+const nextConfig: NextConfig = isGithubPages
+  ? {
+      output: 'export',
+      basePath: repoBase,
+      assetPrefix: `${repoBase}/`,
+    }
+  : {};
 
 export default nextConfig;
