@@ -37,7 +37,9 @@
       overflow-x: hidden;
       scroll-behavior: smooth;
       scroll-padding-top: var(--sticky-h);
-      scroll-snap-type: y proximity;
+    }
+    @media (max-width: 1023px) {
+      html { scroll-snap-type: y proximity; }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; scroll-snap-type: none; }
@@ -70,6 +72,14 @@
       min-height: calc(100dvh - var(--sticky-h) - var(--block-pad-y) * 2);
       box-sizing: border-box;
     }
+    @media (min-width: 1024px) {
+      .view-block {
+        min-height: auto;
+        scroll-snap-align: none;
+        scroll-snap-stop: normal;
+        scroll-margin-top: 0;
+      }
+    }
     @media (prefers-reduced-motion: reduce) {
       .view-block { scroll-snap-align: none; scroll-snap-stop: normal; }
     }
@@ -81,6 +91,22 @@
     .view-block--compact {
       min-height: auto;
       scroll-snap-stop: normal;
+    }
+    @media (min-width: 1024px) {
+      html { scroll-snap-type: none; }
+      .app-shell {
+        display: block;
+      }
+      .app-shell > * + * {
+        margin-top: 1.5rem;
+      }
+      #intro {
+        display: contents;
+      }
+      .view-block--center {
+        display: block;
+        justify-content: initial;
+      }
     }
     .kpi-value { transition: opacity 0.25s ease, transform 0.25s ease; }
     .kpi-value.kpi-pulse { animation: kpiPulse 0.45s ease; }
@@ -367,7 +393,7 @@
       <span class="text-sm md:text-base font-extrabold tracking-tight shrink-0">
         <span class="text-amber-500">Sun</span><span class="text-brand-700">Size</span>
       </span>
-      <span id="sticky-step-label" class="sticky-step-label text-xs md:text-sm font-semibold text-slate-600 bg-slate-100 px-2.5 md:px-3 py-1 rounded-full">Inizio</span>
+      <span id="sticky-step-label" class="sticky-step-label text-xs md:text-sm font-semibold text-blue-600 bg-blue-50 px-2.5 md:px-3 py-1 rounded-full">Passo 1</span>
     </div>
   </div>
 
@@ -1551,55 +1577,76 @@ function initStickyBar() {
   const hero = document.getElementById('hero');
   if (!stickyBar || !stickyLabel || !hero) return;
 
-  const STEP_SECTIONS = [
-    { id: 'intro', label: 'Inizio', color: 'text-slate-600 bg-slate-100' },
+  const PASSO_SECTIONS = [
     { id: 'passo-1', label: 'Passo 1', color: 'text-blue-600 bg-blue-50' },
     { id: 'passo-2', label: 'Passo 2', color: 'text-brand-600 bg-brand-50' },
     { id: 'passo-3', label: 'Passo 3', color: 'text-emerald-600 bg-emerald-50' },
     { id: 'passo-4', label: 'Passo 4', color: 'text-amber-600 bg-amber-50' },
   ];
+  const MOBILE_SECTIONS = [
+    { id: 'intro', label: 'Inizio', color: 'text-slate-600 bg-slate-100' },
+    ...PASSO_SECTIONS,
+  ];
+  const desktopMq = window.matchMedia('(min-width: 1024px)');
 
-  let activeStepId = 'intro';
+  let activeStepId = desktopMq.matches ? 'passo-1' : 'intro';
+  let stepObserver = null;
+
+  function getStepSections() {
+    return desktopMq.matches ? PASSO_SECTIONS : MOBILE_SECTIONS;
+  }
 
   function setActiveStep(id) {
     if (activeStepId === id) return;
     activeStepId = id;
-    const cfg = STEP_SECTIONS.find((s) => s.id === id);
-    if (!cfg) return;
+    const cfg = getStepSections().find((s) => s.id === id) || PASSO_SECTIONS[0];
     stickyLabel.textContent = cfg.label;
     stickyLabel.className = `sticky-step-label text-xs md:text-sm font-semibold px-2.5 md:px-3 py-1 rounded-full ${cfg.color}`;
   }
 
   function resolveActiveStep() {
+    if (desktopMq.matches) return;
     const stickyOffset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-h')) || 48;
     const anchor = window.scrollY + stickyOffset + 32;
-    let current = 'intro';
-    STEP_SECTIONS.forEach(({ id }) => {
+    const sections = getStepSections();
+    let current = sections[0]?.id || 'intro';
+    sections.forEach(({ id }) => {
       const el = document.getElementById(id);
       if (el && el.offsetTop <= anchor) current = id;
     });
     setActiveStep(current);
   }
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) setActiveStep(entry.target.id);
+  function bindStepObserver() {
+    if (stepObserver) stepObserver.disconnect();
+    const isDesktop = desktopMq.matches;
+    stepObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) setActiveStep(entry.target.id);
+      });
+      resolveActiveStep();
+    }, {
+      rootMargin: isDesktop ? '-35% 0px -50% 0px' : '-42% 0px -48% 0px',
+      threshold: 0,
     });
-    resolveActiveStep();
-  }, { rootMargin: '-42% 0px -48% 0px', threshold: 0 });
 
-  STEP_SECTIONS.forEach(({ id }) => {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el);
-  });
+    getStepSections().forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) stepObserver.observe(el);
+    });
+    if (isDesktop) setActiveStep('passo-1');
+    else resolveActiveStep();
+  }
 
   function updateStickyVisibility() {
-    const show = window.scrollY > hero.offsetHeight * 0.45;
+    const show = window.scrollY > hero.offsetHeight * (desktopMq.matches ? 0.55 : 0.45);
     stickyBar.classList.toggle('visible', show);
     stickyBar.setAttribute('aria-hidden', show ? 'false' : 'true');
     resolveActiveStep();
   }
 
+  desktopMq.addEventListener('change', bindStepObserver);
+  bindStepObserver();
   window.addEventListener('scroll', updateStickyVisibility, { passive: true });
   updateStickyVisibility();
 }
