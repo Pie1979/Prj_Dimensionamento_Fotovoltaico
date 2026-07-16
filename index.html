@@ -112,107 +112,83 @@
     }
     .step-header-top {
       display: flex;
-      align-items: flex-start;
-      gap: 0.875rem;
+      align-items: center;
+      gap: 1rem;
       width: 100%;
     }
     @media (min-width: 640px) {
       .step-header-top {
         flex-direction: column;
         align-items: center;
-        gap: 0;
+        gap: 0.75rem;
       }
     }
     .step-heading {
       min-width: 0;
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
     }
     @media (min-width: 640px) {
       .step-heading {
         flex: none;
         width: 100%;
-      }
-    }
-    .step-heading-line {
-      display: flex;
-      align-items: baseline;
-      gap: 0.5rem;
-      width: 100%;
-      min-width: 0;
-    }
-    @media (min-width: 640px) {
-      .step-heading-line {
-        flex-direction: column;
         align-items: center;
-        gap: 0;
+        gap: 0.25rem;
       }
     }
     .step-badge {
-      width: 2.75rem;
-      height: 2.75rem;
-      border-radius: 0.875rem;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 1rem;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
+      font-size: 1.125rem;
       font-weight: 800;
       color: #fff;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
-      margin-bottom: 0;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16), 0 0 0 3px rgba(255, 255, 255, 0.65);
       flex-shrink: 0;
     }
-    @media (min-width: 640px) {
-      .step-badge {
-        width: 3rem;
-        height: 3rem;
-        border-radius: 1rem;
-        font-size: 1.125rem;
-        margin-bottom: 0.5rem;
-      }
-    }
-    .step-tag {
-      font-size: 0.65rem;
+    .step-eyebrow {
+      font-size: 0.625rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
-      margin-bottom: 0;
+      letter-spacing: 0.16em;
       line-height: 1.2;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    @media (min-width: 640px) {
-      .step-tag { margin-bottom: 0.15rem; }
     }
     .step-title {
-      font-size: 1rem;
+      font-size: 1.125rem;
       font-weight: 800;
-      line-height: 1.3;
+      line-height: 1.25;
       letter-spacing: -0.02em;
-      text-wrap: balance;
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-    .step-title-nowrap {
-      white-space: nowrap;
+      margin: 0;
     }
     @media (min-width: 640px) {
-      .step-title { font-size: 1.25rem; line-height: 1.25; }
+      .step-title { font-size: 1.375rem; }
     }
     .step-rule {
       width: 2.5rem;
       height: 2px;
       border-radius: 99px;
-      margin: 0.75rem 0;
+      margin: 0.875rem 0 0.75rem;
     }
     @media (min-width: 640px) {
-      .step-rule { margin: 0.75rem auto; }
+      .step-rule { margin: 0.875rem auto 0.75rem; }
     }
     .step-header-body {
       width: 100%;
-      padding-left: calc(2.75rem + 0.875rem);
+      margin-top: 0.875rem;
+      padding-top: 0.875rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.15);
     }
     @media (min-width: 640px) {
-      .step-header-body { padding-left: 0; }
+      .step-header-body {
+        margin-top: 1rem;
+        padding-top: 0;
+        border-top: none;
+      }
     }
     .step-intro {
       max-width: 34rem;
@@ -397,10 +373,8 @@
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-blue-400 to-blue-600">1</div>
           <div class="step-heading">
-            <div class="step-heading-line">
-              <p class="step-tag text-blue-500">Passo 1</p>
-              <h2 class="step-title text-blue-900">Identikit Bolletta</h2>
-            </div>
+            <span class="step-eyebrow text-blue-500/80">Passo 1</span>
+            <h2 class="step-title text-blue-900">Bolletta</h2>
           </div>
         </div>
         <div class="step-header-body">
@@ -447,10 +421,8 @@
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-brand-500 to-teal-700">2</div>
           <div class="step-heading">
-            <div class="step-heading-line">
-              <p class="step-tag text-brand-600">Passo 2</p>
-              <h2 class="step-title text-brand-900">Dimensionamento</h2>
-            </div>
+            <span class="step-eyebrow text-brand-600/80">Passo 2</span>
+            <h2 class="step-title text-brand-900">Dimensionamento</h2>
           </div>
         </div>
         <div class="step-header-body">
@@ -540,10 +512,8 @@
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-emerald-400 to-emerald-600">3</div>
           <div class="step-heading">
-            <div class="step-heading-line">
-              <p class="step-tag text-emerald-600">Passo 3</p>
-              <h2 class="step-title step-title-nowrap text-emerald-900">Simulazione Economica</h2>
-            </div>
+            <span class="step-eyebrow text-emerald-600/80">Passo 3</span>
+            <h2 class="step-title text-emerald-900">Simulazione Economica</h2>
           </div>
         </div>
         <div class="step-header-body">
@@ -600,10 +570,8 @@
         <div class="step-header-top">
           <div class="step-badge bg-gradient-to-br from-amber-400 to-amber-600">4</div>
           <div class="step-heading">
-            <div class="step-heading-line">
-              <p class="step-tag text-amber-600">Passo 4</p>
-              <h2 class="step-title text-amber-900">Il Verdetto Finale</h2>
-            </div>
+            <span class="step-eyebrow text-amber-600/80">Passo 4</span>
+            <h2 class="step-title text-amber-900">Verdetto</h2>
           </div>
         </div>
         <div class="step-header-body">
