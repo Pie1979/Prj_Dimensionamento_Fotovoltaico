@@ -1,7 +1,7 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { RotateCcw } from 'lucide-react';
-import { PaybackChart } from '@/components/payback-chart';
 import { ScenarioSelector } from '@/components/scenario-selector';
 import { eur, formatPayback } from '@/lib/format';
 import { ANNI_GRAFICO, VERDICT_STYLES } from '@/lib/solar-calc';
@@ -9,6 +9,14 @@ import type { SimInput, SimResult } from '@/lib/types';
 import { actionBtnBase, cn } from '@/lib/utils';
 
 const FISCAL_ANNI = 10;
+
+const PaybackChart = dynamic(
+  () => import('@/components/payback-chart').then((m) => m.PaybackChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-80 animate-pulse rounded-xl bg-slate-200/60 sm:h-72" />,
+  },
+);
 
 type ResultsStepProps = {
   input: SimInput;

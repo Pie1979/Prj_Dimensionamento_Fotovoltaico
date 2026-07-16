@@ -1,23 +1,11 @@
 'use client';
 
-import {
-  CategoryScale,
-  Chart as ChartJS,
-  ChartOptions,
-  Filler,
-  Legend,
-  LinearScale,
-  LineElement,
-  Plugin,
-  PointElement,
-  Tooltip,
-} from 'chart.js';
+import Chart from 'chart.js/auto';
+import type { ChartOptions, Plugin } from 'chart.js';
 import { useEffect, useRef } from 'react';
 import { ANNI_GRAFICO } from '@/lib/solar-calc';
 import { fmt0, fmt2, formatPayback } from '@/lib/format';
 import type { SimResult } from '@/lib/types';
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
 const zeroLinePlugin: Plugin = {
   id: 'zeroLine',
@@ -43,7 +31,7 @@ const zeroLinePlugin: Plugin = {
 
 function creaPaybackMarkerPlugin(paybackIdx: number | null, paybackLabel: string | null): Plugin {
   return {
-    id: 'paybackMarker',
+    id: `paybackMarker-${paybackIdx ?? 'none'}`,
     afterDraw(chart) {
       if (paybackIdx == null || paybackIdx <= 0) return;
       const { ctx, chartArea, scales } = chart;
@@ -88,7 +76,7 @@ type PaybackChartProps = {
 
 export function PaybackChart({ result }: PaybackChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<ChartJS | null>(null);
+  const chartRef = useRef<Chart | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -156,7 +144,7 @@ export function PaybackChart({ result }: PaybackChartProps) {
       },
     };
 
-    chartRef.current = new ChartJS(canvas, {
+    chartRef.current = new Chart(canvas, {
       type: 'line',
       data: {
         labels,
