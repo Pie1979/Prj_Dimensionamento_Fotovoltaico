@@ -57,10 +57,10 @@
     .btn-fattura:hover { transform: translateY(-2px); box-shadow: 0 8px 24px #0d948844; }
     .step-line { height: 3px; flex: 1; min-width: 0.5rem; background: linear-gradient(90deg, #e2e8f0, #cbd5e1, #e2e8f0); border-radius: 99px; align-self: center; }
     .stepper-node {
-      width: 2.5rem;
-      height: 2.5rem;
+      width: 2rem;
+      height: 2rem;
       border-radius: 9999px;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       font-weight: 800;
       display: flex;
       align-items: center;
@@ -69,18 +69,36 @@
       box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
       flex-shrink: 0;
     }
+    @media (min-width: 640px) {
+      .stepper-node {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 0.8rem;
+      }
+    }
     .stepper-label {
-      font-size: 0.625rem;
+      font-size: 0.5625rem;
       font-weight: 700;
       text-align: center;
-      line-height: 1.15;
-      min-height: 2.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      line-height: 1.2;
+      display: block;
       width: 100%;
       padding: 0 0.125rem;
-      hyphens: auto;
+      hyphens: none;
+      word-break: normal;
+      overflow-wrap: normal;
+      white-space: nowrap;
+    }
+    @media (min-width: 640px) {
+      .stepper-label {
+        font-size: 0.625rem;
+        line-height: 1.15;
+        min-height: 2.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: normal;
+      }
     }
     .step-header {
       text-align: left;
@@ -143,6 +161,9 @@
       margin-bottom: 0.1rem;
       line-height: 1.2;
     }
+    @media (max-width: 639px) {
+      .step-tag { display: none; }
+    }
     @media (min-width: 640px) {
       .step-tag { margin-bottom: 0.15rem; }
     }
@@ -164,6 +185,13 @@
     }
     @media (min-width: 640px) {
       .step-rule { margin: 0.75rem auto; }
+    }
+    .step-header-body {
+      width: 100%;
+      padding-left: calc(2.75rem + 0.875rem);
+    }
+    @media (min-width: 640px) {
+      .step-header-body { padding-left: 0; }
     }
     .step-intro {
       max-width: 34rem;
@@ -274,7 +302,7 @@
         <div class="step-line"></div>
         <div class="flex flex-col items-center gap-1.5 min-w-0 flex-1">
           <div class="stepper-node bg-brand-600">2</div>
-          <span class="stepper-label text-brand-700">Dimensionamento</span>
+          <span class="stepper-label text-brand-700">Impianto</span>
         </div>
         <div class="step-line"></div>
         <div class="flex flex-col items-center gap-1.5 min-w-0 flex-1">
@@ -327,9 +355,11 @@
             <h2 class="step-title text-blue-900">Identikit Bolletta</h2>
           </div>
         </div>
-        <div class="step-rule bg-blue-400/50"></div>
-        <p class="step-intro text-slate-600">Partiamo dalla tua situazione attuale: quanta energia consumi e quanto paghi ogni anno. Questi due numeri servono a capire quanto costa oggi ogni kWh che usi in casa.</p>
-        <div class="step-rule bg-blue-300/40"></div>
+        <div class="step-header-body">
+          <div class="step-rule bg-blue-400/50"></div>
+          <p class="step-intro text-slate-600">Partiamo dalla tua situazione attuale: quanta energia consumi e quanto paghi ogni anno. Questi due numeri servono a capire quanto costa oggi ogni kWh che usi in casa.</p>
+          <div class="step-rule bg-blue-300/40"></div>
+        </div>
       </header>
       <div class="p-4 sm:p-6 space-y-5">
         <div class="grid md:grid-cols-2 gap-4 items-stretch">
@@ -373,15 +403,17 @@
             <h2 class="step-title text-brand-900">Il Dimensionamento &amp; Sovrapproduzione</h2>
           </div>
         </div>
-        <div class="step-rule bg-brand-400/50"></div>
-        <p class="step-intro text-slate-600">Definiamo l'impianto e calcoliamo quanta energia produce, quanta usi direttamente e quanta vendi in rete. Così capisci se l'impianto è sovradimensionato rispetto ai tuoi consumi.</p>
-        <div class="step-rule bg-brand-300/40"></div>
+        <div class="step-header-body">
+          <div class="step-rule bg-brand-400/50"></div>
+          <p class="step-intro text-slate-600">Definiamo l'impianto e calcoliamo quanta energia produce, quanta usi direttamente e quanta vendi in rete. Così capisci se l'impianto è sovradimensionato rispetto ai tuoi consumi.</p>
+          <div class="step-rule bg-brand-300/40"></div>
+        </div>
       </header>
       <div class="p-4 sm:p-6 space-y-5">
         <div class="grid md:grid-cols-3 gap-4 items-stretch">
           <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Irraggiamento Locale</span>
-            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[4.5rem] leading-relaxed">Quanta energia produce 1 kWp di pannelli nella tua zona in un anno. Per l'Italia centrale usa ~1.400 kWh/kWp (fonte ENEA).</p>
+            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-0 sm:min-h-[4.5rem] leading-relaxed">Quanta energia produce 1 kWp di pannelli nella tua zona in un anno. Per l'Italia centrale usa ~1.400 kWh/kWp (fonte ENEA).</p>
             <div class="input-wrap flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500" data-field="irraggiamento">
               <input type="text" inputmode="decimal" id="irraggiamento" value="1400" placeholder="1400"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
@@ -391,7 +423,7 @@
           </label>
           <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Potenza Impianto Proposta</span>
-            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[4.5rem] leading-relaxed">La potenza totale dei pannelli in kWp (kilowatt di picco). È il valore che trovi nel preventivo dell'installatore, es. 4,5 kWp.</p>
+            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-0 sm:min-h-[4.5rem] leading-relaxed">La potenza totale dei pannelli in kWp (kilowatt di picco). È il valore che trovi nel preventivo dell'installatore, es. 4,5 kWp.</p>
             <div class="input-wrap flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500" data-field="kwp">
               <input type="text" inputmode="decimal" id="kwp" placeholder="4,50"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
@@ -401,7 +433,7 @@
           </label>
           <label class="flex flex-col h-full">
             <span class="text-sm font-medium text-slate-600">Capacità Batteria</span>
-            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-[4.5rem] leading-relaxed">Energia accumulabile in kWh. Campo opzionale, per calcoli futuri con batteria.</p>
+            <p class="text-xs text-slate-400 mt-0.5 mb-2 min-h-0 sm:min-h-[4.5rem] leading-relaxed">Energia accumulabile in kWh. Campo opzionale, per calcoli futuri con batteria.</p>
             <div class="input-wrap flex rounded-2xl border-2 border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500" data-field="batteria">
               <input type="text" inputmode="decimal" id="batteria" placeholder="5,12"
                 class="flex-1 px-3 py-2.5 font-semibold tabular-nums outline-none bg-white">
@@ -462,9 +494,11 @@
             <h2 class="step-title text-emerald-900">La Simulazione Economica</h2>
           </div>
         </div>
-        <div class="step-rule bg-emerald-400/50"></div>
-        <p class="step-intro text-slate-600">Traduciamo l'energia in soldi: quanto risparmi in bolletta, quanto incassi dal GSE e quanto recuperi con la detrazione fiscale. La somma è il tuo guadagno netto ogni anno.</p>
-        <div class="step-rule bg-emerald-300/40"></div>
+        <div class="step-header-body">
+          <div class="step-rule bg-emerald-400/50"></div>
+          <p class="step-intro text-slate-600">Traduciamo l'energia in soldi: quanto risparmi in bolletta, quanto incassi dal GSE e quanto recuperi con la detrazione fiscale. La somma è il tuo guadagno netto ogni anno.</p>
+          <div class="step-rule bg-emerald-300/40"></div>
+        </div>
       </header>
       <div class="p-4 sm:p-6 space-y-5">
         <div class="grid sm:grid-cols-2 gap-3">
@@ -518,9 +552,11 @@
             <h2 class="step-title text-amber-900">Il Verdetto Finale</h2>
           </div>
         </div>
-        <div class="step-rule bg-amber-400/50"></div>
-        <p class="step-intro text-slate-600">Confrontiamo quanto spendi per l'impianto con quanto risparmi ogni anno. Il tempo di rientro ti dice in quanti anni l'investimento si ripaga da solo.</p>
-        <div class="step-rule bg-amber-300/40"></div>
+        <div class="step-header-body">
+          <div class="step-rule bg-amber-400/50"></div>
+          <p class="step-intro text-slate-600">Confrontiamo quanto spendi per l'impianto con quanto risparmi ogni anno. Il tempo di rientro ti dice in quanti anni l'investimento si ripaga da solo.</p>
+          <div class="step-rule bg-amber-300/40"></div>
+        </div>
       </header>
       <div class="p-4 sm:p-6 space-y-5">
         <div class="grid md:grid-cols-2 gap-4">
