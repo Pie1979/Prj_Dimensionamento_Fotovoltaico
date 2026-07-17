@@ -2,20 +2,22 @@
 
 import { Calculator } from 'lucide-react';
 import { NumField } from '@/components/num-field';
+import { PlantEnergyPreview } from '@/components/plant-energy-preview';
 import { ScenarioSelector } from '@/components/scenario-selector';
 import { eur, fmt3, kwh } from '@/lib/format';
-import type { SimInput } from '@/lib/types';
+import type { SimInput, SimResult } from '@/lib/types';
 import { actionBtnBase, cn } from '@/lib/utils';
 
 type PlantStepProps = {
   input: SimInput;
+  preview: SimResult;
   manualMode?: boolean;
   onChange: (patch: Partial<SimInput>) => void;
   onCalculate: () => void;
   canCalculate: boolean;
 };
 
-export function PlantStep({ input, manualMode, onChange, onCalculate, canCalculate }: PlantStepProps) {
+export function PlantStep({ input, preview, manualMode, onChange, onCalculate, canCalculate }: PlantStepProps) {
   const costoEnergia = input.consumoKwh > 0 ? input.spesaAnnua / input.consumoKwh : 0;
 
   return (
@@ -85,7 +87,9 @@ export function PlantStep({ input, manualMode, onChange, onCalculate, canCalcula
 
       <ScenarioSelector value={input.scenario} onChange={(scenario) => onChange({ scenario })} />
 
-      {input.consumoKwh > 0 && (
+      <PlantEnergyPreview input={input} preview={preview} />
+
+      {input.consumoKwh > 0 && input.spesaAnnua > 0 && (
         <p className="text-center text-xs text-slate-500">
           Riferimento: {kwh(input.consumoKwh)} · {eur(input.spesaAnnua)}/anno
         </p>

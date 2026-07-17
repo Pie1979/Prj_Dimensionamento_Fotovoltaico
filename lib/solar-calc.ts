@@ -1,7 +1,7 @@
 import type { PaybackColor, PaybackSerie, SimInput, SimResult } from '@/lib/types';
 
 const FISCAL = { DETRAZIONE: 0.5, ANNI: 10 };
-const PREZZO_GSE = 0.09;
+export const PREZZO_GSE = 0.09;
 export const ANNI_GRAFICO = 15;
 
 function calcolaBeneficioTotale(
@@ -39,6 +39,20 @@ function colorePayback(years: number): PaybackColor {
   if (years <= 3) return 'green';
   if (years <= 5) return 'orange';
   return 'red';
+}
+
+export function commentoCopertura(produzione: number, consumo: number): string {
+  if (consumo <= 0 && produzione > 0) {
+    return 'Inserisci il consumo annuo per calcolare copertura e autoconsumo';
+  }
+  if (consumo <= 0) return '';
+  const ratio = produzione / consumo;
+  if (ratio >= 2.8) return 'Produce quasi il triplo dei consumi';
+  if (ratio >= 1.8) return 'Produce quasi il doppio dei consumi';
+  if (ratio >= 1.2) return 'Copre ampiamente i consumi annui';
+  if (ratio >= 0.9) return 'Copre quasi interamente i consumi';
+  if (ratio >= 0.5) return 'Copre circa la metà dei consumi';
+  return 'Impianto sottodimensionato rispetto al consumo';
 }
 
 export function generaSeriePayback(

@@ -138,6 +138,7 @@ export default function HomePage() {
             <>
               <PlantStep
                 input={input}
+                preview={result}
                 manualMode={manualMode}
                 onChange={patchInput}
                 onCalculate={handleCalculate}
