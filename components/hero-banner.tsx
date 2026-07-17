@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Sun } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 type HeroBannerProps = {
   onStart: () => void;
@@ -12,10 +12,6 @@ export function HeroBanner({ onStart }: HeroBannerProps) {
       <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#F59E0B]/20 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
       <div className="relative mx-auto max-w-2xl text-center">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
-          <Sun className="h-3.5 w-3.5 text-[#FCD34D]" aria-hidden />
-          SunSize
-        </div>
         <h1 className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
           Scopri in 60 secondi quanto risparmi davvero con il fotovoltaico
         </h1>
