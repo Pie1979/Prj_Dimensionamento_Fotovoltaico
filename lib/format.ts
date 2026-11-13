@@ -5,8 +5,9 @@ export const fmt2 = (v: number) =>
 export const fmt3 = (v: number) =>
   new Intl.NumberFormat('it-IT', { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(v);
 export const fmt1pct = (v: number) =>
-  new Intl.NumberFormat('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(v) + '%';
-export const eur = (v: number) => fmt2(v) + ' €';
+  new Intl.NumberFormat('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(v) +
+  '%';
+export const eur = (v: number) => (Number.isFinite(v) ? fmt2(v === 0 ? 0 : v) + ' €' : '—');
 export const kwh = (v: number) => fmt0(v) + ' kWh';
 
 export function formatPayback(years: number): string {

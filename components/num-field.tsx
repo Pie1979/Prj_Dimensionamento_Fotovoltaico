@@ -1,54 +1,110 @@
 'use client';
-
-import { useEffect, useState } from 'react';
-import { formatNumeroInput, parseNumeroInput, sanitizeNumeroInput } from '@/lib/parse';
-
-type NumFieldProps = {
+import { useEffect, useRef, useState } from 'react';
+import { formatNumeroInput, parseNumeroInput } from '@/lib/parse';
+type Props = {
   id: string;
   label: string;
   hint?: string;
   placeholder: string;
   value: number;
-  onChange: (v: number) => void;
+  onChange: (value: number) => void;
+  unit?: string;
+  min?: number;
+  max?: number;
+  required?: boolean;
+  allowZero?: boolean;
 };
-
-export function NumField({ id, label, hint, placeholder, value, onChange }: NumFieldProps) {
-  const [text, setText] = useState(() => formatNumeroInput(value));
-  const [focused, setFocused] = useState(false);
-
+export function NumField({
+  id,
+  label,
+  hint,
+  placeholder,
+  value,
+  onChange,
+  unit,
+  min = 0,
+  max,
+  required = true,
+  allowZero = false,
+}: Props) {
+  const [text, setText] = useState(() =>
+    value === 0 && !allowZero ? '' : formatNumeroInput(value),
+  );
+  const focused = useRef(false);
+  const [error, setError] = useState('');
   useEffect(() => {
-    if (!focused) {
-      setText(formatNumeroInput(value));
-    }
-  }, [value, focused]);
-
+    if (!focused.current) setText(value === 0 && !allowZero ? '' : formatNumeroInput(value));
+  }, [value, allowZero]);
+  const validate = (element: HTMLInputElement) => {
+    const number = parseNumeroInput(element.value);
+    const invalid =
+      !Number.isFinite(number) ||
+      number < min ||
+      (!allowZero && number === 0) ||
+      (max !== undefined && number > max);
+    const message =
+      required && !element.value.trim()
+        ? 'Inserisci questo dato per continuare.'
+        : invalid
+          ? `Inserisci un numero ${allowZero ? 'da ' + min : 'maggiore di ' + min}${max !== undefined ? ' e non superiore a ' + max : ''}.`
+          : '';
+    element.setCustomValidity(message);
+    return message;
+  };
   return (
-    <div className="space-y-2">
-      <label htmlFor={id} className="text-sm font-medium text-slate-700">
+    <div className="number-field">
+      <label htmlFor={id}>
         {label}
+        {!required && <span className="muted"> · facoltativo</span>}
       </label>
-      <input
-        id={id}
-        type="text"
-        inputMode="decimal"
-        autoComplete="off"
-        placeholder={placeholder}
-        value={text}
-        onFocus={() => setFocused(true)}
-        onBlur={() => {
-          setFocused(false);
-          const parsed = parseNumeroInput(text);
-          onChange(parsed);
-          setText(formatNumeroInput(parsed));
-        }}
-        onChange={(e) => {
-          const next = sanitizeNumeroInput(e.target.value);
-          setText(next);
-          onChange(parseNumeroInput(next));
-        }}
-        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-base tabular-nums outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20"
-      />
-      {hint && <p className="text-xs text-slate-500">{hint}</p>}
+      <div className={`input-wrap ${error ? 'has-error' : ''}`}>
+        <input
+          id={id}
+          name={id}
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          required={required}
+          placeholder={placeholder}
+          value={text}
+          aria-invalid={!!error}
+          aria-describedby={
+            [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined
+          }
+          onFocus={() => {
+            focused.current = true;
+          }}
+          onChange={(e) => {
+            const next = e.target.value;
+            setText(next);
+            onChange(parseNumeroInput(next));
+            validate(e.target);
+            setError('');
+          }}
+          onBlur={(e) => {
+            focused.current = false;
+            const message = validate(e.target);
+            setError(message);
+            if (!message) setText(formatNumeroInput(parseNumeroInput(e.target.value)));
+          }}
+          onInvalid={(e) => setError(validate(e.currentTarget))}
+        />
+        {unit && (
+          <span className="input-unit" aria-hidden="true">
+            {unit}
+          </span>
+        )}
+      </div>
+      {hint && (
+        <p className="field-hint" id={`${id}-hint`}>
+          {hint}
+        </p>
+      )}
+      {error && (
+        <p className="field-error" id={`${id}-error`}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }

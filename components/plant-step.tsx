@@ -1,114 +1,215 @@
 'use client';
-
-import { Calculator } from 'lucide-react';
+import { ArrowLeft, ArrowRight, SlidersHorizontal, Sun, Info } from 'lucide-react';
 import { NumField } from '@/components/num-field';
-import { PlantEnergyPreview } from '@/components/plant-energy-preview';
-import { ScenarioSelector } from '@/components/scenario-selector';
-import { eur, fmt3, kwh } from '@/lib/format';
-import type { SimInput, SimResult } from '@/lib/types';
-import { actionBtnBase, cn } from '@/lib/utils';
+import { eur, kwh } from '@/lib/format';
+import type { SimInput } from '@/lib/types';
 
-type PlantStepProps = {
+export function PlantStep({
+  input,
+  onChange,
+  onCalculate,
+  onBack,
+}: {
   input: SimInput;
-  preview: SimResult;
-  manualMode?: boolean;
   onChange: (patch: Partial<SimInput>) => void;
   onCalculate: () => void;
-  canCalculate: boolean;
-};
-
-export function PlantStep({ input, preview, manualMode, onChange, onCalculate, canCalculate }: PlantStepProps) {
-  const costoEnergia = input.consumoKwh > 0 ? input.spesaAnnua / input.consumoKwh : 0;
-
+  onBack: () => void;
+}) {
+  const production = input.kwp * input.irraggiamento * input.scenario;
+  const profiles = [
+    { value: 0.25, label: 'Di sera', hint: 'Poco presente di giorno' },
+    { value: 0.4, label: 'Misto', hint: 'Consumi distribuiti' },
+    { value: 0.6, label: 'Di giorno', hint: 'Spesso presente in casa' },
+  ];
   return (
-    <div className="space-y-6">
-      {manualMode && (
-        <p className="rounded-xl border border-teal-100 bg-teal-50/80 px-4 py-3 text-sm leading-relaxed text-slate-700">
-          Compila i campi sotto con i dati della tua bolletta e dell&apos;impianto che vuoi simulare.
-          Puoi modificarli in qualsiasi momento.
+    <form
+      className="panel"
+      onInvalidCapture={(e) => {
+        const details = (e.target as HTMLElement).closest('details');
+        if (details) details.open = true;
+      }}
+      aria-labelledby="step-title"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onCalculate();
+      }}
+    >
+      <span className="eyebrow">Un impianto adatto alle tue abitudini</span>
+      <h1 id="step-title" tabIndex={-1}>
+        Configura il tuo impianto
+      </h1>
+      <p className="intro">Usa i dati del preventivo. Le ipotesi si possono sempre modificare.</p>
+      <div className="data-summary">
+        <span>
+          {kwh(input.consumoKwh)}/anno <span aria-hidden="true">·</span> {eur(input.spesaAnnua)}
+          /anno
+        </span>
+        <button type="button" onClick={onBack}>
+          Modifica consumi
+        </button>
+      </div>
+      <div className="field-grid">
+        <NumField
+          id="kwp"
+          label="Potenza impianto"
+          unit="kWp"
+          hint="La potenza nominale indicata nel preventivo."
+          placeholder="Es. 4,5"
+          value={input.kwp}
+          onChange={(kwp) => onChange({ kwp })}
+        />
+        <NumField
+          id="costo"
+          label="Costo totale dell’impianto"
+          unit="€"
+          hint="L’importo completo da pagare, prima di eventuali detrazioni."
+          placeholder="Es. 6.990"
+          value={input.costoImpianto}
+          onChange={(costoImpianto) => onChange({ costoImpianto })}
+        />
+      </div>
+      <NumField
+        id="produzione"
+        label="Produzione specifica annua"
+        unit="kWh/kWp"
+        hint="Ipotesi iniziale: 1.400 kWh per ogni kWp all’anno. Sostituiscila con una stima per il tuo tetto."
+        placeholder="Es. 1.400"
+        value={input.irraggiamento}
+        onChange={(irraggiamento) => onChange({ irraggiamento })}
+      />
+      <details className="help-details">
+        <summary>Come stimare la produzione?</summary>
+        <p>
+          Usa una simulazione PVGIS o il preventivo dell’installatore: località, orientamento,
+          inclinazione, ombre e perdite influenzano la resa. Questo valore è una produzione
+          specifica, non il solo irraggiamento solare. L’unità completa è kWh/kWp/anno.
         </p>
-      )}
-
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-base font-semibold text-slate-800">
-          {manualMode ? 'Inserisci i dati della bolletta' : 'Dati dalla bolletta'}
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <NumField
-            id="consumo"
-            label="Consumo annuo (kWh)"
-            hint="Consumo elettrico annuo totale"
-            placeholder="2301"
-            value={input.consumoKwh}
-            onChange={(consumoKwh) => onChange({ consumoKwh })}
-          />
-          <NumField
-            id="spesa"
-            label="Spesa annua (€)"
-            hint="Tasse incluse, annualizzata se bimestrale"
-            placeholder="892,92"
-            value={input.spesaAnnua}
-            onChange={(spesaAnnua) => onChange({ spesaAnnua })}
-          />
-          <div className="sm:col-span-2 rounded-lg bg-teal-50 px-4 py-3 text-sm">
-            <span className="text-slate-600">Costo reale energia: </span>
-            <strong className="tabular-nums text-[#0F766E]">{fmt3(costoEnergia)} €/kWh</strong>
+      </details>
+      <fieldset className="profile-group">
+        <legend>Quando consumi più energia?</legend>
+        <div className="profile-options">
+          {profiles.map((profile) => (
+            <label
+              className={`profile-option ${input.quotaAutoconsumo === profile.value ? 'selected' : ''}`}
+              key={profile.value}
+            >
+              <input
+                type="radio"
+                name="profilo"
+                value={profile.value}
+                checked={input.quotaAutoconsumo === profile.value}
+                onChange={() => onChange({ quotaAutoconsumo: profile.value })}
+              />
+              <strong>{profile.label}</strong>
+              <span>{profile.hint}</span>
+            </label>
+          ))}
+        </div>
+        <p className="field-hint">
+          Ipotesi indicative di autoconsumo: 25%, 40% e 60% della produzione. Non sono misure dei
+          tuoi consumi orari. Puoi impostare una quota diversa qui sotto.
+        </p>
+      </fieldset>
+      <details className="assumptions">
+        <summary>
+          <SlidersHorizontal size={18} aria-hidden="true" /> Ipotesi di produzione e benefici{' '}
+          <span>Modifica</span>
+        </summary>
+        <div className="assumptions-content">
+          <p className="field-hint">
+            Sono parametri di simulazione, non tariffe ufficiali o agevolazioni garantite.
+          </p>
+          <div className="field-grid">
+            <NumField
+              id="quota"
+              label="Quota di produzione autoconsumata"
+              unit="%"
+              allowZero
+              max={100}
+              placeholder="40"
+              value={input.quotaAutoconsumo * 100}
+              onChange={(v) => onChange({ quotaAutoconsumo: v / 100 })}
+              hint="Limitata anche dal consumo annuo. Nessun modello specifico della batteria."
+            />
+            <NumField
+              id="scenario"
+              label="Produzione rispetto alla stima"
+              unit="%"
+              max={100}
+              placeholder="100"
+              value={input.scenario * 100}
+              onChange={(v) => onChange({ scenario: v / 100 })}
+              hint="100% è lo scenario base; prova 80% o 50% per ridurre la produzione."
+            />
+            <NumField
+              id="prezzo-evitato"
+              label="Prezzo evitato dell’energia"
+              unit="€/kWh"
+              allowZero
+              placeholder="0,25"
+              value={input.prezzoEvitato}
+              onChange={(prezzoEvitato) => onChange({ prezzoEvitato })}
+              hint="Stima iniziale 0,25 €/kWh: considera solo le componenti variabili che non pagheresti autoconsumando."
+            />
+            <NumField
+              id="prezzo-vendita"
+              label="Prezzo dell’energia immessa"
+              unit="€/kWh"
+              allowZero
+              placeholder="0,09"
+              value={input.prezzoVendita}
+              onChange={(prezzoVendita) => onChange({ prezzoVendita })}
+              hint="Stima iniziale 0,09 €/kWh. Il prezzo effettivo può variare e non è garantito."
+            />
+            <NumField
+              id="detrazione"
+              label="Detrazione fiscale ipotizzata"
+              unit="%"
+              allowZero
+              max={100}
+              placeholder="0"
+              value={input.aliquotaDetrazione * 100}
+              onChange={(v) => onChange({ aliquotaDetrazione: v / 100 })}
+              hint="Esclusa per impostazione iniziale. Inserisci solo l’aliquota applicabile al tuo caso, verificando requisiti e capienza fiscale. Ripartizione su 10 anni."
+            />
+            <NumField
+              id="manutenzione"
+              label="Costi ricorrenti annuali"
+              unit="€/anno"
+              allowZero
+              placeholder="0"
+              value={input.manutenzioneAnnua}
+              onChange={(manutenzioneAnnua) => onChange({ manutenzioneAnnua })}
+              hint="Manutenzione, assicurazione o altri costi. Zero significa che questi costi sono esclusi."
+            />
           </div>
         </div>
-      </section>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-base font-semibold text-slate-800">Configura l&apos;impianto</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <NumField
-            id="kwp"
-            label="Potenza impianto (kWp)"
-            placeholder="4,5"
-            value={input.kwp}
-            onChange={(kwp) => onChange({ kwp })}
-          />
-          <NumField
-            id="costo"
-            label="Costo chiavi in mano (€)"
-            placeholder="6990"
-            value={input.costoImpianto}
-            onChange={(costoImpianto) => onChange({ costoImpianto })}
-          />
-          <NumField
-            id="irraggiamento"
-            label="Irraggiamento (kWh/kWp)"
-            hint="Valore tipico Italia centrale ~1.400"
-            placeholder="1400"
-            value={input.irraggiamento}
-            onChange={(irraggiamento) => onChange({ irraggiamento })}
-          />
-        </div>
-      </section>
-
-      <ScenarioSelector value={input.scenario} onChange={(scenario) => onChange({ scenario })} />
-
-      <PlantEnergyPreview input={input} preview={preview} />
-
-      {input.consumoKwh > 0 && input.spesaAnnua > 0 && (
-        <p className="text-center text-xs text-slate-500">
-          Riferimento: {kwh(input.consumoKwh)} · {eur(input.spesaAnnua)}/anno
+      </details>
+      <div className="inline-note">
+        <Info size={18} aria-hidden="true" />
+        <p>
+          Stime attive: autoconsumo{' '}
+          {Number.isFinite(input.quotaAutoconsumo) ? Math.round(input.quotaAutoconsumo * 100) : '—'}
+          %, energia evitata {eur(input.prezzoEvitato)}/kWh, detrazione{' '}
+          {Math.round(input.aliquotaDetrazione * 100)}%. Controlla le ipotesi prima di continuare.
         </p>
+      </div>
+      {Number.isFinite(production) && production > 0 && (
+        <div className="production-preview">
+          <Sun size={23} aria-hidden="true" />
+          <div>
+            <span>Produzione annua nello scenario scelto</span>
+            <strong>{kwh(production)}</strong>
+          </div>
+          <span className="estimate-tag">Stima</span>
+        </div>
       )}
-
-      <button
-        type="button"
-        onClick={onCalculate}
-        disabled={!canCalculate}
-        className={cn(
-          actionBtnBase,
-          'border-transparent bg-[#0F766E] text-white shadow-md hover:bg-[#0D9488] disabled:pointer-events-none disabled:opacity-40 sm:w-full',
-        )}
-      >
-        <span className="flex items-center justify-center gap-2">
-          <Calculator className="h-5 w-5 shrink-0" aria-hidden />
-          Calcola risultati
-        </span>
+      <button className="button primary" type="submit">
+        Mostra la mia simulazione <ArrowRight size={18} aria-hidden="true" />
       </button>
-    </div>
+      <button className="back-link" type="button" onClick={onBack}>
+        <ArrowLeft size={16} aria-hidden="true" /> Torna ai consumi
+      </button>
+    </form>
   );
 }
