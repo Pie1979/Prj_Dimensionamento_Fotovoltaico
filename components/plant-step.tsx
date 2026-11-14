@@ -4,17 +4,21 @@ import { ProductionEstimate } from '@/components/production-estimate';
 import type { ProductionChoice } from '@/lib/production-estimate';
 import { NumField } from '@/components/num-field';
 import { eur, kwh } from '@/lib/format';
-import type { SimInput } from '@/lib/types';
+import type { SimInput, UsageContext } from '@/lib/types';
 
 export function PlantStep({
   input,
   productionChoice,
   onProductionChange,
+  usageContext,
+  onUsageChange,
   onChange,
   onCalculate,
   onBack,
 }: {
   input: SimInput;
+  usageContext: UsageContext;
+  onUsageChange: (context: UsageContext) => void;
   productionChoice: ProductionChoice;
   onProductionChange: (choice: ProductionChoice) => void;
   onChange: (patch: Partial<SimInput>) => void;
@@ -23,9 +27,9 @@ export function PlantStep({
 }) {
   const production = input.kwp * input.irraggiamento * input.scenario;
   const profiles = [
-    { value: 0.25, label: 'Di sera', hint: 'Poco presente di giorno' },
-    { value: 0.4, label: 'Misto', hint: 'Consumi distribuiti' },
-    { value: 0.6, label: 'Di giorno', hint: 'Spesso presente in casa' },
+    { value: 0.25, label: '25%', hint: 'Quota della produzione' },
+    { value: 0.4, label: '40%', hint: 'Quota della produzione' },
+    { value: 0.6, label: '60%', hint: 'Quota della produzione' },
   ];
   return (
     <form
@@ -75,8 +79,49 @@ export function PlantStep({
         />
       </div>
       <ProductionEstimate choice={productionChoice} onChange={onProductionChange} />
+      <div className="usage-context">
+        <div className="number-field">
+          <label htmlFor="orario-consumi">Quando consumi di più?</label>
+          <select
+            id="orario-consumi"
+            value={usageContext.timing}
+            onChange={(e) =>
+              onUsageChange({ ...usageContext, timing: e.target.value as UsageContext['timing'] })
+            }
+          >
+            <option value="unknown">Non lo so</option>
+            <option value="evening">Soprattutto la sera</option>
+            <option value="mixed">Durante tutta la giornata</option>
+            <option value="daytime">Soprattutto di giorno</option>
+          </select>
+        </div>
+        <div className="number-field">
+          <label htmlFor="batteria">È prevista una batteria?</label>
+          <select
+            id="batteria"
+            value={usageContext.battery}
+            onChange={(e) =>
+              onUsageChange({ ...usageContext, battery: e.target.value as UsageContext['battery'] })
+            }
+          >
+            <option value="unknown">Non so / da valutare</option>
+            <option value="no">No</option>
+            <option value="yes">Sì</option>
+          </select>
+        </div>
+      </div>
+      <p className="field-hint">
+        {usageContext.timing === 'evening'
+          ? 'Con consumi serali, verifica quanta produzione puoi usare mentre c’è sole.'
+          : usageContext.timing === 'daytime'
+            ? 'I consumi diurni possono coincidere con la produzione: verifica la quota con dati orari.'
+            : 'Il totale annuo della bolletta non misura la coincidenza tra produzione e consumi.'}{' '}
+        {usageContext.battery === 'yes'
+          ? 'Includi il costo della batteria nel preventivo. Per stimarne il contributo servono capacità, perdite e profili orari: qui non viene simulata né aumenta automaticamente l’autoconsumo.'
+          : 'Le risposte aiutano a valutare la quota; non determinano automaticamente una percentuale.'}
+      </p>
       <fieldset className="profile-group">
-        <legend>Quando consumi più energia?</legend>
+        <legend>Quale quota di produzione pensi di usare in casa?</legend>
         <div className="profile-options">
           {profiles.map((profile) => (
             <label
@@ -96,10 +141,33 @@ export function PlantStep({
           ))}
         </div>
         <p className="field-hint">
-          Ipotesi indicative di autoconsumo: 25%, 40% e 60% della produzione. Non sono misure dei
-          tuoi consumi orari. Puoi impostare una quota diversa qui sotto.
+          Percentuali illustrative, non ricavate dalle risposte precedenti o misurate dai tuoi
+          consumi. Usa la quota del preventivo se disponibile, oppure esplora più scenari. Puoi
+          impostare una quota diversa qui sotto.
         </p>
       </fieldset>
+      {Number.isFinite(production) && production > 0 && input.consumoKwh > 0 && (
+        <div className="inline-note">
+          <Info size={18} aria-hidden="true" />
+          <p>
+            Questa quota equivale a{' '}
+            <strong>
+              {kwh(Math.min(production * input.quotaAutoconsumo, input.consumoKwh))}/anno
+            </strong>
+            , cioè il{' '}
+            <strong>
+              {Math.round(
+                (Math.min(production * input.quotaAutoconsumo, input.consumoKwh) /
+                  input.consumoKwh) *
+                  100,
+              )}
+              % dei tuoi consumi
+            </strong>
+            . Verifica che sia plausibile con gli orari d’uso: non basta produrre abbastanza energia
+            nell’anno.
+          </p>
+        </div>
+      )}
       <details className="assumptions">
         <summary>
           <SlidersHorizontal size={18} aria-hidden="true" /> Ipotesi di produzione e benefici{' '}
@@ -153,7 +221,7 @@ export function PlantStep({
             />
             <NumField
               id="detrazione"
-              label="Detrazione fiscale ipotizzata"
+              label="Detrazione fiscale ipotizzata · facoltativa"
               unit="%"
               allowZero
               max={100}

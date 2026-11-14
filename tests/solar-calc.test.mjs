@@ -75,3 +75,70 @@ test('Italian numbers, negatives and malformed input are not silently reinterpre
   assert.ok(Number.isNaN(parseNumeroInput('1,2,3')));
   assert.ok(Number.isNaN(parseNumeroInput('abc')));
 });
+
+test('tax comparison preserves full upfront cost and only changes tax cash flows', async () => {
+  const { calcolaConfrontoFiscale } = await import('../lib/solar-calc.ts');
+  const c = calcolaConfrontoFiscale({
+    ...base,
+    irraggiamento: 1440,
+    aliquotaDetrazione: 0.5,
+    manutenzioneAnnua: 100,
+  });
+  close(c.senzaDetrazione.serie.saldoInvestimento[0], -6990);
+  close(c.conDetrazione.serie.saldoInvestimento[0], -6990);
+  close(c.conDetrazione.beneficioOperativo, 897.92);
+  close(c.conDetrazione.quotaDetrazione, 349.5);
+  close(c.flussi[10].saldoCon - c.flussi[10].saldoSenza, 3495);
+  close(c.flussi[11].recuperoFiscale, 0);
+  close(c.flussi[11].flussoCon, c.flussi[11].flussoSenza);
+  for (const row of c.flussi.slice(1)) {
+    close(row.flussoSenza, row.risparmio + row.ricavi - row.costi);
+    close(row.flussoCon, row.flussoSenza + row.recuperoFiscale);
+  }
+});
+
+test('payback after tax relief ends is computed from annual flows rather than permanent relief', async () => {
+  const { calcolaConfrontoFiscale } = await import('../lib/solar-calc.ts');
+  const c = calcolaConfrontoFiscale({
+    ...base,
+    kwp: 1,
+    irraggiamento: 1000,
+    consumoKwh: 1000,
+    costoImpianto: 3000,
+    quotaAutoconsumo: 1,
+    prezzoEvitato: 0.1,
+    aliquotaDetrazione: 0.5,
+  });
+  close(c.senzaDetrazione.payback.years, 30);
+  close(c.conDetrazione.payback.years, 15);
+  close(c.flussi[10].saldoCon, -500);
+  close(c.flussi[15].saldoCon, 0);
+});
+
+test('tax benefit alone may never repay the cost and a zero rate creates no tax advantage', async () => {
+  const { calcolaConfrontoFiscale } = await import('../lib/solar-calc.ts');
+  const zero = calcolaConfrontoFiscale(base);
+  assert.deepEqual(zero.conDetrazione.serie, zero.senzaDetrazione.serie);
+  const insufficient = calcolaConfrontoFiscale({
+    ...base,
+    prezzoEvitato: 0,
+    prezzoVendita: 0,
+    aliquotaDetrazione: 0.5,
+  });
+  assert.equal(insufficient.conDetrazione.payback.reached, false);
+});
+
+test('sensitivity changes stated assumptions and clamps the annual energy balance', async () => {
+  const { calcolaScenariSensibilita } = await import('../lib/solar-calc.ts');
+  const cases = calcolaScenariSensibilita({ ...base, quotaAutoconsumo: 0.95, consumoKwh: 1000 });
+  close(cases[0].input.quotaAutoconsumo, 0.85);
+  close(cases[2].input.quotaAutoconsumo, 1);
+  close(cases[0].input.prezzoEvitato, 0.225);
+  close(cases[2].input.prezzoVendita, 0.099);
+  for (const c of cases) {
+    assert.ok(c.result.autoconsumo <= 1000);
+    close(c.result.autoconsumo + c.result.sovrapproduzione, c.result.produzioneLorda);
+    close(c.input.manutenzioneAnnua, base.manutenzioneAnnua);
+    close(c.input.irraggiamento, base.irraggiamento);
+  }
+});

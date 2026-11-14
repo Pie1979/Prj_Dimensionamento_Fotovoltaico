@@ -18,8 +18,8 @@ Apri http://localhost:3000. Per la produzione: `npm run build` e `npm start`. Pe
 ## Percorso
 
 1. **Consumi**: consumo e spesa degli ultimi 12 mesi, con istruzioni per reperirli. La spesa complessiva non viene usata come costo evitabile per kWh: comprende anche costi fissi.
-2. **Impianto**: potenza e costo completo del preventivo, produzione specifica e profilo indicativo di autoconsumo. Le ipotesi economiche sono modificabili prima del calcolo.
-3. **Risultati**: rientro stimato, benefici annuali distinti, bilancio energetico, saldo cumulato a 15 anni e tabella accessibile dei valori. Si può tornare ai dati senza azzerarli.
+2. **Impianto**: potenza e costo completo del preventivo, produzione specifica e quota ipotizzata di autoconsumo. Orario dei consumi e presenza della batteria raccolgono il contesto, senza modificare automaticamente la quota. Le ipotesi economiche sono modificabili prima del calcolo.
+3. **Risultati**: confronto del rientro senza e con la detrazione inserita, benefici annuali distinti, bilancio energetico, due saldi cumulati a 15 anni e dettaglio accessibile dei flussi annuali. Tre scenari illustrano la sensibilità ad autoconsumo e prezzi. Si può tornare ai dati senza azzerarli.
 
 Il precedente caricamento simulato della bolletta non viene proposto nel nuovo percorso: non effettuava estrazione OCR. L'inserimento manuale evita risultati basati su valori fittizi. Il contenuto in `public/legacy` resta un archivio della versione precedente e non è il motore del nuovo percorso.
 
@@ -36,7 +36,7 @@ La tabella è un'elaborazione SunSize di **209 campioni PVGIS 5.3/SARAH3, 2005�
 | Parametro | Valore iniziale | Significato |
 | --- | --- | --- |
 | Produzione specifica | Nessuna regione preselezionata | Seleziona una delle 20 regioni oppure inserisci la resa del preventivo |
-| Quota autoconsumo | 40% della produzione | Profilo misto, non una misura; alternative 25% e 60% o quota personalizzata |
+| Quota autoconsumo | 40% della produzione | Ipotesi iniziale, non una misura; alternative 25% e 60% o quota personalizzata |
 | Scenario produzione | 100% | Modificabile, ad esempio a 80% o 50% |
 | Prezzo energia evitato | 0,25 €/kWh | Ipotesi per le componenti variabili risparmiabili, non tariffa ufficiale |
 | Prezzo energia immessa | 0,09 €/kWh | Ipotesi, non ricavo garantito |
@@ -60,6 +60,16 @@ La detrazione entra una sola volta, nei flussi annuali. Non riduce l'esborso ini
 
 Il modello annuale è indicativo: non simula i consumi orari o la batteria. Prezzi e produzione sono costanti. Non sono modellati inflazione, finanziamento, degrado, sostituzioni straordinarie o variazioni normative. I requisiti, i massimali e la capienza fiscale devono essere verificati dall'utente; la ripartizione ipotizzata è su 10 anni, con quote attribuite a fine anno. Non è una verifica fiscale o un preventivo professionale.
 
+## Confronto e sensibilità
+
+Il confronto mantiene invariati investimento iniziale, produzione, autoconsumo, prezzi e costi: cambia solo la detrazione. Con aliquota iniziale 0%, il secondo caso mostra **Da impostare**. Nessuna aliquota viene scelta in base alla regione o alla presenza di una batteria.
+
+La tabella dei flussi mostra esborso all'anno 0, risparmio, ricavi, costi, quota fiscale e saldi cumulati fino all'anno 15. La quota fiscale termina dopo il decimo anno. I collegamenti dai risultati aprono direttamente i campi detrazione o costi, conservando i dati.
+
+Gli scenari modificano congiuntamente la quota di autoconsumo di −10 / +10 punti percentuali (limitata a 0–100%) e i due prezzi di −10% / +10%. Produzione, investimento, costi e aliquota restano invariati. Sono combinazioni illustrative, senza probabilità associate; non costituiscono un intervallo completo di incertezza. Il limite dell'autoconsumo al fabbisogno resta attivo in ciascun caso.
+
+Gli orari e la batteria aiutano a contestualizzare la quota, ma non bastano a stimarla: servirebbero profili orari e caratteristiche dell'accumulo. Anche la percentuale di fabbisogno coperta calcolata su base annua richiede una verifica della coincidenza temporale. I costi inizialmente a zero sono indicati come **esclusi**, non come necessariamente nulli.
+
 ## Esempio verificato
 
 Con 3.000 kWh/anno, spesa annua 900 €, impianto da 4,5 kWp a 6.990 € e una **resa manuale di 1.400 kWh/kWp/anno**:
@@ -79,7 +89,7 @@ npm run lint
 npm run build
 ```
 
-I test verificano anche che tutte le 20 rese siano riproducibili dai 209 campioni, che la regione non sia scelta implicitamente e che il valore manuale prevalga solo nella modalità corrispondente. I test coprono conservazione dell'energia, limite dell'autoconsumo, detrazione conteggiata una volta, fine del beneficio fiscale, costi ricorrenti, scenari di produzione e parsing numerico italiano. Il percorso è stato verificato in Chromium a 1440, 390 e 320 px, inclusi errori, navigazione e conservazione dei dati.
+I 14 test verificano anche che tutte le 20 rese siano riproducibili dai 209 campioni, che la regione non sia scelta implicitamente e che il valore manuale prevalga solo nella modalità corrispondente. I test coprono conservazione dell'energia, limite dell'autoconsumo, detrazione conteggiata una volta, fine del beneficio fiscale, rientro dopo il decimo anno, mancato rientro, identità dei flussi, costi ricorrenti, scenari di produzione e sensibilità, parsing numerico italiano. Il percorso è stato verificato in Chromium a 1440, 390 e 320 px, inclusi errori, navigazione, confronto fiscale, fine delle quote, collegamenti ai campi e conservazione dei dati.
 
 ## Pubblicazione
 

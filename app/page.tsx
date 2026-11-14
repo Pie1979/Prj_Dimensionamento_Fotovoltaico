@@ -11,7 +11,12 @@ import { PlantStep } from '@/components/plant-step';
 import { ResultsStep } from '@/components/results-step';
 import { StepProgress } from '@/components/step-progress';
 import { calcolaSimulazione, isValidSimulation } from '@/lib/solar-calc';
-import { DEFAULT_INPUT, type SimInput } from '@/lib/types';
+import {
+  DEFAULT_INPUT,
+  DEFAULT_USAGE_CONTEXT,
+  type UsageContext,
+  type SimInput,
+} from '@/lib/types';
 
 export default function HomePage() {
   const [step, setStep] = useState(1);
@@ -19,12 +24,23 @@ export default function HomePage() {
   const [productionChoice, setProductionChoice] = useState<ProductionChoice>({
     ...INITIAL_PRODUCTION_CHOICE,
   });
+  const [usageContext, setUsageContext] = useState<UsageContext>({ ...DEFAULT_USAGE_CONTEXT });
+  const editTarget = useRef<string | undefined>(undefined);
   const previousStep = useRef(1);
   const patch = (values: Partial<SimInput>) => setInput((current) => ({ ...current, ...values }));
   const result = isValidSimulation(input) ? calcolaSimulazione(input) : null;
   useEffect(() => {
     if (previousStep.current === step) return;
     previousStep.current = step;
+    if (step === 2 && editTarget.current) {
+      const field = document.getElementById(editTarget.current);
+      const details = field?.closest('details');
+      if (details) details.open = true;
+      field?.focus();
+      field?.scrollIntoView({ block: 'center' });
+      editTarget.current = undefined;
+      return;
+    }
     document.getElementById('step-title')?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [step]);
@@ -96,6 +112,8 @@ export default function HomePage() {
             <PlantStep
               input={input}
               productionChoice={productionChoice}
+              usageContext={usageContext}
+              onUsageChange={setUsageContext}
               onProductionChange={(choice) => {
                 setProductionChoice(choice);
                 patch({ irraggiamento: resolveProductionYield(choice) });
@@ -112,7 +130,11 @@ export default function HomePage() {
               input={input}
               result={result}
               productionChoice={productionChoice}
-              onEdit={() => setStep(2)}
+              usageContext={usageContext}
+              onEdit={(target) => {
+                editTarget.current = target;
+                setStep(2);
+              }}
               onRestart={() => {
                 if (
                   window.confirm(
@@ -121,6 +143,7 @@ export default function HomePage() {
                 ) {
                   setInput({ ...DEFAULT_INPUT });
                   setProductionChoice({ ...INITIAL_PRODUCTION_CHOICE });
+                  setUsageContext({ ...DEFAULT_USAGE_CONTEXT });
                   setStep(1);
                 }
               }}

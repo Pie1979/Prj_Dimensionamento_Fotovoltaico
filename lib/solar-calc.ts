@@ -210,3 +210,42 @@ export const VERDICT_STYLES: Record<PaybackColor, { box: string; badge: string; 
     label: 'Payback lungo — rivedi i parametri',
   },
 };
+
+/** Confronto omogeneo: stessi costi, prezzi ed energia; cambia solo il recupero fiscale. */
+export function calcolaConfrontoFiscale(input: SimInput) {
+  const senzaDetrazione = calcolaSimulazione({ ...input, aliquotaDetrazione: 0 });
+  const conDetrazione = calcolaSimulazione(input);
+  const flussi = Array.from({ length: ANNI_GRAFICO + 1 }, (_, anno) => {
+    const recuperoFiscale = anno > 0 && anno <= FISCAL.ANNI ? conDetrazione.quotaDetrazione : 0;
+    return {
+      anno,
+      risparmio: anno > 0 ? conDetrazione.risparmio : 0,
+      ricavi: anno > 0 ? conDetrazione.ricavoGse : 0,
+      costi: anno > 0 ? input.manutenzioneAnnua : input.costoImpianto,
+      recuperoFiscale,
+      flussoSenza: anno === 0 ? -input.costoImpianto : senzaDetrazione.beneficioOperativo,
+      flussoCon:
+        anno === 0 ? -input.costoImpianto : conDetrazione.beneficioOperativo + recuperoFiscale,
+      saldoSenza: senzaDetrazione.serie.saldoInvestimento[anno],
+      saldoCon: conDetrazione.serie.saldoInvestimento[anno],
+    };
+  });
+  return { senzaDetrazione, conDetrazione, flussi };
+}
+
+/** Sensibilità illustrativa: nessuna probabilità e nessuna stima automatica della batteria. */
+export function calcolaScenariSensibilita(input: SimInput) {
+  return [
+    { key: 'ridotti', label: 'Quota e prezzi ridotti', deltaQuota: -0.1, fattorePrezzi: 0.9 },
+    { key: 'inseriti', label: 'Ipotesi inserite', deltaQuota: 0, fattorePrezzi: 1 },
+    { key: 'aumentati', label: 'Quota e prezzi aumentati', deltaQuota: 0.1, fattorePrezzi: 1.1 },
+  ].map((scenario) => {
+    const parametri = {
+      ...input,
+      quotaAutoconsumo: Math.max(0, Math.min(1, input.quotaAutoconsumo + scenario.deltaQuota)),
+      prezzoEvitato: input.prezzoEvitato * scenario.fattorePrezzi,
+      prezzoVendita: input.prezzoVendita * scenario.fattorePrezzi,
+    };
+    return { ...scenario, input: parametri, result: calcolaSimulazione(parametri) };
+  });
+}

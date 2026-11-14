@@ -2,8 +2,14 @@
 import dynamic from 'next/dynamic';
 import { ArrowLeft, ArrowRight, TrendingUp, Sun, Home, Zap, RotateCcw } from 'lucide-react';
 import { eur, formatPayback, kwh, fmt2 } from '@/lib/format';
+import {
+  InvestmentComparison,
+  CashFlowTable,
+  SensitivityScenarios,
+} from '@/components/investment-comparison';
+import { calcolaConfrontoFiscale } from '@/lib/solar-calc';
 import { findRegion, type ProductionChoice } from '@/lib/production-estimate';
-import type { SimInput, SimResult } from '@/lib/types';
+import type { SimInput, SimResult, UsageContext } from '@/lib/types';
 const PaybackChart = dynamic(
   () => import('@/components/payback-chart').then((m) => m.PaybackChart),
   {
@@ -20,15 +26,18 @@ export function ResultsStep({
   input,
   result,
   productionChoice,
+  usageContext,
   onEdit,
   onRestart,
 }: {
   input: SimInput;
   result: SimResult;
   productionChoice: ProductionChoice;
-  onEdit: () => void;
+  usageContext: UsageContext;
+  onEdit: (target?: string) => void;
   onRestart: () => void;
 }) {
+  const comparison = calcolaConfrontoFiscale(input);
   const selectedRegion = findRegion(productionChoice.regionCode);
   const payback = result.payback.reached
     ? formatPayback(result.payback.years)
@@ -92,9 +101,10 @@ export function ResultsStep({
           </p>
         )}
       </section>
-      <button className="back-link quick-edit" type="button" onClick={onEdit}>
+      <button className="back-link quick-edit" type="button" onClick={() => onEdit()}>
         Modifica le ipotesi e ricalcola →
       </button>
+      <InvestmentComparison input={input} comparison={comparison} onEdit={onEdit} />
       <section aria-labelledby="benefits-title">
         <h2 id="benefits-title">Da dove arrivano i benefici</h2>
         <p className="section-caption">Importi annuali nello scenario scelto</p>
@@ -115,7 +125,11 @@ export function ResultsStep({
         </div>
         <div className="benefit-total">
           <div>
-            <strong>Beneficio annuo netto</strong>
+            <strong>
+              {input.manutenzioneAnnua === 0
+                ? 'Beneficio annuo prima dei costi esclusi'
+                : 'Beneficio annuo dopo i costi inseriti'}
+            </strong>
             <span>
               {input.aliquotaDetrazione > 0
                 ? 'Nei primi 10 anni, inclusa la quota fiscale'
@@ -156,36 +170,39 @@ export function ResultsStep({
           Il saldo parte da −{eur(input.costoImpianto)}. Il pareggio è il punto in cui raggiunge
           zero.
         </p>
-        <PaybackChart result={result} />
+        <PaybackChart
+          result={result}
+          withoutTax={comparison.senzaDetrazione}
+          hasTax={input.aliquotaDetrazione > 0}
+        />
         <p className="chart-summary">
           Saldo stimato a 10 anni: <strong>{eur(result.saldo10)}</strong>.{' '}
           {result.payback.years > 15
             ? 'Il rientro stimato è oltre i 15 anni mostrati nel grafico.'
             : ''}
         </p>
-        <details className="help-details">
-          <summary>Leggi i valori del grafico</summary>
-          <div className="table-scroll">
-            <table>
-              <caption>Saldo cumulato dopo costo iniziale, benefici e costi ricorrenti</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Anno</th>
-                  <th scope="col">Saldo stimato</th>
-                </tr>
-              </thead>
-              <tbody>
-                {result.serie.labels.map((label, i) => (
-                  <tr key={label}>
-                    <th scope="row">{label}</th>
-                    <td>{eur(result.serie.saldoInvestimento[i])}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </details>
+        <CashFlowTable input={input} comparison={comparison} />
       </section>
+      <SensitivityScenarios input={input} />
+      <p className="field-hint">
+        Contesto dichiarato:{' '}
+        {usageContext.timing === 'evening'
+          ? 'consumi soprattutto serali'
+          : usageContext.timing === 'daytime'
+            ? 'consumi soprattutto diurni'
+            : usageContext.timing === 'mixed'
+              ? 'consumi distribuiti nella giornata'
+              : 'orari non noti'}
+        ;{' '}
+        {usageContext.battery === 'yes'
+          ? 'batteria prevista, non simulata'
+          : usageContext.battery === 'no'
+            ? 'senza batteria'
+            : 'batteria da valutare'}
+        . La quota di autoconsumo resta un’ipotesi esplicita:{' '}
+        {Math.round(input.quotaAutoconsumo * 100)}% della produzione, equivalente al{' '}
+        {Math.round((result.autoconsumo / input.consumoKwh) * 100)}% dei consumi.
+      </p>
       <p className="field-hint">
         Origine della resa:{' '}
         {productionChoice.mode === 'region'
@@ -242,11 +259,11 @@ export function ResultsStep({
           </p>
         </div>
       </details>
-      <button type="button" className="button primary" onClick={onEdit}>
+      <button type="button" className="button primary" onClick={() => onEdit()}>
         Modifica dati e confronta <ArrowRight size={18} aria-hidden="true" />
       </button>
       <div className="result-actions">
-        <button type="button" className="back-link" onClick={onEdit}>
+        <button type="button" className="back-link" onClick={() => onEdit()}>
           <ArrowLeft size={16} aria-hidden="true" /> Torna all’impianto
         </button>
         <button type="button" className="back-link" onClick={onRestart}>

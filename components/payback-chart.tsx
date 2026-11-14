@@ -4,7 +4,15 @@ import { useEffect, useRef } from 'react';
 import { eur } from '@/lib/format';
 import type { SimResult } from '@/lib/types';
 
-export function PaybackChart({ result }: { result: SimResult }) {
+export function PaybackChart({
+  result,
+  withoutTax,
+  hasTax,
+}: {
+  result: SimResult;
+  withoutTax: SimResult;
+  hasTax: boolean;
+}) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     if (!ref.current) return;
@@ -14,14 +22,27 @@ export function PaybackChart({ result }: { result: SimResult }) {
         labels: result.serie.labels,
         datasets: [
           {
-            label: 'Saldo stimato',
-            data: result.serie.saldoInvestimento,
+            label: 'Senza detrazione',
+            data: withoutTax.serie.saldoInvestimento,
             borderColor: '#0f766e',
             backgroundColor: '#0f766e',
             borderWidth: 3,
             pointRadius: 2,
             tension: 0,
           },
+          ...(hasTax
+            ? [
+                {
+                  label: 'Con detrazione ipotizzata',
+                  data: result.serie.saldoInvestimento,
+                  borderColor: '#b47916',
+                  backgroundColor: '#b47916',
+                  borderWidth: 3,
+                  pointRadius: 2,
+                  tension: 0,
+                },
+              ]
+            : []),
           {
             label: 'Pareggio',
             data: result.serie.labels.map(() => 0),
@@ -78,13 +99,13 @@ export function PaybackChart({ result }: { result: SimResult }) {
       },
     });
     return () => chart.destroy();
-  }, [result]);
+  }, [result, withoutTax, hasTax]);
   return (
     <div className="payback-chart">
       <canvas
         ref={ref}
         role="img"
-        aria-label="Saldo stimato dell’investimento nei primi 15 anni. I dati sono disponibili nella tabella sottostante."
+        aria-label="Confronto del saldo dell’investimento con e senza detrazione nei primi 15 anni. I flussi annuali sono disponibili nella tabella sottostante."
       />
     </div>
   );

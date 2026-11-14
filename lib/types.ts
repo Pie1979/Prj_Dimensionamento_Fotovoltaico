@@ -58,3 +58,9 @@ export const DEFAULT_INPUT: SimInput = {
 };
 
 export const STEP_LABELS = ['Consumi', 'Impianto', 'Risultati'] as const;
+
+export type UsageContext = {
+  timing: 'unknown' | 'evening' | 'mixed' | 'daytime';
+  battery: 'unknown' | 'no' | 'yes';
+};
+export const DEFAULT_USAGE_CONTEXT: UsageContext = { timing: 'unknown', battery: 'unknown' };
