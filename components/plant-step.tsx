@@ -1,11 +1,10 @@
 'use client';
-import { ArrowLeft, ArrowRight, SlidersHorizontal, Sun, Info } from 'lucide-react';
 import { ProductionEstimate } from '@/components/production-estimate';
-import type { ProductionChoice } from '@/lib/production-estimate';
 import { NumField } from '@/components/num-field';
-import { eur, kwh } from '@/lib/format';
+import { eur, kwh, fmt1pct } from '@/lib/format';
+import type { ProductionChoice } from '@/lib/production-estimate';
+import type { SupportView } from '@/components/support-views';
 import type { SimInput, UsageContext } from '@/lib/types';
-
 export function PlantStep({
   input,
   productionChoice,
@@ -15,259 +14,244 @@ export function PlantStep({
   onChange,
   onCalculate,
   onBack,
+  onOpen,
 }: {
   input: SimInput;
-  usageContext: UsageContext;
-  onUsageChange: (context: UsageContext) => void;
   productionChoice: ProductionChoice;
   onProductionChange: (choice: ProductionChoice) => void;
+  usageContext: UsageContext;
+  onUsageChange: (context: UsageContext) => void;
   onChange: (patch: Partial<SimInput>) => void;
   onCalculate: () => void;
   onBack: () => void;
+  onOpen: (view: SupportView) => void;
 }) {
   const production = input.kwp * input.irraggiamento * input.scenario;
-  const profiles = [
-    { value: 0.25, label: '25%', hint: 'Quota della produzione' },
-    { value: 0.4, label: '40%', hint: 'Quota della produzione' },
-    { value: 0.6, label: '60%', hint: 'Quota della produzione' },
-  ];
+  const used = Math.min(production * input.quotaAutoconsumo, input.consumoKwh);
+  const preview = Number.isFinite(production) && production > 0;
   return (
-    <form
-      className="panel"
-      onInvalidCapture={(e) => {
-        const details = (e.target as HTMLElement).closest('details');
-        if (details) details.open = true;
-      }}
-      aria-labelledby="step-title"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onCalculate();
-      }}
-    >
-      <span className="eyebrow">Un impianto adatto alle tue abitudini</span>
-      <h1 id="step-title" tabIndex={-1}>
-        Configura il tuo impianto
-      </h1>
-      <p className="intro">Usa i dati del preventivo. Le ipotesi si possono sempre modificare.</p>
-      <div className="data-summary">
-        <span>
-          {kwh(input.consumoKwh)}/anno <span aria-hidden="true">·</span> {eur(input.spesaAnnua)}
-          /anno
-        </span>
-        <button type="button" onClick={onBack}>
-          Modifica consumi
-        </button>
-      </div>
-      <div className="field-grid">
-        <NumField
-          id="kwp"
-          label="Potenza impianto"
-          unit="kWp"
-          hint="La potenza nominale indicata nel preventivo."
-          placeholder="Es. 4,5"
-          value={input.kwp}
-          onChange={(kwp) => onChange({ kwp })}
-        />
-        <NumField
-          id="costo"
-          label="Costo totale dell’impianto"
-          unit="€"
-          hint="L’importo completo da pagare, prima di eventuali detrazioni."
-          placeholder="Es. 6.990"
-          value={input.costoImpianto}
-          onChange={(costoImpianto) => onChange({ costoImpianto })}
-        />
-      </div>
-      <ProductionEstimate choice={productionChoice} onChange={onProductionChange} />
-      <div className="usage-context">
-        <div className="number-field">
-          <label htmlFor="orario-consumi">Quando consumi di più?</label>
-          <select
-            id="orario-consumi"
-            value={usageContext.timing}
-            onChange={(e) =>
-              onUsageChange({ ...usageContext, timing: e.target.value as UsageContext['timing'] })
-            }
-          >
-            <option value="unknown">Non lo so</option>
-            <option value="evening">Soprattutto la sera</option>
-            <option value="mixed">Durante tutta la giornata</option>
-            <option value="daytime">Soprattutto di giorno</option>
-          </select>
+    <div className="plant-layout">
+      <form
+        className="panel plant-panel"
+        aria-label="Configurazione e ipotesi"
+        onInvalidCapture={(e) => {
+          const details = (e.target as HTMLElement).closest('details');
+          if (details) details.open = true;
+        }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          onCalculate();
+        }}
+      >
+        <div className="data-summary">
+          <strong>
+            {kwh(input.consumoKwh)}/anno · {eur(input.spesaAnnua)}/anno
+          </strong>
+          <button type="button" className="back-link" onClick={onBack}>
+            Modifica consumi
+          </button>
         </div>
-        <div className="number-field">
-          <label htmlFor="batteria">È prevista una batteria?</label>
-          <select
-            id="batteria"
-            value={usageContext.battery}
-            onChange={(e) =>
-              onUsageChange({ ...usageContext, battery: e.target.value as UsageContext['battery'] })
-            }
-          >
-            <option value="unknown">Non so / da valutare</option>
-            <option value="no">No</option>
-            <option value="yes">Sì</option>
-          </select>
+        <div className="field-grid">
+          <NumField
+            id="kwp"
+            label="Potenza impianto"
+            unit="kWp"
+            hint="La potenza nominale nel preventivo."
+            placeholder="Es. 4,5"
+            value={input.kwp}
+            onChange={(kwp) => onChange({ kwp })}
+          />
+          <NumField
+            id="costo"
+            label="Costo totale"
+            unit="€"
+            hint="Esborso iniziale, prima delle detrazioni."
+            placeholder="Es. 6.990"
+            value={input.costoImpianto}
+            onChange={(costoImpianto) => onChange({ costoImpianto })}
+          />
         </div>
-      </div>
-      <p className="field-hint">
-        {usageContext.timing === 'evening'
-          ? 'Con consumi serali, verifica quanta produzione puoi usare mentre c’è sole.'
-          : usageContext.timing === 'daytime'
-            ? 'I consumi diurni possono coincidere con la produzione: verifica la quota con dati orari.'
-            : 'Il totale annuo della bolletta non misura la coincidenza tra produzione e consumi.'}{' '}
-        {usageContext.battery === 'yes'
-          ? 'Includi il costo della batteria nel preventivo. Per stimarne il contributo servono capacità, perdite e profili orari: qui non viene simulata né aumenta automaticamente l’autoconsumo.'
-          : 'Le risposte aiutano a valutare la quota; non determinano automaticamente una percentuale.'}
-      </p>
-      <fieldset className="profile-group">
-        <legend>Quale quota di produzione pensi di usare in casa?</legend>
-        <div className="profile-options">
-          {profiles.map((profile) => (
-            <label
-              className={`profile-option ${input.quotaAutoconsumo === profile.value ? 'selected' : ''}`}
-              key={profile.value}
+        <ProductionEstimate
+          choice={productionChoice}
+          kwp={input.kwp}
+          scenario={input.scenario}
+          onChange={onProductionChange}
+          onSource={() => onOpen('source')}
+        />
+        <section className="usage-context" aria-label="Contesto dei consumi">
+          <div className="number-field">
+            <label htmlFor="orario-consumi">Quando consumi di più?</label>
+            <select
+              id="orario-consumi"
+              name="orario-consumi"
+              value={usageContext.timing}
+              onChange={(e) =>
+                onUsageChange({
+                  ...usageContext,
+                  timing: e.target.value as UsageContext['timing'],
+                })
+              }
             >
-              <input
-                type="radio"
-                name="profilo"
-                value={profile.value}
-                checked={input.quotaAutoconsumo === profile.value}
-                onChange={() => onChange({ quotaAutoconsumo: profile.value })}
-              />
-              <strong>{profile.label}</strong>
-              <span>{profile.hint}</span>
-            </label>
-          ))}
-        </div>
-        <p className="field-hint">
-          Percentuali illustrative, non ricavate dalle risposte precedenti o misurate dai tuoi
-          consumi. Usa la quota del preventivo se disponibile, oppure esplora più scenari. Puoi
-          impostare una quota diversa qui sotto.
-        </p>
-      </fieldset>
-      {Number.isFinite(production) && production > 0 && input.consumoKwh > 0 && (
-        <div className="inline-note">
-          <Info size={18} aria-hidden="true" />
-          <p>
-            Questa quota equivale a{' '}
-            <strong>
-              {kwh(Math.min(production * input.quotaAutoconsumo, input.consumoKwh))}/anno
-            </strong>
-            , cioè il{' '}
-            <strong>
-              {Math.round(
-                (Math.min(production * input.quotaAutoconsumo, input.consumoKwh) /
-                  input.consumoKwh) *
-                  100,
-              )}
-              % dei tuoi consumi
-            </strong>
-            . Verifica che sia plausibile con gli orari d’uso: non basta produrre abbastanza energia
-            nell’anno.
-          </p>
-        </div>
-      )}
-      <details className="assumptions">
-        <summary>
-          <SlidersHorizontal size={18} aria-hidden="true" /> Ipotesi di produzione e benefici{' '}
-          <span>Modifica</span>
-        </summary>
-        <div className="assumptions-content">
+              <option value="unknown">Non lo so</option>
+              <option value="evening">Soprattutto la sera</option>
+              <option value="mixed">Durante tutta la giornata</option>
+              <option value="daytime">Soprattutto di giorno</option>
+            </select>
+            <p className="field-hint">
+              Contesto dichiarato: non assegna automaticamente una percentuale.
+            </p>
+          </div>
+          <div className="number-field">
+            <label htmlFor="batteria">È prevista una batteria?</label>
+            <select
+              id="batteria"
+              name="batteria"
+              value={usageContext.battery}
+              onChange={(e) =>
+                onUsageChange({
+                  ...usageContext,
+                  battery: e.target.value as UsageContext['battery'],
+                })
+              }
+            >
+              <option value="unknown">Non so / da valutare</option>
+              <option value="no">No</option>
+              <option value="yes">Sì</option>
+            </select>
+            <p className="field-hint">
+              Una batteria non viene simulata: servono capacità e profili orari. Il suo costo va
+              incluso nel preventivo.
+            </p>
+          </div>
+        </section>
+        <fieldset className="profile-group">
+          <legend>Quale quota di produzione userai in casa?</legend>
+          <div className="profile-options">
+            {[0.25, 0.4, 0.6].map((value) => (
+              <label
+                className={`profile-option ${input.quotaAutoconsumo === value ? 'selected' : ''}`}
+                key={value}
+              >
+                <input
+                  type="radio"
+                  name="profilo"
+                  value={value}
+                  checked={input.quotaAutoconsumo === value}
+                  onChange={() => onChange({ quotaAutoconsumo: value })}
+                />
+                <strong>
+                  {input.quotaAutoconsumo === value ? '✓ ' : ''}Quota {value * 100}%
+                </strong>
+                <span>{value * 100}%</span>
+              </label>
+            ))}
+          </div>
           <p className="field-hint">
-            Sono parametri di simulazione, non tariffe ufficiali o agevolazioni garantite.
+            {preview && input.consumoKwh > 0
+              ? `Ipotesi ${input.quotaAutoconsumo * 100}%: ${kwh(used)}/anno, cioè il ${fmt1pct((used / input.consumoKwh) * 100)} dei consumi. Verifica la coincidenza con la produzione nelle ore di sole.`
+              : 'Completa i dati per confrontare questa quota con il fabbisogno.'}
           </p>
+          <p className="field-hint">
+            Quote illustrative, non misurate né dedotte dagli orari o dalla batteria. Puoi
+            personalizzarle.
+          </p>
+          <button
+            id="quota-link"
+            type="button"
+            className="back-link"
+            onClick={() => onOpen('quota')}
+          >
+            Personalizza autoconsumo →
+          </button>
+        </fieldset>
+        <section className="economic-assumptions" aria-labelledby="economic-title">
+          <h2 id="economic-title">Ipotesi economiche</h2>
           <div className="field-grid">
             <NumField
-              id="quota"
-              label="Quota di produzione autoconsumata"
-              unit="%"
-              allowZero
-              max={100}
-              placeholder="40"
-              value={input.quotaAutoconsumo * 100}
-              onChange={(v) => onChange({ quotaAutoconsumo: v / 100 })}
-              hint="Limitata anche dal consumo annuo. Nessun modello specifico della batteria."
-            />
-            <NumField
-              id="scenario"
-              label="Produzione rispetto alla stima"
-              unit="%"
-              max={100}
-              placeholder="100"
-              value={input.scenario * 100}
-              onChange={(v) => onChange({ scenario: v / 100 })}
-              hint="100% è lo scenario base; prova 80% o 50% per ridurre la produzione."
-            />
-            <NumField
               id="prezzo-evitato"
-              label="Prezzo evitato dell’energia"
+              label="Energia non acquistata"
               unit="€/kWh"
               allowZero
               placeholder="0,25"
               value={input.prezzoEvitato}
               onChange={(prezzoEvitato) => onChange({ prezzoEvitato })}
-              hint="Stima iniziale 0,25 €/kWh: considera solo le componenti variabili che non pagheresti autoconsumando."
+              hint="Prezzo evitato, senza costi fissi."
             />
             <NumField
               id="prezzo-vendita"
-              label="Prezzo dell’energia immessa"
+              label="Energia immessa"
               unit="€/kWh"
               allowZero
               placeholder="0,09"
               value={input.prezzoVendita}
               onChange={(prezzoVendita) => onChange({ prezzoVendita })}
-              hint="Stima iniziale 0,09 €/kWh. Il prezzo effettivo può variare e non è garantito."
-            />
-            <NumField
-              id="detrazione"
-              label="Detrazione fiscale ipotizzata · facoltativa"
-              unit="%"
-              allowZero
-              max={100}
-              placeholder="0"
-              value={input.aliquotaDetrazione * 100}
-              onChange={(v) => onChange({ aliquotaDetrazione: v / 100 })}
-              hint="Esclusa per impostazione iniziale. Inserisci solo l’aliquota applicabile al tuo caso, verificando requisiti e capienza fiscale. Ripartizione su 10 anni."
-            />
-            <NumField
-              id="manutenzione"
-              label="Costi ricorrenti annuali"
-              unit="€/anno"
-              allowZero
-              placeholder="0"
-              value={input.manutenzioneAnnua}
-              onChange={(manutenzioneAnnua) => onChange({ manutenzioneAnnua })}
-              hint="Manutenzione, assicurazione o altri costi. Zero significa che questi costi sono esclusi."
+              hint="Ipotesi di ricavo, non tariffa garantita."
             />
           </div>
-        </div>
-      </details>
-      <div className="inline-note">
-        <Info size={18} aria-hidden="true" />
+          <p className="field-hint">
+            Fonte: valori dello scenario iniziale, non tariffe verificate. Aggiornali con i tuoi
+            dati.
+          </p>
+          <button
+            id="economics-link"
+            type="button"
+            className="back-link"
+            onClick={() => onOpen('economics')}
+          >
+            {input.aliquotaDetrazione > 0
+              ? `Detrazione ipotizzata ${input.aliquotaDetrazione * 100}%`
+              : 'Detrazione non impostata'}{' '}
+            ·{' '}
+            {input.manutenzioneAnnua > 0
+              ? eur(input.manutenzioneAnnua) + '/anno di costi'
+              : 'costi esclusi'}{' '}
+            · Modifica →
+          </button>
+        </section>
+        <details className="help-details">
+          <summary>Vuoi ridurre la produzione stimata?</summary>
+          <NumField
+            id="scenario"
+            label="Produzione rispetto alla stima"
+            unit="%"
+            max={100}
+            placeholder="100"
+            value={input.scenario * 100}
+            onChange={(v) => onChange({ scenario: v / 100 })}
+            hint="100% è lo scenario base; prova 80% o 50%. Questa riduzione non sostituisce una valutazione del tetto."
+          />
+        </details>
+        <button type="submit" className="button primary">
+          Calcola la simulazione →
+        </button>
+        <button type="button" className="back-link" onClick={onBack}>
+          ← Torna ai consumi
+        </button>
+      </form>
+      <aside className="story-panel plant-summary">
+        <span className="eyebrow">LA TUA CONFIGURAZIONE</span>
+        <h2>Un primo quadro, prima di decidere.</h2>
+        {[
+          ['Produzione annua', preview ? kwh(production) : 'Da stimare'],
+          ['Usata in casa', preview && Number.isFinite(used) ? kwh(used) : 'Da stimare'],
+          ['Esborso iniziale', input.costoImpianto > 0 ? eur(input.costoImpianto) : 'Da inserire'],
+        ].map(([label, value]) => (
+          <div className="summary-metric" key={label}>
+            <span>{label}</span>
+            <strong>{value}</strong>
+          </div>
+        ))}
         <p>
-          Stime attive: autoconsumo{' '}
-          {Number.isFinite(input.quotaAutoconsumo) ? Math.round(input.quotaAutoconsumo * 100) : '—'}
-          %, energia evitata {eur(input.prezzoEvitato)}/kWh, detrazione{' '}
-          {Math.round(input.aliquotaDetrazione * 100)}%. Controlla le ipotesi prima di continuare.
+          Puoi rivedere ogni valore prima di decidere. Questa simulazione non sostituisce una
+          valutazione del tetto.
         </p>
-      </div>
-      {Number.isFinite(production) && production > 0 && (
-        <div className="production-preview">
-          <Sun size={23} aria-hidden="true" />
-          <div>
-            <span>Produzione annua nello scenario scelto</span>
-            <strong>{kwh(production)}</strong>
-          </div>
-          <span className="estimate-tag">Stima</span>
+        <div className="solar-note">
+          <strong>Prima del calcolo</strong>
+          <p>
+            Usa valori positivi per consumi, potenza e costo. Verifica unità e separatori decimali.
+          </p>
         </div>
-      )}
-      <button className="button primary" type="submit">
-        Mostra la mia simulazione <ArrowRight size={18} aria-hidden="true" />
-      </button>
-      <button className="back-link" type="button" onClick={onBack}>
-        <ArrowLeft size={16} aria-hidden="true" /> Torna ai consumi
-      </button>
-    </form>
+      </aside>
+    </div>
   );
 }

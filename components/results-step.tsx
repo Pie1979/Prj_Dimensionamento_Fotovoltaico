@@ -1,7 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { ArrowLeft, ArrowRight, TrendingUp, Sun, Home, Zap, RotateCcw } from 'lucide-react';
-import { eur, formatPayback, kwh, fmt2 } from '@/lib/format';
+import { eur, fmt0, fmt2, fmt1pct, kwh } from '@/lib/format';
 import {
   InvestmentComparison,
   CashFlowTable,
@@ -10,6 +9,8 @@ import {
 import { calcolaConfrontoFiscale } from '@/lib/solar-calc';
 import { findRegion, type ProductionChoice } from '@/lib/production-estimate';
 import type { SimInput, SimResult, UsageContext } from '@/lib/types';
+import type { AnnualEstimate } from '@/lib/annualize';
+import type { SupportView } from '@/components/support-views';
 const PaybackChart = dynamic(
   () => import('@/components/payback-chart').then((m) => m.PaybackChart),
   {
@@ -21,255 +22,310 @@ const PaybackChart = dynamic(
     ),
   },
 );
-
+type ResultData = {
+  input: SimInput;
+  result: SimResult;
+  productionChoice: ProductionChoice;
+  usageContext: UsageContext;
+};
 export function ResultsStep({
   input,
   result,
   productionChoice,
   usageContext,
+  annualEstimate,
   onEdit,
   onRestart,
-}: {
-  input: SimInput;
-  result: SimResult;
-  productionChoice: ProductionChoice;
-  usageContext: UsageContext;
+  onOpen,
+}: ResultData & {
+  annualEstimate: AnnualEstimate | null;
   onEdit: (target?: string) => void;
   onRestart: () => void;
+  onOpen: (view: SupportView) => void;
 }) {
   const comparison = calcolaConfrontoFiscale(input);
-  const selectedRegion = findRegion(productionChoice.regionCode);
-  const payback = result.payback.reached
-    ? formatPayback(result.payback.years)
-    : 'Non raggiunto entro 50 anni';
-  const benefitRows = [
-    {
-      label: 'Risparmio sulla bolletta',
-      value: result.risparmio,
-      detail: `${kwh(result.autoconsumo)} autoconsumati × ${eur(input.prezzoEvitato)}/kWh`,
-      className: 'teal',
-    },
-    {
-      label: 'Ricavi dall’energia immessa',
-      value: result.ricavoGse,
-      detail: `${kwh(result.sovrapproduzione)} immessi × ${eur(input.prezzoVendita)}/kWh`,
-      className: 'blue',
-    },
-    {
-      label: 'Recupero fiscale annuo',
-      value: result.quotaDetrazione,
-      detail:
-        input.aliquotaDetrazione > 0
-          ? `${Math.round(input.aliquotaDetrazione * 100)}% di ${eur(input.costoImpianto)} ÷ 10 anni, se spettante`
-          : 'Nessuna detrazione inclusa',
-      className: 'amber',
-    },
-    {
-      label: 'Costi ricorrenti',
-      value: -input.manutenzioneAnnua,
-      detail:
-        input.manutenzioneAnnua > 0
-          ? 'Importo annuale inserito nelle ipotesi'
-          : 'Esclusi dalla simulazione: importo impostato a zero',
-      className: 'muted',
-    },
-  ];
+  const share = (result.autoconsumo / result.produzioneLorda) * 100;
+  const rows = [
+    ['Risparmio sulla bolletta', result.risparmio],
+    ['Ricavi energia immessa', result.ricavoGse],
+    ['Recupero fiscale', result.quotaDetrazione],
+    ...(input.manutenzioneAnnua > 0 ? [['Costi ricorrenti', -input.manutenzioneAnnua]] : []),
+  ] as [string, number][];
   return (
-    <div className="panel results-panel">
-      <span className="eyebrow">La tua simulazione, spiegata</span>
-      <h1 id="step-title" tabIndex={-1}>
-        I numeri del tuo impianto
-      </h1>
-      <p className="intro">Una stima basata sui dati e sulle ipotesi che hai scelto.</p>
-      <section className="payback-card" aria-labelledby="payback-title">
-        <span className="result-tag">
-          <TrendingUp size={15} aria-hidden="true" /> Stima indicativa
-        </span>
-        <h2 id="payback-title">Tempo di rientro stimato</h2>
-        <p className="payback-number">{payback}</p>
-        <p>
-          Partendo dall’esborso iniziale completo di <strong>{eur(input.costoImpianto)}</strong>.
-        </p>
-        <p className="fiscal-note">
-          {input.aliquotaDetrazione > 0
-            ? 'La detrazione è recuperata nei primi 10 anni, se spettante.'
-            : 'Il calcolo non include detrazioni fiscali.'}
-        </p>
-        {input.manutenzioneAnnua === 0 && (
-          <p className="fiscal-note">
-            Rientro prima di manutenzione e altri costi esclusi. Puoi inserirli nelle ipotesi.
+    <div className="results-layout">
+      {annualEstimate && (
+        <div className="warning-note">
+          <strong>Dati annualizzati · da verificare</strong>
+          <p>
+            Stima iniziale da un periodo di {annualEstimate.months} mesi. Verifica la
+            rappresentatività prima di decidere.
+            {(input.consumoKwh !== annualEstimate.annualConsumption ||
+              input.spesaAnnua !== annualEstimate.annualSpending) &&
+              ' I valori annuali sono stati modificati dopo la stima.'}
           </p>
-        )}
-      </section>
-      <button className="back-link quick-edit" type="button" onClick={() => onEdit()}>
-        Modifica le ipotesi e ricalcola →
-      </button>
+        </div>
+      )}
       <InvestmentComparison input={input} comparison={comparison} onEdit={onEdit} />
-      <section aria-labelledby="benefits-title">
-        <h2 id="benefits-title">Da dove arrivano i benefici</h2>
-        <p className="section-caption">Importi annuali nello scenario scelto</p>
-        <div className="benefit-list">
-          {benefitRows.map((row) => (
-            <div className="benefit-row" key={row.label}>
-              <span className={`benefit-dot ${row.className}`} />
-              <div>
-                <strong>{row.label}</strong>
-                <p>{row.detail}</p>
+      <div className="results-columns">
+        <section className="panel result-section" aria-labelledby="benefits-title">
+          <h2 id="benefits-title">Da dove arrivano i benefici</h2>
+          <p className="section-caption">Importi annuali · scenario scelto</p>
+          <dl className="benefit-list">
+            {rows.map(([label, value]) => (
+              <div className="value-row" key={label}>
+                <dt>{label}</dt>
+                <dd>{eur(value)}</dd>
               </div>
-              <span className="benefit-value">
-                {row.value > 0 ? '+' : ''}
-                {eur(row.value === 0 ? 0 : row.value)}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="benefit-total">
-          <div>
+            ))}
+          </dl>
+          <div className="soft-note">
             <strong>
-              {input.manutenzioneAnnua === 0
-                ? 'Beneficio annuo prima dei costi esclusi'
-                : 'Beneficio annuo dopo i costi inseriti'}
+              Beneficio annuo
+              {input.aliquotaDetrazione > 0 ? ' (anni 1–10)' : ''}: {eur(result.beneficioTotale10)}
             </strong>
-            <span>
+            <p>
+              {eur(result.risparmio)} risparmio + {eur(result.ricavoGse)} ricavi
               {input.aliquotaDetrazione > 0
-                ? 'Nei primi 10 anni, inclusa la quota fiscale'
-                : 'Risparmio + ricavi − costi ricorrenti'}
-            </span>
+                ? ' + ' + eur(result.quotaDetrazione) + ' recupero fiscale'
+                : ''}
+              {input.manutenzioneAnnua > 0 ? ' − ' + eur(input.manutenzioneAnnua) + ' costi' : ''}.
+            </p>
           </div>
-          <strong>{eur(result.beneficioTotale10)}</strong>
-        </div>
-        {input.aliquotaDetrazione > 0 && (
-          <p className="field-hint">
-            Dall’11° anno, terminata la detrazione: {eur(result.beneficioOperativo)}/anno.
-          </p>
-        )}
-      </section>
-      <section className="energy-section" aria-labelledby="energy-title">
-        <h2 id="energy-title">Come si distribuisce l’energia</h2>
-        <div className="energy-grid">
-          {[
-            { icon: Sun, label: 'Prodotta', value: result.produzioneLorda },
-            { icon: Home, label: 'Usata in casa', value: result.autoconsumo },
-            { icon: Zap, label: 'Immessa in rete', value: result.sovrapproduzione },
-          ].map((item) => (
-            <div className="energy-card" key={item.label}>
-              <item.icon size={20} aria-hidden="true" />
-              <span>{item.label}</span>
-              <strong>{kwh(item.value)}</strong>
+          {input.manutenzioneAnnua === 0 ? (
+            <div className="warning-note">
+              <strong>Costi ricorrenti: non inclusi</strong>
+              <p>
+                Manutenzione e assicurazione sono escluse, non gratuite. Le sostituzioni
+                straordinarie non sono modellate.
+              </p>
+              <button
+                id="costs-link"
+                type="button"
+                className="back-link"
+                onClick={() => onEdit('manutenzione')}
+              >
+                Inserisci i costi →
+              </button>
             </div>
-          ))}
-        </div>
-        <p className="field-hint">
-          Energia ancora da acquistare: {kwh(input.consumoKwh - result.autoconsumo)}/anno. La
-          produzione annua non coincide con l’autonomia dalla rete.
-        </p>
-      </section>
-      <section className="chart-section" aria-labelledby="chart-title">
+          ) : (
+            <p className="field-hint">
+              Beneficio dopo i costi inseriti. Sostituzioni straordinarie escluse.
+            </p>
+          )}
+          {input.aliquotaDetrazione > 0 && (
+            <p className="field-hint">
+              Dall’11° anno la quota fiscale termina: {eur(result.beneficioOperativo)}/anno. I costi
+              esclusi non sono necessariamente nulli.
+            </p>
+          )}
+        </section>
+        <section className="panel result-section" aria-labelledby="energy-title">
+          <h2 id="energy-title">Come si distribuisce l’energia</h2>
+          <strong className="energy-total">
+            {kwh(result.produzioneLorda)} prodotti in un anno
+          </strong>
+          <div className="energy-bar" aria-hidden="true">
+            <span style={{ width: share + '%' }} />
+            <span style={{ width: 100 - share + '%' }} />
+          </div>
+          <dl>
+            <div className="value-row">
+              <dt>Usata in casa · {fmt0(share)}%</dt>
+              <dd>{kwh(result.autoconsumo)}</dd>
+            </div>
+            <div className="value-row">
+              <dt>Immessa in rete · {fmt0(100 - share)}%</dt>
+              <dd>{kwh(result.sovrapproduzione)}</dd>
+            </div>
+          </dl>
+          <div className="neutral-note">
+            <strong>Da acquistare: {kwh(input.consumoKwh - result.autoconsumo)}/anno</strong>
+            <p>
+              Il {fmt1pct(((input.consumoKwh - result.autoconsumo) / input.consumoKwh) * 100)} dei
+              consumi. I costi fissi restano.
+            </p>
+          </div>
+          <p className="field-hint">
+            La quota del {fmt0(input.quotaAutoconsumo * 100)}% si riferisce alla produzione, non ai
+            tuoi consumi. Il bilancio annuo non dimostra l’autonomia dalla rete.
+          </p>
+        </section>
+      </div>
+      <section className="panel result-section chart-section" aria-labelledby="chart-title">
         <h2 id="chart-title">Quando recuperi l’investimento?</h2>
         <p className="section-caption">
-          Il saldo parte da −{eur(input.costoImpianto)}. Il pareggio è il punto in cui raggiunge
-          zero.
+          Saldo cumulato · euro,{' '}
+          {input.manutenzioneAnnua === 0 ? 'prima dei costi esclusi' : 'dopo i costi inseriti'}
         </p>
         <PaybackChart
           result={result}
           withoutTax={comparison.senzaDetrazione}
           hasTax={input.aliquotaDetrazione > 0}
         />
-        <p className="chart-summary">
-          Saldo stimato a 10 anni: <strong>{eur(result.saldo10)}</strong>.{' '}
-          {result.payback.years > 15
-            ? 'Il rientro stimato è oltre i 15 anni mostrati nel grafico.'
-            : ''}
-        </p>
-        <CashFlowTable input={input} comparison={comparison} />
-      </section>
-      <SensitivityScenarios input={input} />
-      <p className="field-hint">
-        Contesto dichiarato:{' '}
-        {usageContext.timing === 'evening'
-          ? 'consumi soprattutto serali'
-          : usageContext.timing === 'daytime'
-            ? 'consumi soprattutto diurni'
-            : usageContext.timing === 'mixed'
-              ? 'consumi distribuiti nella giornata'
-              : 'orari non noti'}
-        ;{' '}
-        {usageContext.battery === 'yes'
-          ? 'batteria prevista, non simulata'
-          : usageContext.battery === 'no'
-            ? 'senza batteria'
-            : 'batteria da valutare'}
-        . La quota di autoconsumo resta un’ipotesi esplicita:{' '}
-        {Math.round(input.quotaAutoconsumo * 100)}% della produzione, equivalente al{' '}
-        {Math.round((result.autoconsumo / input.consumoKwh) * 100)}% dei consumi.
-      </p>
-      <p className="field-hint">
-        Origine della resa:{' '}
-        {productionChoice.mode === 'region'
-          ? `${selectedRegion?.name ?? '—'} · elaborazione SunSize su PVGIS 5.3 (2005–2023), sud, 30°, perdite di sistema 14%`
-          : 'valore del preventivo inserito dall’utente'}
-        .{' '}
-        {productionChoice.mode === 'region'
-          ? 'La media regionale non descrive il singolo tetto.'
-          : ''}
-      </p>
-      <details className="assumptions">
-        <summary>
-          Ipotesi, formule e limiti <span>Leggi</span>
-        </summary>
-        <div className="assumptions-content">
-          <dl className="formula-list">
-            <div>
-              <dt>Produzione annua</dt>
-              <dd>
-                {fmt2(input.kwp)} kWp × {input.irraggiamento} kWh/kWp/anno ×{' '}
-                {Math.round(input.scenario * 100)}%
-              </dd>
-            </div>
-            <div>
-              <dt>Autoconsumo</dt>
-              <dd>
-                Il minore tra produzione × {Math.round(input.quotaAutoconsumo * 100)}% e consumo
-                annuo. È un’approssimazione annuale, senza simulazione oraria o della batteria.
-              </dd>
-            </div>
-            <div>
-              <dt>Energia immessa</dt>
-              <dd>Produzione − autoconsumo.</dd>
-            </div>
-            <div>
-              <dt>Saldo dell’investimento</dt>
-              <dd>
-                − costo totale + risparmi cumulati + ricavi cumulati + detrazioni maturate − costi
-                ricorrenti cumulati.
-              </dd>
-            </div>
-          </dl>
+        <div className="soft-note">
+          <strong>
+            Saldo a 10 anni: senza {eur(comparison.senzaDetrazione.saldo10)}
+            {input.aliquotaDetrazione > 0 ? ' · con ' + eur(result.saldo10) : ''}
+          </strong>
           <p>
-            Prezzi e produzione restano costanti nel tempo. Non sono modellati inflazione,
-            finanziamento, degrado dei pannelli, sostituzione dell’inverter e variazioni normative.{' '}
-            {input.manutenzioneAnnua === 0 ? 'Manutenzione e assicurazione non sono incluse.' : ''}{' '}
-            Il rientro è semplice, senza attualizzazione; la quota fiscale è attribuita a fine anno
-            e il rientro frazionario è interpolato.
-          </p>
-          <p>
-            La detrazione è un’ipotesi inserita dall’utente: verifica aliquota, limiti di spesa,
-            requisiti e capienza fiscale. La spesa annua della bolletta è un riferimento; i costi
-            fissi non sono considerati evitati.
+            {input.aliquotaDetrazione > 0
+              ? 'Il recupero fiscale aggiunge ' +
+                eur(result.detrazioneTotale) +
+                ' nei primi 10 anni e poi termina. '
+              : 'Nessuna detrazione inclusa. '}
+            {!result.payback.reached
+              ? 'Rientro non raggiunto entro 50 anni.'
+              : result.payback.years > 15
+                ? 'Il rientro stimato è oltre i 15 anni mostrati.'
+                : ''}
           </p>
         </div>
-      </details>
-      <button type="button" className="button primary" onClick={() => onEdit()}>
-        Modifica dati e confronta <ArrowRight size={18} aria-hidden="true" />
+        <button id="flows-link" className="back-link" type="button" onClick={() => onOpen('flows')}>
+          Vedi i flussi anno per anno →
+        </button>
+      </section>
+      <section className="panel desktop-scenarios result-section">
+        <h2>E se autoconsumo e prezzi cambiassero?</h2>
+        <SensitivityScenarios input={input} />
+      </section>
+      <button
+        id="scenarios-link"
+        className="panel mobile-support"
+        type="button"
+        onClick={() => onOpen('scenarios')}
+      >
+        <strong>
+          Scenari: autoconsumo e prezzi <span>+</span>
+        </strong>
+        <span>Quota ±10 punti · prezzi ±10% · ipotesi illustrative</span>
+      </button>
+      <section className="warning-note desktop-limits">
+        <h2>Ipotesi e limiti, in chiaro</h2>
+        <ResultLimits
+          input={input}
+          result={result}
+          productionChoice={productionChoice}
+          usageContext={usageContext}
+        />
+      </section>
+      <button
+        id="limits-link"
+        className="warning-note mobile-support"
+        type="button"
+        onClick={() => onOpen('limits')}
+      >
+        <strong>
+          Ipotesi e limiti, in chiaro <span>+</span>
+        </strong>
+        <span>PVGIS, prezzi, detrazione e costi esclusi</span>
       </button>
       <div className="result-actions">
-        <button type="button" className="back-link" onClick={() => onEdit()}>
-          <ArrowLeft size={16} aria-hidden="true" /> Torna all’impianto
+        <button type="button" className="button primary" onClick={() => onEdit()}>
+          Modifica e ricalcola →
         </button>
-        <button type="button" className="back-link" onClick={onRestart}>
-          <RotateCcw size={15} aria-hidden="true" /> Nuova simulazione
+        <button type="button" className="button secondary" onClick={onRestart}>
+          Nuova simulazione
         </button>
       </div>
     </div>
+  );
+}
+function ResultLimits({ input, result, productionChoice, usageContext }: ResultData) {
+  const region = findRegion(productionChoice.regionCode);
+  return (
+    <div className="limits-content">
+      <p>
+        {productionChoice.mode === 'region'
+          ? 'Regione: ' + region?.name + '. '
+          : 'Resa del preventivo. '}
+        Resa {fmt0(input.irraggiamento)} kWh/kWp/anno. Potenza {fmt2(input.kwp)} kWp. Produzione
+        relativa {fmt0(input.scenario * 100)}%. Autoconsumo {fmt0(input.quotaAutoconsumo * 100)}%
+        della produzione, limitato al consumo: {kwh(result.autoconsumo)}, il{' '}
+        {fmt1pct((result.autoconsumo / input.consumoKwh) * 100)} del fabbisogno.
+      </p>
+      <p>
+        Prezzi: {eur(input.prezzoEvitato)}/kWh evitato; {eur(input.prezzoVendita)}/kWh immesso.
+        Detrazione {fmt0(input.aliquotaDetrazione * 100)}%, ipotizzata su 10 anni e non verificata.{' '}
+        {input.manutenzioneAnnua === 0
+          ? 'Costi ricorrenti esclusi.'
+          : 'Costi ricorrenti ' + eur(input.manutenzioneAnnua) + '/anno.'}
+      </p>
+      <p>
+        {productionChoice.mode === 'region'
+          ? 'Resa: elaborazione SunSize su PVGIS 5.3/SARAH3 (2005–2023), sud, 30°, perdite di sistema 14% già comprese. La media regionale non descrive il singolo tetto. '
+          : ''}
+        Rientro semplice, non un rendimento percentuale; nessuna attualizzazione, finanziamento,
+        inflazione, degrado o sostituzione straordinaria. Quote fiscali attribuite a fine anno,
+        rientro frazionario interpolato.
+      </p>
+      <p>
+        Orari:{' '}
+        {
+          {
+            unknown: 'non noti',
+            evening: 'soprattutto serali',
+            mixed: 'distribuiti nella giornata',
+            daytime: 'soprattutto diurni',
+          }[usageContext.timing]
+        }
+        . Batteria:{' '}
+        {
+          {
+            unknown: 'da valutare',
+            yes: 'prevista, non simulata',
+            no: 'non prevista',
+          }[usageContext.battery]
+        }
+        . Nessuna simulazione oraria. Prezzi e produzione costanti; aliquota, spese ammesse,
+        massimali e capienza fiscale da verificare. La spesa annua non coincide con il risparmio.
+      </p>
+      <details className="help-details">
+        <summary>Formule del calcolo</summary>
+        <p>
+          Produzione = kWp × resa × produzione relativa. Autoconsumo = min(produzione × quota,
+          consumo). Immessa = produzione − autoconsumo. Saldo = − costo completo + risparmi + ricavi
+          + quote fiscali − costi ricorrenti cumulati. Il recupero fiscale termina dopo 10 anni. Il
+          rientro è il primo saldo non negativo entro 50 anni; i flussi successivi possono cambiare.
+        </p>
+      </details>
+    </div>
+  );
+}
+export function ResultsSupport({
+  view,
+  input,
+  result,
+  productionChoice,
+  usageContext,
+  onBack,
+}: ResultData & {
+  view: 'flows' | 'scenarios' | 'limits';
+  onBack: () => void;
+}) {
+  return (
+    <section className={`panel helper-panel ${view === 'flows' ? 'wide-helper' : ''}`}>
+      <h1 id="step-title" tabIndex={-1}>
+        {view === 'flows'
+          ? 'Flussi anno per anno'
+          : view === 'scenarios'
+            ? 'Scenari: autoconsumo e prezzi'
+            : 'Ipotesi e limiti'}
+      </h1>
+      {view === 'flows' ? (
+        <CashFlowTable input={input} comparison={calcolaConfrontoFiscale(input)} />
+      ) : view === 'scenarios' ? (
+        <SensitivityScenarios input={input} />
+      ) : (
+        <ResultLimits
+          input={input}
+          result={result}
+          productionChoice={productionChoice}
+          usageContext={usageContext}
+        />
+      )}
+      <button type="button" className="back-link" onClick={onBack}>
+        ← Torna ai risultati
+      </button>
+    </section>
   );
 }

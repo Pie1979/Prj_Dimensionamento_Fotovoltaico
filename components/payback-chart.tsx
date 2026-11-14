@@ -26,8 +26,8 @@ export function PaybackChart({
             data: withoutTax.serie.saldoInvestimento,
             borderColor: '#0f766e',
             backgroundColor: '#0f766e',
-            borderWidth: 3,
-            pointRadius: 2,
+            borderWidth: 2,
+            pointRadius: 0,
             tension: 0,
           },
           ...(hasTax
@@ -35,10 +35,10 @@ export function PaybackChart({
                 {
                   label: 'Con detrazione ipotizzata',
                   data: result.serie.saldoInvestimento,
-                  borderColor: '#b47916',
-                  backgroundColor: '#b47916',
-                  borderWidth: 3,
-                  pointRadius: 2,
+                  borderColor: '#5c400e',
+                  backgroundColor: '#5c400e',
+                  borderWidth: 2,
+                  pointRadius: 0,
                   tension: 0,
                 },
               ]
@@ -56,9 +56,7 @@ export function PaybackChart({
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          ? false
-          : { duration: 250 },
+        animation: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: {
@@ -105,7 +103,7 @@ export function PaybackChart({
       <canvas
         ref={ref}
         role="img"
-        aria-label="Confronto del saldo dell’investimento con e senza detrazione nei primi 15 anni. I flussi annuali sono disponibili nella tabella sottostante."
+        aria-label="Confronto del saldo dell’investimento con e senza detrazione nei primi 15 anni. Apri “Vedi i flussi anno per anno” per leggere gli stessi valori."
       />
     </div>
   );

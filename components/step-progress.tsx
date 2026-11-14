@@ -1,4 +1,3 @@
-import { Check } from 'lucide-react';
 import { STEP_LABELS } from '@/lib/types';
 export function StepProgress({
   current,
@@ -11,13 +10,20 @@ export function StepProgress({
     <nav className="step-progress" aria-label="Passi della simulazione">
       <ol>
         {STEP_LABELS.map((label, i) => (
-          <li key={label} aria-current={current === i + 1 ? 'step' : undefined}>
-            <button type="button" onClick={() => onNavigate(i + 1)} disabled={i + 1 > current}>
-              <span className={`step-dot ${i + 1 <= current ? 'active' : ''}`}>
-                {i + 1 < current ? <Check size={15} aria-hidden="true" /> : i + 1}
+          <li
+            key={label}
+            className={i + 1 === current ? 'current' : i + 1 < current ? 'complete' : ''}
+            aria-current={current === i + 1 ? 'step' : undefined}
+          >
+            {i + 1 < current ? (
+              <button type="button" onClick={() => onNavigate(i + 1)}>
+                <span aria-hidden="true">✓</span> {label}
+              </button>
+            ) : (
+              <span>
+                <span aria-hidden="true">0{i + 1}</span> {label}
               </span>
-              <span>{label}</span>
-            </button>
+            )}
           </li>
         ))}
       </ol>

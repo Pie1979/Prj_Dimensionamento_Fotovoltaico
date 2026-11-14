@@ -21,6 +21,10 @@ Apri http://localhost:3000. Per la produzione: `npm run build` e `npm start`. Pe
 2. **Impianto**: potenza e costo completo del preventivo, produzione specifica e quota ipotizzata di autoconsumo. Orario dei consumi e presenza della batteria raccolgono il contesto, senza modificare automaticamente la quota. Le ipotesi economiche sono modificabili prima del calcolo.
 3. **Risultati**: confronto del rientro senza e con la detrazione inserita, benefici annuali distinti, bilancio energetico, due saldi cumulati a 15 anni e dettaglio accessibile dei flussi annuali. Tre scenari illustrano la sensibilità ad autoconsumo e prezzi. Si può tornare ai dati senza azzerarli.
 
+È disponibile anche la stima da un periodo di 1–12 mesi interi: consumi e spesa sono estrapolati con ×12/mesi, con provenienza e avviso visibili fino ai risultati. I valori si possono correggere.
+
+La V2 usa il layout Figma con moduli, riepiloghi e risultati responsive. Autoconsumo personalizzato e detrazione/costi si modificano in viste dedicate: **Salva** applica, **Annulla** scarta il draft. Fonte regionale, scenari e limiti hanno viste di supporto; i flussi sono tabellari su desktop e schede annuali su mobile. I ritorni conservano i valori e ripristinano il focus sul comando di apertura.
+
 Il precedente caricamento simulato della bolletta non viene proposto nel nuovo percorso: non effettuava estrazione OCR. L'inserimento manuale evita risultati basati su valori fittizi. Il contenuto in `public/legacy` resta un archivio della versione precedente e non è il motore del nuovo percorso.
 
 ## Stima dalla regione
@@ -89,8 +93,22 @@ npm run lint
 npm run build
 ```
 
-I 14 test verificano anche che tutte le 20 rese siano riproducibili dai 209 campioni, che la regione non sia scelta implicitamente e che il valore manuale prevalga solo nella modalità corrispondente. I test coprono conservazione dell'energia, limite dell'autoconsumo, detrazione conteggiata una volta, fine del beneficio fiscale, rientro dopo il decimo anno, mancato rientro, identità dei flussi, costi ricorrenti, scenari di produzione e sensibilità, parsing numerico italiano. Il percorso è stato verificato in Chromium a 1440, 390 e 320 px, inclusi errori, navigazione, confronto fiscale, fine delle quote, collegamenti ai campi e conservazione dei dati.
+I 16 test unitari verificano anche che tutte le 20 rese siano riproducibili dai 209 campioni, che la regione non sia scelta implicitamente e che il valore manuale prevalga solo nella modalità corrispondente. I test coprono conservazione dell'energia, limite dell'autoconsumo, detrazione conteggiata una volta, fine del beneficio fiscale, rientro dopo il decimo anno, mancato rientro, identità dei flussi, costi ricorrenti, scenari di produzione e sensibilità, parsing numerico italiano. Il percorso è stato verificato in Chromium a 1440, 390 e 320 px, inclusi errori, navigazione, confronto fiscale, fine delle quote, collegamenti ai campi e conservazione dei dati. La suite Playwright copre l’intero percorso a 1440, 768, 390 e 320 px, più salvataggio, validazione da tastiera, ricalcolo e perdita dello stato dopo refresh. Axe verifica WCAG A/AA sulle viste principali e sui flussi: il controllo automatico non sostituisce una prova con lettore di schermo.
+
+### Verifiche nel browser
+
+```sh
+npx playwright install chromium
+npm run build
+npm run test:e2e
+```
+
+Per usare Chromium installato nel sistema: `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`. La suite avvia la build su porta 3100 e produce schermate in `test-results/`. Il workflow `Validate SunSize` esegue test, lint, TypeScript, build e browser sulle PR e sul ramo di lavoro.
 
 ## Pubblicazione
 
-Il workflow GitHub Pages pubblica i push su `main`; Vercel usa una build Next.js standard. Le modifiche UX vanno revisionate sul ramo dedicato prima dell'integrazione. La versione attualmente pubblicata su Vercel differisce dal `main` esaminato: l'associazione esatta al deployment non è stata verificata, perché la connessione non dispone dell'accesso allo scope Vercel richiesto.
+Il workflow GitHub Pages pubblica i push su `main`; Vercel usa una build Next.js standard. La PR resta in bozza e il ramo dedicato genera un’anteprima Vercel tramite l’integrazione GitHub già esistente: [anteprima SunSize](https://prj-dimensionamento-fotovoltaico-git-codex-sunsize-ux-pm79.vercel.app). Le anteprime possono richiedere l’accesso Vercel del proprietario.
+
+L’associazione al progetto `prj-dimensionamento-fotovoltaico` è stata riscontrata negli stati e nel commento del bot Vercel della PR #9; la connessione Vercel diretta non restituisce team accessibili. Non sono stati modificati dominio, protezioni o collegamenti dei progetti. Il sito di produzione non viene aggiornato dal ramo di revisione.
+
+Prima del rilascio: revisionare l’anteprima e la verifica del flusso, completare le informazioni privacy/titolare adatte al deployment effettivo, confermare dominio e destinazione di produzione e quindi integrare il ramo. Il controllo automatico di accessibilità va completato con una prova manuale su dispositivi e tecnologie assistive.

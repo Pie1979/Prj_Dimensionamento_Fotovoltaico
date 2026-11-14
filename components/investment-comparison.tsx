@@ -21,7 +21,7 @@ export function InvestmentComparison({
   const hasTax = input.aliquotaDetrazione > 0;
   return (
     <section className="fiscal-comparison" aria-labelledby="fiscal-comparison-title">
-      <h2 id="fiscal-comparison-title">Quanto incide la detrazione?</h2>
+      <h2 id="fiscal-comparison-title">Tempo di rientro: senza e con detrazione</h2>
       <p className="section-caption">
         Stesso investimento, stessa energia e stessi costi. Cambia solo il recupero fiscale
         ipotizzato.
@@ -38,8 +38,8 @@ export function InvestmentComparison({
             <>
               <strong>{paybackText(comparison.conDetrazione)}</strong>
               <p>
-                Aliquota inserita: {Math.round(input.aliquotaDetrazione * 100)}%. Non è una verifica
-                del diritto all’agevolazione.
+                Aliquota inserita: {Math.round(input.aliquotaDetrazione * 100)}
+                %. Non è una verifica del diritto all’agevolazione.
               </p>
             </>
           ) : (
@@ -50,7 +50,12 @@ export function InvestmentComparison({
               </p>
             </>
           )}
-          <button type="button" className="back-link" onClick={() => onEdit('detrazione')}>
+          <button
+            id="tax-link"
+            type="button"
+            className="back-link"
+            onClick={() => onEdit('detrazione')}
+          >
             {hasTax ? 'Modifica ipotesi fiscale →' : 'Imposta ipotesi fiscale →'}
           </button>
         </div>
@@ -62,7 +67,7 @@ export function InvestmentComparison({
         </p>
         {hasTax && (
           <>
-            <p>
+            <p className="tax-recovery-note">
               Recupero fiscale totale ipotizzato:{' '}
               <strong>{eur(comparison.conDetrazione.detrazioneTotale)}</strong>, cioè{' '}
               <strong>{eur(comparison.conDetrazione.quotaDetrazione)}/anno per 10 anni</strong>.
@@ -80,19 +85,6 @@ export function InvestmentComparison({
           non una divisione che prolunghi la detrazione oltre il decimo anno.
         </p>
       </div>
-      {input.manutenzioneAnnua === 0 ? (
-        <p className="cost-warning">
-          Costi ricorrenti esclusi, non necessariamente nulli.{' '}
-          <button type="button" onClick={() => onEdit('manutenzione')}>
-            Inserisci manutenzione e altri costi →
-          </button>
-        </p>
-      ) : (
-        <p className="field-hint">
-          Costi ricorrenti inclusi in entrambi i casi: {eur(input.manutenzioneAnnua)}/anno. Le
-          sostituzioni straordinarie restano escluse.
-        </p>
-      )}
     </section>
   );
 }
@@ -106,9 +98,13 @@ export function CashFlowTable({
 }) {
   const hasTax = input.aliquotaDetrazione > 0;
   return (
-    <details className="help-details cash-flow-details">
-      <summary>Come cambia il saldo anno per anno?</summary>
-      <div className="table-scroll">
+    <div className="cash-flow-details">
+      <div
+        className="table-scroll"
+        tabIndex={0}
+        role="region"
+        aria-label="Flussi annuali, tabella scorrevole"
+      >
         <table>
           <caption>
             Anno 0: esborso completo. Dal primo anno: risparmio + ricavi − costi inseriti, con
@@ -140,21 +136,43 @@ export function CashFlowTable({
           </tbody>
         </table>
       </div>
+      <div className="annual-cards">
+        {comparison.flussi.map((row) => (
+          <article className="annual-card" key={row.anno}>
+            <h2>Anno {row.anno}</h2>
+            <p>
+              {row.anno === 0 ? 'Esborso iniziale completo' : 'Risparmio + ricavi − costi inseriti'}
+            </p>
+            <dl>
+              {[
+                ['Risparmio', row.risparmio],
+                ['Ricavi', row.ricavi],
+                ['Costi / esborso', row.costi],
+                ['Quota fiscale', row.recuperoFiscale],
+                ['Saldo senza detrazione', row.saldoSenza],
+                ...(hasTax ? [['Saldo con detrazione', row.saldoCon]] : []),
+              ].map(([label, value]) => (
+                <div className="value-row" key={String(label)}>
+                  <dt>{label}</dt>
+                  <dd>{eur(Number(value))}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        ))}
+      </div>
       <p className="field-hint">
         Quote fiscali attribuite a fine anno; rientro frazionario interpolato tra due saldi annuali.
         Nessuna attualizzazione dei flussi.
       </p>
-    </details>
+    </div>
   );
 }
 
 export function SensitivityScenarios({ input }: { input: SimInput }) {
   const scenarios = calcolaScenariSensibilita(input);
   return (
-    <details className="assumptions sensitivity">
-      <summary>
-        Scenari: autoconsumo e prezzi <span>Esplora</span>
-      </summary>
+    <div className="sensitivity">
       <div className="assumptions-content">
         <p>
           Tre combinazioni illustrative: quota autoconsumata −10 / +10 punti percentuali e prezzi
@@ -176,7 +194,8 @@ export function SensitivityScenarios({ input }: { input: SimInput }) {
                 €/kWh immesso.
               </p>
               <p>
-                Beneficio annuo{input.aliquotaDetrazione > 0 ? ' nei primi 10 anni' : ''}:{' '}
+                Beneficio annuo
+                {input.aliquotaDetrazione > 0 ? ' nei primi 10 anni' : ''}:{' '}
                 {eur(s.result.beneficioTotale10)}.
               </p>
             </div>
@@ -187,6 +206,6 @@ export function SensitivityScenarios({ input }: { input: SimInput }) {
           fra prezzo evitato e prezzo di vendita. Modifica le ipotesi per esplorare il tuo caso.
         </p>
       </div>
-    </details>
+    </div>
   );
 }

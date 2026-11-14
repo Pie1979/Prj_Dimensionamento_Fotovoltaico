@@ -84,10 +84,19 @@ export function NumField({
           onBlur={(e) => {
             focused.current = false;
             const message = validate(e.target);
-            setError(message);
+            // Keep a clicked action in place until its click completes. Submit
+            // reports invalid data through onInvalid; Cancel discards the draft.
+            if (!(e.relatedTarget instanceof HTMLButtonElement)) setError(message);
             if (!message) setText(formatNumeroInput(parseNumeroInput(e.target.value)));
           }}
-          onInvalid={(e) => setError(validate(e.currentTarget))}
+          onInvalid={(e) => {
+            const field = e.currentTarget;
+            setError(validate(field));
+            // Custom validation can reflow the form before the browser places focus.
+            requestAnimationFrame(() =>
+              field.form?.querySelector<HTMLElement>('input:invalid, select:invalid')?.focus(),
+            );
+          }}
         />
         {unit && (
           <span className="input-unit" aria-hidden="true">
@@ -101,7 +110,7 @@ export function NumField({
         </p>
       )}
       {error && (
-        <p className="field-error" id={`${id}-error`}>
+        <p className="field-error" id={`${id}-error`} role="alert">
           {error}
         </p>
       )}

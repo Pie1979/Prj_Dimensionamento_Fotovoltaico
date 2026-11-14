@@ -1,21 +1,27 @@
 'use client';
 import { useState } from 'react';
 import { NumField } from '@/components/num-field';
-import { fmt0 } from '@/lib/format';
+import { fmt0, fmt2, kwh } from '@/lib/format';
 import { findRegion, REGIONAL_YIELDS, type ProductionChoice } from '@/lib/production-estimate';
-
 export function ProductionEstimate({
   choice,
   onChange,
+  kwp,
+  scenario,
+  onSource,
 }: {
   choice: ProductionChoice;
   onChange: (choice: ProductionChoice) => void;
+  kwp: number;
+  scenario: number;
+  onSource: () => void;
 }) {
   const [error, setError] = useState(false);
   const region = findRegion(choice.regionCode);
   return (
     <section className="regional-estimate" aria-labelledby="production-heading">
       <h2 id="production-heading">Dove installerai l’impianto?</h2>
+      <p>Scegli la regione: la resa si compila automaticamente.</p>
       <fieldset className="production-mode">
         <legend className="sr-only">Come stimare la produzione</legend>
         <label>
@@ -37,7 +43,7 @@ export function ProductionEstimate({
               onChange({ ...choice, mode: 'manual' });
             }}
           />{' '}
-          Ho il valore del preventivo
+          Valore del preventivo
         </label>
       </fieldset>
       {choice.mode === 'region' ? (
@@ -56,10 +62,6 @@ export function ProductionEstimate({
                 onChange({ ...choice, regionCode: e.target.value });
               }}
               onInvalid={() => setError(true)}
-              onBlur={(e) => {
-                if (e.currentTarget.matches(':user-invalid'))
-                  setError(!e.currentTarget.validity.valid);
-              }}
             >
               <option value="">Seleziona la tua regione</option>
               {REGIONAL_YIELDS.map((item) => (
@@ -69,10 +71,10 @@ export function ProductionEstimate({
               ))}
             </select>
             <p id="regione-hint" className="field-hint">
-              Una prima stima, senza dover conoscere inclinazione ed esposizione del tetto.
+              Seleziona una delle 20 regioni italiane.
             </p>
             {error && (
-              <p id="regione-error" className="field-error">
+              <p id="regione-error" className="field-error" role="alert">
                 Seleziona una regione oppure inserisci il valore del preventivo.
               </p>
             )}
@@ -80,52 +82,54 @@ export function ProductionEstimate({
           {region && (
             <div className="regional-yield" role="status">
               <span>Resa annua indicativa · {region.name}</span>
-              <strong>
-                {fmt0(region.annualYield)} <small>kWh/kWp/anno</small>
-              </strong>
-              <p>
-                Elaborazione SunSize su dati PVGIS della Commissione europea. Non è una valutazione
-                del tuo tetto.
-              </p>
+              <strong>{fmt0(region.annualYield)} kWh/kWp/anno</strong>
+              {kwp > 0 && Number.isFinite(kwp) && scenario > 0 && scenario <= 1 && (
+                <p>
+                  {fmt2(kwp)} kWp × {fmt0(region.annualYield)}
+                  {scenario !== 1 ? ' × ' + fmt0(scenario * 100) + '%' : ''} ={' '}
+                  {kwh(kwp * region.annualYield * scenario)}/anno
+                </p>
+              )}
             </div>
           )}
           <p className="field-hint">
-            Riferimento: pannelli verso sud, inclinazione 30°, perdite di sistema 14%. Esposizione e
-            ombre locali possono modificare la produzione.
+            Elaborazione SunSize su PVGIS 5.3 · 2005–2023. Sud, 30°, perdite di sistema 14%. La
+            media regionale non descrive il singolo tetto.
           </p>
+          <button
+            type="button"
+            className="back-link"
+            onClick={() => {
+              setError(false);
+              onChange({ ...choice, mode: 'manual' });
+            }}
+          >
+            Ho la resa del preventivo →
+          </button>
         </>
       ) : (
-        <NumField
-          id="produzione"
-          label="Resa annua del preventivo"
-          unit="kWh/kWp/anno"
-          hint="Se il preventivo riporta la produzione totale annua, dividila per i kWp. Esempio: 6.300 kWh ÷ 4,5 kWp = 1.400 kWh/kWp/anno."
-          placeholder="Es. 1.400"
-          value={choice.manualYield}
-          onChange={(manualYield) => onChange({ ...choice, manualYield })}
-        />
-      )}
-      <details className="help-details">
-        <summary>Fonte e metodo della stima regionale</summary>
-        <p>
-          Le rese sono medie indicative di più punti distribuiti sul territorio di ogni regione,
-          arrotondate a 10 kWh/kWp/anno. Fonte:{' '}
-          <a
-            href="https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en"
-            target="_blank"
-            rel="noreferrer"
+        <>
+          <NumField
+            id="produzione"
+            label="Resa annua del preventivo"
+            unit="kWh/kWp/anno"
+            hint="Se il preventivo riporta la produzione totale annua, dividila per i kWp. Esempio: 6.300 kWh ÷ 4,5 kWp = 1.400 kWh/kWp/anno. Non sottrarre nuovamente il 14%."
+            placeholder="Es. 1.400"
+            value={choice.manualYield}
+            onChange={(manualYield) => onChange({ ...choice, manualYield })}
+          />
+          <button
+            type="button"
+            className="back-link"
+            onClick={() => onChange({ ...choice, mode: 'region' })}
           >
-            PVGIS 5.3, Commissione europea
-          </a>
-          , database SARAH3, periodo 2005–2023. Non sono medie ufficiali pubblicate per regione né
-          medie dei tetti abitati.
-        </p>
-        <p>
-          Il valore è già una resa elettrica che comprende le perdite impostate: non sottrarre di
-          nuovo il 14%. Puoi sostituirlo con la stima dell’installatore scegliendo “Ho il valore del
-          preventivo”.
-        </p>
-      </details>
+            Usa la stima regionale →
+          </button>
+        </>
+      )}
+      <button id="source-link" type="button" className="back-link" onClick={onSource}>
+        Fonte e metodo dei valori regionali →
+      </button>
     </section>
   );
 }
