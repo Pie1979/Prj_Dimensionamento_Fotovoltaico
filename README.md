@@ -4,6 +4,16 @@ Simulatore fotovoltaico di PCODING Software: consumi → impianto → risultati,
 
 [Design Figma SunSize](https://www.figma.com/design/vcPymGVSDw6q9dbrxBY7K7)
 
+## Documentazione completa V2
+
+- [Scheda tecnica di realizzazione](docs/scheda-tecnica.md): architettura, stato, flussi UX, interazioni, responsive e mappa dei file.
+- [Logiche di calcolo](docs/logiche-calcolo.md): input e unità, annualizzazione, bilanci energetici, detrazione, rientro e scenari con esempi riproducibili.
+- [Scheda Figma integrale con appendici](docs/specifiche-figma-v2.md): tutte le specifiche e il rilievo del canvas; [origine e hash](docs/specifiche-figma-v2.provenienza.json).
+- [Fonti e rese regionali](docs/rese-regionali.md): PVGIS, 209 campioni e metodo di aggregazione.
+- [Verifiche e rilascio](docs/verifiche-e-rilascio.md): test locali/remoti, CI e passaggi prima della produzione.
+
+La documentazione operativa descrive il codice del commit `0f90d86`. La copia Figma conserva anche i contenuti dimostrativi e le note di revisione del canvas; l’esito della verifica remota successiva è nel documento di verifica.
+
 ## Avvio
 
 Richiede Node.js 22.18+ (o 24 LTS) per eseguire i test TypeScript senza compilazione aggiuntiva.
@@ -47,6 +57,8 @@ La tabella è un'elaborazione SunSize di **209 campioni PVGIS 5.3/SARAH3, 2005�
 | Detrazione fiscale | 0% | Esclusa finché l'utente non imposta un'aliquota verificata |
 | Costi ricorrenti | 0 €/anno | Esclusi finché l'utente non li specifica |
 
+Nelle formule, scenario, quota e aliquota sono frazioni interne: **40% = 0,4**, **50% = 0,5**, **100% = 1**.
+
 ```
 Produzione = kWp × produzione specifica × scenario
 Autoconsumo = min(produzione × quota autoconsumo, consumo annuo)
@@ -68,7 +80,7 @@ Il modello annuale è indicativo: non simula i consumi orari o la batteria. Prez
 
 Il confronto mantiene invariati investimento iniziale, produzione, autoconsumo, prezzi e costi: cambia solo la detrazione. Con aliquota iniziale 0%, il secondo caso mostra **Da impostare**. Nessuna aliquota viene scelta in base alla regione o alla presenza di una batteria.
 
-La tabella dei flussi mostra esborso all'anno 0, risparmio, ricavi, costi, quota fiscale e saldi cumulati fino all'anno 15. La quota fiscale termina dopo il decimo anno. I collegamenti dai risultati aprono direttamente i campi detrazione o costi, conservando i dati.
+La vista dei flussi mostra esborso all'anno 0, risparmio, ricavi, costi, quota fiscale e saldi cumulati fino all'anno 15. Su desktop/tablet usa una tabella, su mobile schede annuali. La quota fiscale termina dopo il decimo anno. I collegamenti dai risultati aprono la vista dedicata a detrazione e costi, conservando i dati; Salva applica e ricalcola, Annulla scarta le modifiche temporanee.
 
 Gli scenari modificano congiuntamente la quota di autoconsumo di −10 / +10 punti percentuali (limitata a 0–100%) e i due prezzi di −10% / +10%. Produzione, investimento, costi e aliquota restano invariati. Sono combinazioni illustrative, senza probabilità associate; non costituiscono un intervallo completo di incertezza. Il limite dell'autoconsumo al fabbisogno resta attivo in ciascun caso.
 
@@ -109,6 +121,6 @@ Per usare Chromium installato nel sistema: `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=
 
 Il workflow GitHub Pages pubblica i push su `main`; Vercel usa una build Next.js standard. La PR resta in bozza e il ramo dedicato genera un’anteprima Vercel tramite l’integrazione GitHub già esistente: [anteprima SunSize](https://prj-dimensionamento-fotovoltaico-git-codex-sunsize-ux-pm79.vercel.app). Le anteprime possono richiedere l’accesso Vercel del proprietario.
 
-L’associazione al progetto `prj-dimensionamento-fotovoltaico` è stata riscontrata negli stati e nel commento del bot Vercel della PR #9; la connessione Vercel diretta non restituisce team accessibili. Non sono stati modificati dominio, protezioni o collegamenti dei progetti. Il sito di produzione non viene aggiornato dal ramo di revisione.
+Accesso e associazione al progetto `prj-dimensionamento-fotovoltaico` sono stati confermati direttamente tramite Vercel. L’anteprima del commit `0f90d86` è `READY` e ha superato anche i 5 test browser remoti. [Esito e identificazione del deployment](docs/verifiche-e-rilascio.md). Il sito di produzione non è stato aggiornato; le protezioni restano attive.
 
 Prima del rilascio: revisionare l’anteprima e la verifica del flusso, completare le informazioni privacy/titolare adatte al deployment effettivo, confermare dominio e destinazione di produzione e quindi integrare il ramo. Il controllo automatico di accessibilità va completato con una prova manuale su dispositivi e tecnologie assistive.
