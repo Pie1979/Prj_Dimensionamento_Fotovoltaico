@@ -1,26 +1,16 @@
-/** Converte input utente (formato IT) in numero. */
-export function parseNumeroInput(val: string | null | undefined): number {
-  if (val === null || val === undefined || val === '') return 0;
-  let s = String(val).trim().replace(/\s/g, '');
-  if (/,\d{1,2}$/.test(s) && s.includes('.')) {
-    s = s.replace(/\./g, '').replace(',', '.');
-  } else if (s.includes(',') && !s.includes('.')) {
-    s = s.replace(',', '.');
-  } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
-    s = s.replace(/\./g, '');
-  }
-  const n = parseFloat(s);
-  return Number.isNaN(n) ? 0 : n;
+/** Formato italiano; accetta anche il punto decimale se non separa le migliaia. */
+export function parseNumeroInput(value: string | null | undefined): number {
+  const text = (value ?? '').trim().replace(/\s/g, '');
+  if (!text) return 0;
+  if (/^-?0\.\d+$/.test(text)) return Number(text);
+  if (/^-?(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d+)?$/.test(text))
+    return Number(text.replace(/\./g, '').replace(',', '.'));
+  if (/^-?\d+\.\d+$/.test(text)) return Number(text);
+  return Number.NaN;
 }
-
-/** Mostra un numero con virgola decimale (solo se necessario). */
 export function formatNumeroInput(value: number): string {
-  if (!value || value <= 0) return '';
-  const s = String(value);
-  return s.includes('.') ? s.replace('.', ',') : s;
+  return Number.isFinite(value) ? String(value).replace('.', ',') : '';
 }
-
-/** Accetta solo cifre, virgola e punto durante la digitazione. */
 export function sanitizeNumeroInput(raw: string): string {
-  return raw.replace(/\s/g, '').replace(/[^\d.,]/g, '');
+  return raw;
 }

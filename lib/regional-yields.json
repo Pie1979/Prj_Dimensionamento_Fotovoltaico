@@ -1,0 +1,228 @@
+{
+  "metadata": {
+    "generatedAt": "2026-11-14T10:11:54.343713+00:00",
+    "source": "European Commission, Joint Research Centre, PVGIS 5.3",
+    "sourceUrl": "https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en",
+    "api": "https://re.jrc.ec.europa.eu/api/v5_3/PVcalc",
+    "radiationDatabase": "PVGIS-SARAH3",
+    "period": [2005, 2023],
+    "parameters": {
+      "peakpower": 1,
+      "loss": 14,
+      "angle": 30,
+      "aspect": 0,
+      "pvtechchoice": "crystSi",
+      "mountingplace": "free",
+      "raddatabase": "PVGIS-SARAH3",
+      "usehorizon": 1,
+      "outputformat": "json"
+    },
+    "boundariesUrl": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_01M_2024_4326_LEVL_2.geojson",
+    "boundariesSha256": "fcf7625d322668dc491dc285010c132192495660a8bb98c7cd7762925c8f2c65",
+    "method": "Grid-centre sample at 0.5 degrees; 0.25 degrees when fewer than 5 points. Within each region weights are proportional to cos(latitude). Nearest 10 kWh/kWp/year. Trento and Bolzano combined before averaging. Approximate spatial benchmark, not roof- or population-weighted.",
+    "pointCount": 209,
+    "unit": "kWh/kWp/year"
+  },
+  "regions": [
+    {
+      "code": "ITC1",
+      "name": "Piemonte",
+      "annualYield": 1260,
+      "unroundedMean": 1257.9101,
+      "sampleCount": 11,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 996.19,
+      "maximumSampleYield": 1394.57
+    },
+    {
+      "code": "ITC2",
+      "name": "Valle d’Aosta",
+      "annualYield": 1240,
+      "unroundedMean": 1239.0075,
+      "sampleCount": 6,
+      "gridStepDegrees": 0.25,
+      "minimumSampleYield": 1148.87,
+      "maximumSampleYield": 1297.84
+    },
+    {
+      "code": "ITC3",
+      "name": "Liguria",
+      "annualYield": 1310,
+      "unroundedMean": 1311.1825,
+      "sampleCount": 9,
+      "gridStepDegrees": 0.25,
+      "minimumSampleYield": 1209.38,
+      "maximumSampleYield": 1410.88
+    },
+    {
+      "code": "ITC4",
+      "name": "Lombardia",
+      "annualYield": 1300,
+      "unroundedMean": 1299.6153,
+      "sampleCount": 14,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1019.92,
+      "maximumSampleYield": 1413.59
+    },
+    {
+      "code": "ITH12",
+      "name": "Trentino-Alto Adige",
+      "annualYield": 1220,
+      "unroundedMean": 1219.6211,
+      "sampleCount": 7,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1072.68,
+      "maximumSampleYield": 1338.65
+    },
+    {
+      "code": "ITH3",
+      "name": "Veneto",
+      "annualYield": 1280,
+      "unroundedMean": 1276.8011,
+      "sampleCount": 7,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 949.75,
+      "maximumSampleYield": 1361.23
+    },
+    {
+      "code": "ITH4",
+      "name": "Friuli-Venezia Giulia",
+      "annualYield": 1230,
+      "unroundedMean": 1231.713,
+      "sampleCount": 13,
+      "gridStepDegrees": 0.25,
+      "minimumSampleYield": 914.12,
+      "maximumSampleYield": 1344.26
+    },
+    {
+      "code": "ITH5",
+      "name": "Emilia-Romagna",
+      "annualYield": 1330,
+      "unroundedMean": 1327.0262,
+      "sampleCount": 9,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1262.33,
+      "maximumSampleYield": 1366.95
+    },
+    {
+      "code": "ITI1",
+      "name": "Toscana",
+      "annualYield": 1380,
+      "unroundedMean": 1384.3907,
+      "sampleCount": 11,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1298.93,
+      "maximumSampleYield": 1483.78
+    },
+    {
+      "code": "ITI2",
+      "name": "Umbria",
+      "annualYield": 1340,
+      "unroundedMean": 1344.0124,
+      "sampleCount": 13,
+      "gridStepDegrees": 0.25,
+      "minimumSampleYield": 1165.78,
+      "maximumSampleYield": 1428.54
+    },
+    {
+      "code": "ITI3",
+      "name": "Marche",
+      "annualYield": 1330,
+      "unroundedMean": 1332.4492,
+      "sampleCount": 17,
+      "gridStepDegrees": 0.25,
+      "minimumSampleYield": 1237.13,
+      "maximumSampleYield": 1410.82
+    },
+    {
+      "code": "ITI4",
+      "name": "Lazio",
+      "annualYield": 1440,
+      "unroundedMean": 1444.257,
+      "sampleCount": 9,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1304.14,
+      "maximumSampleYield": 1540.49
+    },
+    {
+      "code": "ITF1",
+      "name": "Abruzzo",
+      "annualYield": 1350,
+      "unroundedMean": 1349.1616,
+      "sampleCount": 19,
+      "gridStepDegrees": 0.25,
+      "minimumSampleYield": 1060.22,
+      "maximumSampleYield": 1464.72
+    },
+    {
+      "code": "ITF2",
+      "name": "Molise",
+      "annualYield": 1390,
+      "unroundedMean": 1392.1027,
+      "sampleCount": 8,
+      "gridStepDegrees": 0.25,
+      "minimumSampleYield": 1320.75,
+      "maximumSampleYield": 1463.61
+    },
+    {
+      "code": "ITF3",
+      "name": "Campania",
+      "annualYield": 1350,
+      "unroundedMean": 1348.2342,
+      "sampleCount": 7,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1238.59,
+      "maximumSampleYield": 1414.61
+    },
+    {
+      "code": "ITF4",
+      "name": "Puglia",
+      "annualYield": 1470,
+      "unroundedMean": 1470.4203,
+      "sampleCount": 7,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1445.34,
+      "maximumSampleYield": 1496.39
+    },
+    {
+      "code": "ITF5",
+      "name": "Basilicata",
+      "annualYield": 1410,
+      "unroundedMean": 1414.4938,
+      "sampleCount": 17,
+      "gridStepDegrees": 0.25,
+      "minimumSampleYield": 1363.91,
+      "maximumSampleYield": 1483.87
+    },
+    {
+      "code": "ITF6",
+      "name": "Calabria",
+      "annualYield": 1390,
+      "unroundedMean": 1393.5606,
+      "sampleCount": 6,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1191.88,
+      "maximumSampleYield": 1514.98
+    },
+    {
+      "code": "ITG1",
+      "name": "Sicilia",
+      "annualYield": 1550,
+      "unroundedMean": 1548.7892,
+      "sampleCount": 10,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1447.82,
+      "maximumSampleYield": 1669.54
+    },
+    {
+      "code": "ITG2",
+      "name": "Sardegna",
+      "annualYield": 1500,
+      "unroundedMean": 1501.9707,
+      "sampleCount": 9,
+      "gridStepDegrees": 0.5,
+      "minimumSampleYield": 1435.83,
+      "maximumSampleYield": 1582.04
+    }
+  ]
+}

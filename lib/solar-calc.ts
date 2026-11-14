@@ -1,6 +1,26 @@
 import type { PaybackColor, PaybackSerie, SimInput, SimResult } from '@/lib/types';
 
-const FISCAL = { DETRAZIONE: 0.5, ANNI: 10 };
+const FISCAL = { ANNI: 10 };
+
+export function isValidSimulation(input: SimInput): boolean {
+  return (
+    Object.values(input).every(Number.isFinite) &&
+    input.consumoKwh > 0 &&
+    input.spesaAnnua > 0 &&
+    input.kwp > 0 &&
+    input.costoImpianto > 0 &&
+    input.irraggiamento > 0 &&
+    input.quotaAutoconsumo >= 0 &&
+    input.quotaAutoconsumo <= 1 &&
+    input.aliquotaDetrazione >= 0 &&
+    input.aliquotaDetrazione <= 1 &&
+    input.scenario > 0 &&
+    input.scenario <= 1 &&
+    input.prezzoEvitato >= 0 &&
+    input.prezzoVendita >= 0 &&
+    input.manutenzioneAnnua >= 0
+  );
+}
 export const PREZZO_GSE = 0.09;
 export const ANNI_GRAFICO = 15;
 
@@ -9,8 +29,9 @@ function calcolaBeneficioTotale(
   ricavoGse: number,
   quotaDetrazione: number,
   anno: number,
+  manutenzione = 0,
 ) {
-  const base = risparmio + ricavoGse;
+  const base = risparmio + ricavoGse - manutenzione;
   return anno <= FISCAL.ANNI ? base + quotaDetrazione : base;
 }
 
@@ -19,12 +40,19 @@ function calcolaPayback(
   risparmio: number,
   ricavoGse: number,
   quotaDetrazione: number,
+  manutenzione = 0,
 ) {
   if (investimentoNetto <= 0) return { years: 0, reached: true };
 
   let cumulativo = -investimentoNetto;
   for (let anno = 1; anno <= 50; anno++) {
-    const beneficio = calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, anno);
+    const beneficio = calcolaBeneficioTotale(
+      risparmio,
+      ricavoGse,
+      quotaDetrazione,
+      anno,
+      manutenzione,
+    );
     const precedente = cumulativo;
     cumulativo += beneficio;
     if (cumulativo >= 0) {
@@ -61,6 +89,7 @@ export function generaSeriePayback(
   ricavoGse: number,
   quotaDetrazione: number,
   spesaAnnua: number,
+  manutenzione = 0,
 ): PaybackSerie {
   const labels: string[] = [];
   const saldoInvestimento: number[] = [];
@@ -92,7 +121,7 @@ export function generaSeriePayback(
     cumRisparmio.push(cR);
     cumGse.push(cG);
     cumDetrazione.push(cD);
-    saldo += calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, y);
+    saldo += calcolaBeneficioTotale(risparmio, ricavoGse, quotaDetrazione, y, manutenzione);
     saldoInvestimento.push(saldo);
   }
 
@@ -100,25 +129,46 @@ export function generaSeriePayback(
 }
 
 export function calcolaSimulazione(input: SimInput): SimResult {
-  const { consumoKwh: consumo, spesaAnnua: spesa, irraggiamento, kwp, costoImpianto: costo, scenario } =
-    input;
+  const {
+    consumoKwh: consumo,
+    spesaAnnua: spesa,
+    irraggiamento,
+    kwp,
+    costoImpianto: costo,
+    scenario,
+  } = input;
 
-  const costoEnergia = consumo > 0 ? spesa / consumo : 0;
+  if (!isValidSimulation(input)) throw new RangeError('Parametri della simulazione non validi');
+  const costoEnergia = input.prezzoEvitato;
   const produzioneLorda = kwp * irraggiamento * scenario;
-  const autoconsumo = Math.min(produzioneLorda, consumo);
-  const sovrapproduzione = Math.max(0, produzioneLorda - consumo);
+  const autoconsumo = Math.min(produzioneLorda * input.quotaAutoconsumo, consumo);
+  const sovrapproduzione = Math.max(0, produzioneLorda - autoconsumo);
   const indiceCopertura = consumo > 0 ? (produzioneLorda / consumo) * 100 : 0;
   const risparmio = autoconsumo * costoEnergia;
-  const ricavoGse = sovrapproduzione * PREZZO_GSE;
-  const investimentoNetto = costo * FISCAL.DETRAZIONE;
-  const detrazioneTotale = costo * FISCAL.DETRAZIONE;
-  const quotaDetrazione = (costo * FISCAL.DETRAZIONE) / FISCAL.ANNI;
-  const beneficioOperativo = risparmio + ricavoGse;
+  const ricavoGse = sovrapproduzione * input.prezzoVendita;
+  // Esborso completo: la detrazione entra solo nei flussi dei primi 10 anni.
+  const investimentoNetto = costo;
+  const detrazioneTotale = costo * input.aliquotaDetrazione;
+  const quotaDetrazione = (costo * input.aliquotaDetrazione) / FISCAL.ANNI;
+  const beneficioOperativo = risparmio + ricavoGse - input.manutenzioneAnnua;
   const beneficioTotale10 = beneficioOperativo + quotaDetrazione;
-  const payback = calcolaPayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione);
+  const payback = calcolaPayback(
+    investimentoNetto,
+    risparmio,
+    ricavoGse,
+    quotaDetrazione,
+    input.manutenzioneAnnua,
+  );
   const colore = colorePayback(payback.years);
 
-  const serie = generaSeriePayback(investimentoNetto, risparmio, ricavoGse, quotaDetrazione, spesa);
+  const serie = generaSeriePayback(
+    investimentoNetto,
+    risparmio,
+    ricavoGse,
+    quotaDetrazione,
+    spesa,
+    input.manutenzioneAnnua,
+  );
   const idx10 = Math.min(FISCAL.ANNI, ANNI_GRAFICO);
   const saldo = serie.saldoInvestimento[idx10];
 
@@ -133,6 +183,7 @@ export function calcolaSimulazione(input: SimInput): SimResult {
     investimentoNetto,
     detrazioneTotale,
     quotaDetrazione,
+    manutenzioneAnnua: input.manutenzioneAnnua,
     beneficioOperativo,
     beneficioTotale10,
     payback,
@@ -142,10 +193,7 @@ export function calcolaSimulazione(input: SimInput): SimResult {
   };
 }
 
-export const VERDICT_STYLES: Record<
-  PaybackColor,
-  { box: string; badge: string; label: string }
-> = {
+export const VERDICT_STYLES: Record<PaybackColor, { box: string; badge: string; label: string }> = {
   green: {
     box: 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700',
     badge: 'bg-emerald-600 text-white',
@@ -162,3 +210,42 @@ export const VERDICT_STYLES: Record<
     label: 'Payback lungo — rivedi i parametri',
   },
 };
+
+/** Confronto omogeneo: stessi costi, prezzi ed energia; cambia solo il recupero fiscale. */
+export function calcolaConfrontoFiscale(input: SimInput) {
+  const senzaDetrazione = calcolaSimulazione({ ...input, aliquotaDetrazione: 0 });
+  const conDetrazione = calcolaSimulazione(input);
+  const flussi = Array.from({ length: ANNI_GRAFICO + 1 }, (_, anno) => {
+    const recuperoFiscale = anno > 0 && anno <= FISCAL.ANNI ? conDetrazione.quotaDetrazione : 0;
+    return {
+      anno,
+      risparmio: anno > 0 ? conDetrazione.risparmio : 0,
+      ricavi: anno > 0 ? conDetrazione.ricavoGse : 0,
+      costi: anno > 0 ? input.manutenzioneAnnua : input.costoImpianto,
+      recuperoFiscale,
+      flussoSenza: anno === 0 ? -input.costoImpianto : senzaDetrazione.beneficioOperativo,
+      flussoCon:
+        anno === 0 ? -input.costoImpianto : conDetrazione.beneficioOperativo + recuperoFiscale,
+      saldoSenza: senzaDetrazione.serie.saldoInvestimento[anno],
+      saldoCon: conDetrazione.serie.saldoInvestimento[anno],
+    };
+  });
+  return { senzaDetrazione, conDetrazione, flussi };
+}
+
+/** Sensibilità illustrativa: nessuna probabilità e nessuna stima automatica della batteria. */
+export function calcolaScenariSensibilita(input: SimInput) {
+  return [
+    { key: 'ridotti', label: 'Quota e prezzi ridotti', deltaQuota: -0.1, fattorePrezzi: 0.9 },
+    { key: 'inseriti', label: 'Ipotesi inserite', deltaQuota: 0, fattorePrezzi: 1 },
+    { key: 'aumentati', label: 'Quota e prezzi aumentati', deltaQuota: 0.1, fattorePrezzi: 1.1 },
+  ].map((scenario) => {
+    const parametri = {
+      ...input,
+      quotaAutoconsumo: Math.max(0, Math.min(1, input.quotaAutoconsumo + scenario.deltaQuota)),
+      prezzoEvitato: input.prezzoEvitato * scenario.fattorePrezzi,
+      prezzoVendita: input.prezzoVendita * scenario.fattorePrezzi,
+    };
+    return { ...scenario, input: parametri, result: calcolaSimulazione(parametri) };
+  });
+}

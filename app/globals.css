@@ -1,11 +1,1072 @@
-@import "tailwindcss";
-
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+@import 'tailwindcss';
+@theme inline {
+  --font-sans: var(--font-inter), sans-serif;
 }
-
+:root {
+  --background: #f4f7f6;
+  --surface: #fff;
+  --foreground: #203738;
+  --muted: #52676b;
+  --brand: #0f766e;
+  --brand-dark: #115e59;
+  --brand-soft: #edf7f3;
+  --border: #dce5e2;
+  --solar: #ffcc45;
+  --solar-soft: #fff5da;
+  --solar-ink: #5c400e;
+  --error: #a52d2d;
+  --radius: 20px;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-padding-block: 24px;
+}
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+a,
+input,
+select,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
+button {
+  color: inherit;
+}
+button:disabled {
+  cursor: default;
+}
+a {
+  color: var(--brand);
+  text-underline-offset: 3px;
+}
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ol {
+  margin: 0;
+}
+h1,
+h2,
+h3,
+strong {
+  font-weight: 600;
+}
+h1 {
+  font-size: 36px;
+  line-height: 1.2;
+}
+h2 {
+  font-size: 20px;
+  line-height: 1.5;
+}
+h3 {
+  font-size: 16px;
+}
+button {
+  border: 0;
+}
+:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 4px;
+}
+h1:focus {
+  outline: none;
+}
+.app-shell {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 31px;
+}
+.wordmark {
+  color: var(--brand);
+  text-decoration: none;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.2;
+  flex: 0 1 960px;
+}
+.maker {
+  font-size: 14px;
+  color: var(--muted);
+}
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+}
+.step-progress ol {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.step-progress li {
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.step-progress li > span,
+.step-progress button {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  text-align: left;
+  background: none;
+  border-radius: 12px;
+}
+.step-progress li span span,
+.step-progress button > span {
+  margin-right: 6px;
+}
+.step-progress .current {
+  color: var(--surface);
+  background: var(--brand);
+}
+.step-progress .complete {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+.page-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.page-intro h1,
+.page-intro h2 {
+  font-size: 48px;
+  line-height: 1.2;
+}
+.page-intro p,
+.intro {
+  color: var(--muted);
+}
+.eyebrow {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand);
+}
+.consumption-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 440fr) minmax(0, 840fr);
+  gap: 32px;
+  align-items: start;
+}
+.panel {
+  padding: 32px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.story-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  background: var(--brand-dark);
+  color: var(--surface);
+  border-radius: var(--radius);
+  padding: 32px;
+  min-width: 0;
+}
+.story-panel .eyebrow,
+.story-points strong {
+  color: var(--solar);
+}
+.story-panel h2 {
+  font-size: 36px;
+  line-height: 1.2;
+}
+.story-points {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.story-points p {
+  margin-top: 4px;
+}
+.small,
+.field-hint,
+.section-caption,
+.fiscal-recovery,
+.comparison-card p {
+  font-size: 14px;
+  color: var(--muted);
+}
+.story-panel .small {
+  color: var(--surface);
+}
+.soft-note,
+.warning-note,
+.neutral-note,
+.solar-note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.soft-note {
+  background: var(--brand-soft);
+}
+.soft-note strong {
+  color: var(--brand-dark);
+}
+.soft-note p,
+.neutral-note p {
+  font-size: 14px;
+  color: var(--muted);
+}
+.warning-note {
+  background: var(--solar-soft);
+  color: var(--solar-ink);
+}
+.warning-note p,
+.solar-note p {
+  font-size: 14px;
+}
+.neutral-note {
+  background: var(--background);
+}
+.solar-note {
+  background: var(--solar);
+  color: var(--solar-ink);
+  padding: 20px;
+}
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+.number-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.number-field label {
+  font-size: 14px;
+  font-weight: 600;
+}
+.input-wrap {
+  position: relative;
+  display: flex;
+  border: 1px solid var(--muted);
+  background: var(--surface);
+  border-radius: 10px;
+  min-height: 56px;
+  align-items: center;
+  min-width: 0;
+}
+.input-wrap:focus-within {
+  outline: 3px solid var(--brand);
+  outline-offset: 3px;
+}
+.input-wrap input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 13px 16px;
+  line-height: 1.5;
+  color: var(--foreground);
+  outline: none;
+}
+.input-wrap input:focus-visible {
+  outline: none;
+}
+.input-unit {
+  padding-right: 16px;
+  color: var(--muted);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.number-field select {
+  width: 100%;
+  min-width: 0;
+  min-height: 56px;
+  padding: 13px 16px;
+  border: 1px solid var(--muted);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--foreground);
+}
+::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+.field-error {
+  font-size: 14px;
+  color: var(--error);
+}
+.has-error,
+.number-field select[aria-invalid='true'] {
+  border-color: var(--error);
+}
+.button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 56px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+}
+.primary {
+  background: var(--brand);
+  color: var(--surface);
+}
+.primary:hover {
+  background: var(--brand-dark);
+}
+.secondary {
+  background: var(--surface);
+  color: var(--brand);
+  border: 1px solid var(--border);
+}
+.secondary:hover {
+  background: var(--brand-soft);
+}
+.back-link {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--brand);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+.back-link:hover {
+  background: var(--brand-soft);
+}
+.plant-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 864fr) minmax(0, 416fr);
+  gap: 32px;
+  align-items: start;
+}
+.data-summary {
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.regional-estimate {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.regional-estimate > p {
+  color: var(--muted);
+}
+fieldset {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  margin: 0;
+}
+.production-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  color: var(--brand);
+  font-size: 14px;
+}
+.production-mode label {
+  padding-block: 4px;
+  cursor: pointer;
+}
+input[type='radio'] {
+  accent-color: var(--brand);
+}
+.regional-yield {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--brand-soft);
+  border-radius: 16px;
+  color: var(--brand);
+  font-weight: 600;
+}
+.regional-yield strong {
+  font-size: 20px;
+  color: var(--foreground);
+}
+.usage-context {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.profile-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.profile-group legend {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.profile-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.profile-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: var(--background);
+  border-radius: var(--radius);
+  min-height: 72px;
+  cursor: pointer;
+}
+.profile-option strong {
+  font-size: 14px;
+}
+.profile-option span {
+  font-weight: 600;
+  color: var(--muted);
+}
+.profile-option.selected {
+  background: var(--brand);
+  color: var(--surface);
+}
+.profile-option.selected span {
+  color: var(--surface);
+}
+.profile-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.profile-option:has(input:focus-visible) {
+  outline: 3px solid var(--brand-dark);
+  outline-offset: 4px;
+}
+.economic-assumptions {
+  padding: 16px;
+  background: var(--background);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.economic-assumptions .field-grid {
+  gap: 20px;
+}
+.plant-summary {
+  padding: 28px;
+}
+.summary-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.summary-metric span {
+  font-size: 14px;
+}
+.summary-metric strong {
+  font-size: 26px;
+  line-height: 1.2;
+}
+.help-details {
+  font-size: 14px;
+  color: var(--muted);
+}
+.help-details summary {
+  cursor: pointer;
+  color: var(--brand);
+  padding-block: 8px;
+  font-weight: 600;
+}
+.help-details[open] > :not(summary) {
+  margin-top: 16px;
+}
+.results-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.fiscal-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.fiscal-comparison h2 {
+  font-size: 26px;
+  line-height: 1.2;
+}
+.fiscal-comparison > .section-caption {
+  display: none;
+}
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.comparison-card {
+  padding: 24px;
+  border-radius: var(--radius);
+  background: var(--brand-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.comparison-card h3 {
+  color: var(--brand);
+  text-transform: uppercase;
+}
+.comparison-card > strong {
+  color: var(--brand);
+  font-size: 26px;
+  line-height: 1.2;
+}
+.comparison-card.with-tax {
+  background: var(--solar-soft);
+}
+.with-tax h3,
+.with-tax > strong {
+  color: var(--solar-ink);
+}
+.comparison-card .back-link {
+  margin-top: auto;
+}
+.fiscal-recovery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fiscal-recovery p {
+  margin: 0;
+}
+.results-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+.result-section {
+  padding: 28px;
+  gap: 20px;
+}
+.result-section .section-caption {
+  margin-top: -8px;
+}
+.value-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 8px;
+}
+.value-row dt {
+  color: var(--muted);
+}
+.value-row dd {
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+.energy-total {
+  font-size: 26px;
+  line-height: 1.2;
+}
+.energy-bar {
+  height: 24px;
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--brand);
+}
+.energy-bar span:first-child {
+  background: var(--solar);
+}
+.energy-bar span:last-child {
+  background: var(--brand);
+}
+.chart-section {
+  gap: 16px;
+}
+.payback-chart,
+.chart-loading {
+  height: 290px;
+  width: 100%;
+}
+.sensitivity > .assumptions-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.sensitivity p {
+  font-size: 14px;
+  color: var(--muted);
+}
+.sensitivity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.sensitivity-card {
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--brand-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sensitivity-card > strong {
+  font-size: 26px;
+  color: var(--brand);
+  line-height: 1.2;
+}
+.limits-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+}
+.result-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.mobile-support {
+  display: none;
+}
+.helper-panel {
+  width: min(900px, 100%);
+  padding: 36px;
+  gap: 22px;
+}
+.wide-helper {
+  width: 100%;
+}
+.helper-panel .sensitivity-grid {
+  grid-template-columns: 1fr;
+}
+.table-scroll {
+  overflow: auto;
+  max-width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+}
+caption {
+  text-align: left;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+th,
+td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+}
+thead {
+  background: var(--brand-soft);
+}
+.cash-flow-details table {
+  min-width: 740px;
+}
+.cash-flow-details td {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cash-flow-details > .field-hint {
+  margin-top: 16px;
+}
+.annual-cards {
+  display: none;
+}
+.region-table td {
+  text-align: right;
+}
+.region-table th {
+  font-weight: 600;
+}
+.site-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.footer-link {
+  background: none;
+  color: var(--brand);
+  text-align: left;
+  padding: 8px 0;
+  width: fit-content;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 14px;
+}
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  transform: translateY(-150%);
+  padding: 12px 20px;
+  border-radius: 12px;
+  color: var(--surface);
+  background: var(--brand);
+  z-index: 10;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+@media (min-width: 1600px) {
+  .app-shell {
+    max-width: 1440px;
+  }
+}
+@media (max-width: 1100px) {
+  .app-shell {
+    padding: 40px;
+  }
+  .consumption-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.65fr);
+    gap: 24px;
+  }
+  .story-panel,
+  .panel {
+    padding: 24px;
+  }
+  .plant-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 24px;
+  }
+  .plant-summary h2,
+  .story-panel h2 {
+    font-size: 28px;
+  }
+}
+@media (max-width: 800px) {
+  .app-shell {
+    padding: 24px;
+    gap: 24px;
+  }
+  .main-layout {
+    gap: 24px;
+  }
+  .consumption-layout,
+  .plant-layout {
+    grid-template-columns: 1fr;
+  }
+  .story-panel {
+    display: none;
+  }
+  .page-intro h1,
+  .page-intro h2 {
+    font-size: 36px;
+  }
+  .results-columns {
+    grid-template-columns: 1fr;
+  }
+  .sensitivity-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .app-shell {
+    padding: 16px 20px;
+    gap: 16px;
+  }
+  .main-layout {
+    gap: 16px;
+  }
+  .site-header {
+    justify-content: space-between;
+  }
+  .wordmark {
+    flex: initial;
+  }
+  .maker {
+    font-size: 12px;
+  }
+  .step-progress ol {
+    gap: 8px;
+  }
+  .step-progress li {
+    font-size: 12px;
+  }
+  .step-progress li > span,
+  .step-progress button {
+    padding: 12px 8px;
+  }
+  .step-progress li span span,
+  .step-progress button > span {
+    margin-right: 2px;
+  }
+  .eyebrow {
+    font-size: 14px;
+  }
+  .page-intro h1,
+  .page-intro h2 {
+    font-size: 26px;
+  }
+  .step-1 .page-intro h2 {
+    font-size: 28px;
+  }
+  .panel {
+    padding: 16px 20px;
+    gap: 16px;
+  }
+  h1 {
+    font-size: 26px;
+  }
+  .consumption-panel .eyebrow {
+    display: none;
+  }
+  .field-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .comparison-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .comparison-card {
+    padding: 24px;
+  }
+  .fiscal-comparison h2 {
+    font-size: 20px;
+    line-height: 1.5;
+  }
+  .profile-option {
+    padding: 12px 8px;
+    border-radius: 16px;
+  }
+  .profile-option strong {
+    font-size: 12px;
+  }
+  .profile-group legend {
+    font-size: 20px;
+  }
+  .economic-assumptions .field-grid {
+    gap: 16px;
+  }
+  .desktop-scenarios,
+  .desktop-limits {
+    display: none;
+  }
+  .mobile-support {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+    width: 100%;
+  }
+  .mobile-support strong {
+    color: var(--brand);
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .mobile-support > span {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .result-actions {
+    grid-template-columns: 1fr;
+  }
+  .annual-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .annual-card {
+    background: var(--background);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .annual-card p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-block: 8px;
+  }
+  .annual-card .value-row {
+    font-size: 14px;
+    flex-wrap: wrap;
+    padding-block: 4px;
+  }
+  .cash-flow-details .table-scroll {
+    display: none;
+  }
+  .results-columns {
+    gap: 16px;
+  }
+  .value-row {
+    font-size: 14px;
+  }
+  .energy-total {
+    font-size: 26px;
+  }
+  .helper-panel {
+    padding: 20px;
+  }
+  .wide-helper {
+    padding: 16px 20px;
+  }
+  .region-table th,
+  .region-table td {
+    padding: 10px 4px;
+  }
+}
+@media (max-width: 359px) {
+  .app-shell {
+    padding-inline: 12px;
+  }
+  .maker {
+    font-size: 10px;
+  }
+  .step-progress li {
+    font-size: 11px;
+  }
+  .step-progress li > span,
+  .step-progress button {
+    padding-inline: 6px;
+  }
+  .input-unit {
+    font-size: 12px;
+    padding-right: 8px;
+  }
+  .input-wrap input {
+    padding-inline: 12px;
+  }
+  .comparison-card {
+    padding: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.tax-recovery-note {
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
+/* The skip link remains visually hidden until keyboard focus, including full-page capture. */
+.skip-link {
+  transform: none;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+}
+.skip-link:focus {
+  clip-path: none;
+  width: auto;
+  height: auto;
+  padding: 12px 20px;
+}
+@media (max-width: 600px) {
+  .desktop-maker {
+    display: none;
+  }
+  .maker {
+    font-size: 14px;
+  }
+  .step-progress li {
+    font-size: 14px;
+  }
+  .step-progress li > span,
+  .step-progress button {
+    padding: 10px;
+  }
+  .step-1 .page-intro h2 span {
+    display: block;
+  }
+  .consumption-panel .eyebrow {
+    display: block;
+  }
+}
+@media (max-width: 359px) {
+  .maker {
+    font-size: 12px;
+  }
+  .step-progress li {
+    font-size: 12px;
+  }
+  .step-progress li > span,
+  .step-progress button {
+    padding: 10px 6px;
+  }
 }
