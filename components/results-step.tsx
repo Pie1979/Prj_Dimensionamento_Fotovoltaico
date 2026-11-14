@@ -2,6 +2,7 @@
 import dynamic from 'next/dynamic';
 import { ArrowLeft, ArrowRight, TrendingUp, Sun, Home, Zap, RotateCcw } from 'lucide-react';
 import { eur, formatPayback, kwh, fmt2 } from '@/lib/format';
+import { findRegion, type ProductionChoice } from '@/lib/production-estimate';
 import type { SimInput, SimResult } from '@/lib/types';
 const PaybackChart = dynamic(
   () => import('@/components/payback-chart').then((m) => m.PaybackChart),
@@ -18,14 +19,17 @@ const PaybackChart = dynamic(
 export function ResultsStep({
   input,
   result,
+  productionChoice,
   onEdit,
   onRestart,
 }: {
   input: SimInput;
   result: SimResult;
+  productionChoice: ProductionChoice;
   onEdit: () => void;
   onRestart: () => void;
 }) {
+  const selectedRegion = findRegion(productionChoice.regionCode);
   const payback = result.payback.reached
     ? formatPayback(result.payback.years)
     : 'Non raggiunto entro 50 anni';
@@ -82,7 +86,15 @@ export function ResultsStep({
             ? 'La detrazione è recuperata nei primi 10 anni, se spettante.'
             : 'Il calcolo non include detrazioni fiscali.'}
         </p>
+        {input.manutenzioneAnnua === 0 && (
+          <p className="fiscal-note">
+            Rientro prima di manutenzione e altri costi esclusi. Puoi inserirli nelle ipotesi.
+          </p>
+        )}
       </section>
+      <button className="back-link quick-edit" type="button" onClick={onEdit}>
+        Modifica le ipotesi e ricalcola →
+      </button>
       <section aria-labelledby="benefits-title">
         <h2 id="benefits-title">Da dove arrivano i benefici</h2>
         <p className="section-caption">Importi annuali nello scenario scelto</p>
@@ -174,6 +186,16 @@ export function ResultsStep({
           </div>
         </details>
       </section>
+      <p className="field-hint">
+        Origine della resa:{' '}
+        {productionChoice.mode === 'region'
+          ? `${selectedRegion?.name ?? '—'} · elaborazione SunSize su PVGIS 5.3 (2005–2023), sud, 30°, perdite di sistema 14%`
+          : 'valore del preventivo inserito dall’utente'}
+        .{' '}
+        {productionChoice.mode === 'region'
+          ? 'La media regionale non descrive il singolo tetto.'
+          : ''}
+      </p>
       <details className="assumptions">
         <summary>
           Ipotesi, formule e limiti <span>Leggi</span>

@@ -46,7 +46,7 @@ export type SimResult = {
 export const DEFAULT_INPUT: SimInput = {
   consumoKwh: 0,
   spesaAnnua: 0,
-  irraggiamento: 1400,
+  irraggiamento: 0,
   kwp: 0,
   costoImpianto: 0,
   scenario: 1,

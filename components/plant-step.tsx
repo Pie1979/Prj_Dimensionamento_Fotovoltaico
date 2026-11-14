@@ -1,16 +1,22 @@
 'use client';
 import { ArrowLeft, ArrowRight, SlidersHorizontal, Sun, Info } from 'lucide-react';
+import { ProductionEstimate } from '@/components/production-estimate';
+import type { ProductionChoice } from '@/lib/production-estimate';
 import { NumField } from '@/components/num-field';
 import { eur, kwh } from '@/lib/format';
 import type { SimInput } from '@/lib/types';
 
 export function PlantStep({
   input,
+  productionChoice,
+  onProductionChange,
   onChange,
   onCalculate,
   onBack,
 }: {
   input: SimInput;
+  productionChoice: ProductionChoice;
+  onProductionChange: (choice: ProductionChoice) => void;
   onChange: (patch: Partial<SimInput>) => void;
   onCalculate: () => void;
   onBack: () => void;
@@ -68,23 +74,7 @@ export function PlantStep({
           onChange={(costoImpianto) => onChange({ costoImpianto })}
         />
       </div>
-      <NumField
-        id="produzione"
-        label="Produzione specifica annua"
-        unit="kWh/kWp"
-        hint="Ipotesi iniziale: 1.400 kWh per ogni kWp all’anno. Sostituiscila con una stima per il tuo tetto."
-        placeholder="Es. 1.400"
-        value={input.irraggiamento}
-        onChange={(irraggiamento) => onChange({ irraggiamento })}
-      />
-      <details className="help-details">
-        <summary>Come stimare la produzione?</summary>
-        <p>
-          Usa una simulazione PVGIS o il preventivo dell’installatore: località, orientamento,
-          inclinazione, ombre e perdite influenzano la resa. Questo valore è una produzione
-          specifica, non il solo irraggiamento solare. L’unità completa è kWh/kWp/anno.
-        </p>
-      </details>
+      <ProductionEstimate choice={productionChoice} onChange={onProductionChange} />
       <fieldset className="profile-group">
         <legend>Quando consumi più energia?</legend>
         <div className="profile-options">

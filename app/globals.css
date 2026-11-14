@@ -983,3 +983,69 @@ th {
     animation: none !important;
   }
 }
+
+.regional-estimate {
+  margin: 28px 0;
+}
+.production-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  border: 0;
+  padding: 0;
+  margin: 15px 0 22px;
+}
+.production-mode label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  min-height: 36px;
+}
+.production-mode input {
+  accent-color: var(--brand);
+  width: 16px;
+  height: 16px;
+}
+.number-field select {
+  width: 100%;
+  min-height: 51px;
+  border: 1px solid #8b9e99;
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 12px 14px;
+  font-size: 16px;
+}
+.number-field select:user-invalid,
+.number-field select[aria-invalid='true'] {
+  border-color: #b73535;
+}
+.regional-yield {
+  background: var(--brand-soft);
+  border-radius: 12px;
+  padding: 18px;
+  margin: 18px 0;
+}
+.regional-yield > span {
+  display: block;
+  font-size: 12px;
+  color: var(--brand-dark);
+}
+.regional-yield > strong {
+  display: block;
+  color: var(--brand);
+  font-size: 28px;
+  margin: 4px 0 7px;
+}
+.regional-yield small {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.regional-yield p {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 0;
+}

@@ -1,6 +1,11 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { Sun, ShieldCheck } from 'lucide-react';
+import {
+  INITIAL_PRODUCTION_CHOICE,
+  resolveProductionYield,
+  type ProductionChoice,
+} from '@/lib/production-estimate';
 import { ConsumptionStep } from '@/components/consumption-step';
 import { PlantStep } from '@/components/plant-step';
 import { ResultsStep } from '@/components/results-step';
@@ -11,6 +16,9 @@ import { DEFAULT_INPUT, type SimInput } from '@/lib/types';
 export default function HomePage() {
   const [step, setStep] = useState(1);
   const [input, setInput] = useState<SimInput>({ ...DEFAULT_INPUT });
+  const [productionChoice, setProductionChoice] = useState<ProductionChoice>({
+    ...INITIAL_PRODUCTION_CHOICE,
+  });
   const previousStep = useRef(1);
   const patch = (values: Partial<SimInput>) => setInput((current) => ({ ...current, ...values }));
   const result = isValidSimulation(input) ? calcolaSimulazione(input) : null;
@@ -87,6 +95,11 @@ export default function HomePage() {
           {step === 2 && (
             <PlantStep
               input={input}
+              productionChoice={productionChoice}
+              onProductionChange={(choice) => {
+                setProductionChoice(choice);
+                patch({ irraggiamento: resolveProductionYield(choice) });
+              }}
               onChange={patch}
               onCalculate={() => {
                 if (isValidSimulation(input)) setStep(3);
@@ -98,6 +111,7 @@ export default function HomePage() {
             <ResultsStep
               input={input}
               result={result}
+              productionChoice={productionChoice}
               onEdit={() => setStep(2)}
               onRestart={() => {
                 if (
@@ -106,6 +120,7 @@ export default function HomePage() {
                   )
                 ) {
                   setInput({ ...DEFAULT_INPUT });
+                  setProductionChoice({ ...INITIAL_PRODUCTION_CHOICE });
                   setStep(1);
                 }
               }}

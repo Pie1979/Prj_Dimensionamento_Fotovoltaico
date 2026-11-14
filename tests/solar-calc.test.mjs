@@ -3,7 +3,14 @@ import assert from 'node:assert/strict';
 import { calcolaSimulazione, isValidSimulation } from '../lib/solar-calc.ts';
 import { DEFAULT_INPUT } from '../lib/types.ts';
 import { parseNumeroInput } from '../lib/parse.ts';
-const base = { ...DEFAULT_INPUT, consumoKwh: 3000, spesaAnnua: 900, kwp: 4.5, costoImpianto: 6990 };
+const base = {
+  ...DEFAULT_INPUT,
+  irraggiamento: 1400,
+  consumoKwh: 3000,
+  spesaAnnua: 900,
+  kwp: 4.5,
+  costoImpianto: 6990,
+};
 const close = (actual, expected) =>
   assert.ok(Math.abs(actual - expected) < 1e-8, `${actual} != ${expected}`);
 test('energy is conserved, self-consumption is a share of production and grid purchases remain', () => {

@@ -23,11 +23,19 @@ Apri http://localhost:3000. Per la produzione: `npm run build` e `npm start`. Pe
 
 Il precedente caricamento simulato della bolletta non viene proposto nel nuovo percorso: non effettuava estrazione OCR. L'inserimento manuale evita risultati basati su valori fittizi. Il contenuto in `public/legacy` resta un archivio della versione precedente e non è il motore del nuovo percorso.
 
+## Stima dalla regione
+
+Il menu include le 20 regioni italiane. La scelta compila automaticamente la resa annua indicativa. **Ho il valore del preventivo** consente una resa manuale distinta; cambiando modalità non si perde il valore precedentemente inserito.
+
+La tabella è un'elaborazione SunSize di **209 campioni PVGIS 5.3/SARAH3, 2005–2023**, con condizioni comuni: sud, inclinazione 30°, perdite di sistema 14%, sistema da 1 kWp. È una media spaziale approssimata: non una tabella regionale ufficiale né una valutazione del singolo tetto. Nessuna chiamata esterna durante la simulazione.
+
+[Metodo, fonti, tabella completa e limiti](docs/rese-regionali.md). Esempio Lazio: **1.440 kWh/kWp/anno**; con 4,5 kWp si stimano 6.480 kWh/anno. Con autoconsumo 40% e prezzi 0,25/0,09 €/kWh: beneficio di 997,92 €/anno prima dei costi esclusi e rientro di circa 7 anni senza detrazione.
+
 ## Modello e ipotesi iniziali
 
 | Parametro | Valore iniziale | Significato |
 | --- | --- | --- |
-| Produzione specifica | 1.400 kWh/kWp/anno | Stima da sostituire con PVGIS o dati dell'installatore |
+| Produzione specifica | Nessuna regione preselezionata | Seleziona una delle 20 regioni oppure inserisci la resa del preventivo |
 | Quota autoconsumo | 40% della produzione | Profilo misto, non una misura; alternative 25% e 60% o quota personalizzata |
 | Scenario produzione | 100% | Modificabile, ad esempio a 80% o 50% |
 | Prezzo energia evitato | 0,25 €/kWh | Ipotesi per le componenti variabili risparmiabili, non tariffa ufficiale |
@@ -54,7 +62,7 @@ Il modello annuale è indicativo: non simula i consumi orari o la batteria. Prez
 
 ## Esempio verificato
 
-Con 3.000 kWh/anno, spesa annua 900 €, impianto da 4,5 kWp a 6.990 € e le ipotesi iniziali:
+Con 3.000 kWh/anno, spesa annua 900 €, impianto da 4,5 kWp a 6.990 € e una **resa manuale di 1.400 kWh/kWp/anno**:
 
 - produzione: 6.300 kWh; autoconsumo: 2.520 kWh; immissione: 3.780 kWh;
 - risparmio: 630 €/anno; ricavi: 340,20 €/anno; totale: 970,20 €/anno;
@@ -71,7 +79,7 @@ npm run lint
 npm run build
 ```
 
-I test coprono conservazione dell'energia, limite dell'autoconsumo, detrazione conteggiata una volta, fine del beneficio fiscale, costi ricorrenti, scenari di produzione e parsing numerico italiano. Il percorso è stato verificato in Chromium a 1440, 390 e 320 px, inclusi errori, navigazione e conservazione dei dati.
+I test verificano anche che tutte le 20 rese siano riproducibili dai 209 campioni, che la regione non sia scelta implicitamente e che il valore manuale prevalga solo nella modalità corrispondente. I test coprono conservazione dell'energia, limite dell'autoconsumo, detrazione conteggiata una volta, fine del beneficio fiscale, costi ricorrenti, scenari di produzione e parsing numerico italiano. Il percorso è stato verificato in Chromium a 1440, 390 e 320 px, inclusi errori, navigazione e conservazione dei dati.
 
 ## Pubblicazione
 
