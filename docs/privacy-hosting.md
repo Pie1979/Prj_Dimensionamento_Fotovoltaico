@@ -22,9 +22,9 @@ Vercel, team `pm79`, progetto `prj-dimensionamento-fotovoltaico` (`prj_j46VA1bAV
 
 ### Accessibilità pubblica del deployment
 
-La configurazione API indica `ssoProtection.enabled=true`, `deploymentType=all_except_custom_domains`. Non è una password di SunSize: è la protezione di accesso della piattaforma. Il dominio `prj-dimensionamento-fotovoltaico.vercel.app` è associato al progetto, ma non va considerato già pubblico senza verifica anonima.
+La configurazione API indica `ssoProtection.enabled=true`, `deploymentType=all_except_custom_domains`. Il controllo HTTP anonimo del dominio stabile `prj-dimensionamento-fotovoltaico.vercel.app` ha restituito **200**, pagina SunSize e nessuna schermata di autenticazione. La protezione dell’anteprima non implica che il dominio stabile sia protetto. Il rilascio può usare il dominio Vercel esistente senza ridurre le protezioni.
 
-Prima del rilascio occorre scegliere l’indirizzo pubblico: collegare un dominio personalizzato del proprietario, oppure autorizzare e verificare la configurazione di accesso appropriata per l’indirizzo Vercel. Non sono state ridotte le protezioni, registrati domini o accettati nuovi accordi.
+Il proprietario ha scelto l’indirizzo Vercel del progetto per il rilascio pubblico. Non sono state ridotte le protezioni, registrati domini o accettati nuovi accordi.
 
 ## Fonti ufficiali consultate
 

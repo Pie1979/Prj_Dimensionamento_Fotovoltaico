@@ -1,6 +1,25 @@
 # SunSize V2 — Verifiche e rilascio
 
-Aggiornamento: **16 novembre 2026**. Codice delle verifiche storiche del 14 novembre: [0f90d86](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/tree/0f90d865f9007919e335660fb3585f9188a95aaf), ramo `codex/sunsize-ux`. La [PR #9](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/pull/9) contiene la V2 e la documentazione, resta in bozza e non è stata integrata in produzione.
+Aggiornamento: **16 novembre 2026**. Codice delle verifiche storiche del 14 novembre: [0f90d86](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/tree/0f90d865f9007919e335660fb3585f9188a95aaf), ramo `codex/sunsize-ux`. La [PR #9](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/pull/9) contiene la V2 e la documentazione. Il rilascio Vercel è descritto sotto; la PR resta aperta senza merge in `main`.
+
+## Rilascio pubblico Vercel — 16 novembre 2026
+
+- URL: **https://prj-dimensionamento-fotovoltaico.vercel.app**.
+- Team/progetto: `pm79` / `prj-dimensionamento-fotovoltaico`.
+- Deployment: `dpl_3wdEfo9gCibGrwiQJur4Guv1P42b`, target **production**, stato **READY**.
+- SHA rilasciato: `b99381d6949212a4f17990baf193e64155e6da49`.
+- Verifica pre-rilascio: [CI 43923940688](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/actions/runs/43923940688), **17 test unitari e 21 casi browser** superati, lint, TypeScript e build validi.
+- Build GitHub Pages eseguita con successo, con informativa GitHub presente nel bundle e riferimenti Vercel esclusi dalla vista corrispondente.
+- Verifica anonima del dominio stabile: **HTTP 200**, titolo V2, prima schermata corretta, nessuna schermata di autenticazione e nessun header Set-Cookie nella risposta verificata.
+- Verifica browser sul codice e sugli asset effettivamente pubblicati: **6 casi Chromium superati in 1,3 minuti**, quattro larghezze complete (1440, 768, 390, 320 px), validazione/salvataggio e tastiera/reflow a 640 CSS px. Nessuna violazione Axe rilevata nelle viste controllate.
+- Errori runtime/fatal consultabili del deployment: nessuno rilevato nella finestra verificata. L’assenza di output runtime non certifica l’assenza di ogni errore sul client.
+- Deployment di produzione precedente, per eventuale ripristino: `dpl_7pAKsJf71uMLPDB4gsBp9ECpo8ux`.
+
+Il browser headless diretto non riconosceva la CA del proxy dell’ambiente (`ERR_CERT_AUTHORITY_INVALID`). La prova remota è stata quindi eseguita tramite un proxy locale che recuperava pagine e asset dall’origine pubblica con verifica TLS e archivio CA del sistema, senza disabilitare la validazione dei certificati. La prova sullo storage del browser resta riferita alla build CI: non è stata inclusa nei 6 casi remoti, perché questo trasporto non rappresenta tutte le caratteristiche dell’origine HTTPS nel browser. Il controllo HTTP anonimo sul dominio pubblico è separato e diretto.
+
+Il proprietario ha scelto l’indirizzo Vercel per il rilascio pubblico. È stata creata una build di produzione del commit verificato sul solo progetto SunSize. Nessun cambiamento alla protezione di accesso e nessun merge in `main`: il repository è collegato anche ad altri deployment automatici, perciò questa pubblicazione è stata circoscritta al progetto richiesto. Non confondere la PR ancora aperta con lo stato della versione servita al pubblico.
+
+Prima di futuri aggiornamenti da `main`, integrare la V2 o selezionare esplicitamente il commit desiderato, per evitare di sovrascrivere il rilascio con il vecchio codice. Gli aggiornamenti documentali successivi a questo SHA non cambiano l’app rilasciata.
 
 ## Revisione del 16 novembre 2026
 
@@ -97,12 +116,12 @@ I test hanno eseguito il codice e caricato gli asset dell’anteprima remota, tr
 
 `next.config.ts` applica export statico e base path `/Prj_Dimensionamento_Fotovoltaico` soltanto con `GITHUB_PAGES=true`; Vercel usa la build Next.js standard. L’integrazione Vercel esistente genera un’anteprima del ramo. La sua presenza non richiede una modifica della produzione.
 
-## 6. Passaggi residui per il rilascio definitivo
+## 6. Verifiche residue e aggiornamenti futuri
 
-1. Revisionare l’anteprima con dati rappresentativi e approvare la versione da pubblicare.
+1. Verificare periodicamente la versione pubblica con dati rappresentativi; registrare il deployment corrente prima di ogni aggiornamento.
 2. Completare le prove manuali: tastiera, zoom 200%, lettore di schermo, dispositivi e browser di destinazione.
 3. Titolare e contatto sono inseriti; completare la verifica dei servizi e del trattamento tecnico effettivi dell’hosting, prima di considerare completa l’informativa applicabile.
-4. Confermare progetto, dominio e percorso di pubblicazione di produzione; distinguere l’anteprima dall’indirizzo definitivo.
+4. Mantenere separati il dominio pubblico Vercel scelto dal proprietario e le anteprime; per un futuro dominio personalizzato verificare DNS e associazione al progetto.
 5. Verificare i controlli CI della revisione finale e integrare la PR soltanto nell’ambito della pubblicazione approvata.
 6. Dopo la pubblicazione controllare caricamento di font/asset, percorso completo, accesso sul dominio reale e correttezza della versione servita. Conservare l’identità del deployment precedente per un eventuale ripristino.
 

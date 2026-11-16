@@ -119,10 +119,16 @@ Per usare Chromium installato nel sistema: `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=
 
 Per l’inventario dei servizi e i limiti della verifica privacy: [hosting e dati](docs/privacy-hosting.md).
 
-## Pubblicazione
+## Sito pubblico
 
-Il workflow GitHub Pages pubblica i push su `main`; Vercel usa una build Next.js standard. La PR resta in bozza e il ramo dedicato genera un’anteprima Vercel tramite l’integrazione GitHub già esistente: [anteprima SunSize](https://prj-dimensionamento-fotovoltaico-git-codex-sunsize-ux-pm79.vercel.app). Le anteprime possono richiedere l’accesso Vercel del proprietario.
+La V2 è pubblicata su **https://prj-dimensionamento-fotovoltaico.vercel.app** dal commit `b99381d`, deployment Vercel `dpl_3wdEfo9gCibGrwiQJur4Guv1P42b`. La build di produzione è `READY`; il dominio risponde senza autenticazione. Prima del rilascio sono passati 17 test unitari e 21 casi browser sui tre motori, lint, TypeScript e build. [Identità del rilascio e verifiche](docs/verifiche-e-rilascio.md).
 
-Accesso e associazione al progetto `prj-dimensionamento-fotovoltaico` sono stati confermati direttamente tramite Vercel. L’anteprima del commit `0f90d86` è `READY` e ha superato anche i 5 test browser remoti. [Esito e identificazione del deployment](docs/verifiche-e-rilascio.md). Il sito di produzione non è stato aggiornato; le protezioni restano attive.
+La PR #9 resta aperta senza merge in `main`; futuri deploy da quel ramo richiedono l’integrazione della V2 o la selezione del commit corretto. Le prove manuali con zoom nativo, lettore di schermo e dispositivi reali restano da completare.
 
-Prima del rilascio: revisionare l’anteprima e la verifica del flusso, verificare i dettagli privacy dell’hosting effettivo (titolare PCODING Software e contatto brando_11@libero.it sono inseriti), confermare dominio e destinazione di produzione e quindi integrare il ramo. Il controllo automatico di accessibilità va completato con una prova manuale su dispositivi e tecnologie assistive.
+## Configurazione di pubblicazione
+
+Il workflow GitHub Pages pubblica i push su `main`; Vercel usa una build Next.js standard. La PR è pronta per la revisione e il ramo dedicato genera un’anteprima Vercel tramite l’integrazione GitHub già esistente: [anteprima SunSize](https://prj-dimensionamento-fotovoltaico-git-codex-sunsize-ux-pm79.vercel.app). Le anteprime possono richiedere l’accesso Vercel del proprietario.
+
+Accesso e associazione al progetto `prj-dimensionamento-fotovoltaico` sono stati confermati direttamente tramite Vercel. L’anteprima del commit `0f90d86` è `READY` e ha superato anche i 5 test browser remoti. [Esito e identificazione del deployment](docs/verifiche-e-rilascio.md). Quel controllo riguardava l’anteprima storica; il rilascio pubblico successivo è identificato sopra. Le protezioni non sono state modificate.
+
+Per i prossimi aggiornamenti: revisionare l’anteprima, verificare i controlli e il commit da pubblicare e aggiornare il documento di rilascio. Titolare PCODING Software e contatto brando_11@libero.it sono inseriti; gli aspetti informativi/contrattuali da confermare dal titolare sono elencati nel documento privacy. Il controllo automatico di accessibilità va completato con una prova manuale su dispositivi e tecnologie assistive.
