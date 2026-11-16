@@ -8,9 +8,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'SunSize – Calcola il tempo di rientro del fotovoltaico dalla tua bolletta',
+  title: 'SunSize – Simula il tuo investimento nel fotovoltaico',
   description:
-    'Carica la bolletta e scopri in 60 secondi il tempo di rientro reale del fotovoltaico, con detrazione 50% e ricavo GSE. Gratis, privato, senza registrazione.',
+    'Stima produzione, autoconsumo, benefici e tempo di rientro del fotovoltaico. Dati e ipotesi modificabili, formule trasparenti, senza registrazione.',
 };
 
 export default function RootLayout({

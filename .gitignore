@@ -4,3 +4,9 @@ out/
 .vercel
 .env*
 next-env.d.ts
+
+*.tsbuildinfo
+
+# Browser test output
+/test-results/
+/playwright-report/

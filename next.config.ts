@@ -4,12 +4,17 @@ import type { NextConfig } from 'next';
 const isGithubPages = process.env.GITHUB_PAGES === 'true';
 const repoBase = '/Prj_Dimensionamento_Fotovoltaico';
 
-const nextConfig: NextConfig = isGithubPages
-  ? {
-      output: 'export',
-      basePath: repoBase,
-      assetPrefix: `${repoBase}/`,
-    }
-  : {};
+const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_HOSTING_PROVIDER: isGithubPages ? 'github' : 'vercel',
+  },
+  ...(isGithubPages
+    ? {
+        output: 'export',
+        basePath: repoBase,
+        assetPrefix: `${repoBase}/`,
+      }
+    : {}),
+};
 
 export default nextConfig;
