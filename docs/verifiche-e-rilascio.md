@@ -1,8 +1,20 @@
 # SunSize V2 — Verifiche e rilascio
 
-Aggiornamento: **14 novembre 2026**. Codice verificato: [0f90d86](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/tree/0f90d865f9007919e335660fb3585f9188a95aaf), ramo `codex/sunsize-ux`. La [PR #9](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/pull/9) contiene la V2 e la documentazione, resta in bozza e non è stata integrata in produzione.
+Aggiornamento: **16 novembre 2026**. Codice delle verifiche storiche del 14 novembre: [0f90d86](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/tree/0f90d865f9007919e335660fb3585f9188a95aaf), ramo `codex/sunsize-ux`. La [PR #9](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/pull/9) contiene la V2 e la documentazione, resta in bozza e non è stata integrata in produzione.
 
-## 1. Esiti registrati
+## Revisione del 16 novembre 2026
+
+La revisione applicativa [56089b2](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/commit/56089b2b08acc9c76d55cda1a45ec1e6495363a5) aggiunge il titolare e il contatto forniti dal proprietario: **PCODING Software**, **brando_11@libero.it**. L’email è un collegamento `mailto:` sottolineato; non viene inviato alcun messaggio dall’app. La vista mantiene le informazioni sullo stato in memoria, sull’hosting e sui limiti della stima.
+
+Corretto un caso di presentazione del rientro: un tempo positivo inferiore a un mese mostra “Meno di 1 mese” invece di “0 mesi”. Il motore economico non cambia; un nuovo test verifica il caso e le soglie di visualizzazione. I test unitari diventano **17**.
+
+La suite browser ha ora **6 casi per motore**: i 5 precedenti più navigazione da tastiera (salta alla simulazione, compilazione, invio, apertura informazioni, raggiungimento del contatto e ritorno con focus) e reflow a 640 CSS px. Questa larghezza corrisponde allo spazio di layout di una finestra da 1280 px con zoom 200%, ma non costituisce una prova dello zoom nativo o di VoiceOver. Il contatto e la vista informativa sono inclusi nel controllo Axe.
+
+Il workflow installa ed esegue Chromium, Firefox e WebKit: **18 casi superati** nella [verifica CI del commit 56089b2](https://github.com/Pie1979/Prj_Dimensionamento_Fotovoltaico/actions/runs/43921735818). Anche test unitari (17), lint, TypeScript e build sono passati. In locale sono passati i 6 casi Chromium; Firefox e WebKit sono stati eseguiti sul runner GitHub perché nell’ambiente locale non avviavano correttamente. WebKit in Playwright non equivale a una verifica su Safari/iPhone fisico. Gli esiti di questa revisione vanno distinti da quelli storici riportati sotto.
+
+Il dominio di produzione associato al progetto Vercel è `prj-dimensionamento-fotovoltaico.vercel.app`, verificato nell’inventario del progetto il 16 novembre. Non è stato modificato o promosso alcun deployment di produzione. Restano da verificare i dettagli effettivi dei dati tecnici dell’hosting (destinatari e conservazione) e da completare la prova con dispositivi e tecnologie assistive.
+
+## 1. Esiti registrati del 14 novembre
 
 | Controllo | Esito e ambito |
 | --- | --- |
@@ -43,8 +55,8 @@ npm test
 npm run lint
 npm run build
 npx tsc --noEmit
-npx playwright install chromium
-npm run test:e2e
+npx playwright install chromium firefox webkit
+npm run test:e2e:crossbrowser
 ```
 
 Il build esegue a sua volta controlli di lint e tipi. La configurazione Playwright avvia la build di produzione sulla porta 3100; localmente può riutilizzare un server già in ascolto. Verificare che quel server corrisponda alla revisione da provare.
@@ -71,7 +83,7 @@ I test hanno eseguito il codice e caricato gli asset dell’anteprima remota, tr
 
 ## 5. Integrazione continua
 
-[Validate SunSize](../.github/workflows/validate.yml) esegue, sulle PR e sui push a `main` e `codex/sunsize-ux`: installazione riproducibile, test unitari, lint, TypeScript, build, installazione Chromium e test browser. In caso di errore conserva gli artefatti Playwright per 7 giorni.
+[Validate SunSize](../.github/workflows/validate.yml) esegue, sulle PR e sui push a `main` e `codex/sunsize-ux`: installazione riproducibile, test unitari, lint, TypeScript, build, installazione Chromium, Firefox e WebKit e test browser sui tre motori. In caso di errore conserva gli artefatti Playwright per 7 giorni.
 
 [Deploy GitHub Pages](../.github/workflows/deploy-pages.yml) è un workflow separato: pubblica i push a `main` o l’avvio manuale, usando `npm run build:pages`. Non è subordinato tramite `needs` al workflow di validazione. Prima di integrare una PR devono quindi essere verdi i controlli richiesti dalla revisione e dalla configurazione del repository.
 
@@ -81,7 +93,7 @@ I test hanno eseguito il codice e caricato gli asset dell’anteprima remota, tr
 
 1. Revisionare l’anteprima con dati rappresentativi e approvare la versione da pubblicare.
 2. Completare le prove manuali: tastiera, zoom 200%, lettore di schermo, dispositivi e browser di destinazione.
-3. Completare le informazioni su titolare/privacy e verificare gli eventuali servizi effettivi dell’hosting.
+3. Titolare e contatto sono inseriti; completare la verifica dei servizi e del trattamento tecnico effettivi dell’hosting, prima di considerare completa l’informativa applicabile.
 4. Confermare progetto, dominio e percorso di pubblicazione di produzione; distinguere l’anteprima dall’indirizzo definitivo.
 5. Verificare i controlli CI della revisione finale e integrare la PR soltanto nell’ambito della pubblicazione approvata.
 6. Dopo la pubblicazione controllare caricamento di font/asset, percorso completo, accesso sul dominio reale e correttezza della versione servita. Conservare l’identità del deployment precedente per un eventuale ripristino.
