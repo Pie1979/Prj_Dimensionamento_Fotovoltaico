@@ -24,6 +24,7 @@ export const kwh = (v: number) => fmt0(v) + ' kWh';
 export function formatPayback(years: number): string {
   if (!isFinite(years) || years <= 0) return '—';
   if (years > 50) return 'Oltre 50 anni';
+  if (years < 1 / 12) return 'Meno di 1 mese';
   const mesiTotali = Math.round(years * 12);
   const anni = Math.floor(mesiTotali / 12);
   const mesi = mesiTotali % 12;

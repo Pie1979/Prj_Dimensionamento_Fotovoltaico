@@ -174,7 +174,7 @@ Caso oltre il decimo anno: consumo 1.000 kWh, 1 kWp, resa 1.000, quota 100%, cos
 | `abc`, `1,2,3` | `NaN`, rifiutato |
 | `-1` | −1, poi i vincoli del campo lo rifiutano |
 
-Non arrotondare prima dei calcoli. `eur` mostra due decimali, `kwh` interi, i prezzi degli scenari tre decimali e `formatPayback` il mese più vicino. Piccoli residui binari come 2.989,2000000000003 non sono differenze economiche da propagare nella UI.
+Non arrotondare prima dei calcoli. `eur` mostra due decimali, `kwh` interi, i prezzi degli scenari tre decimali e `formatPayback` il mese più vicino. Per un tempo positivo inferiore a un mese mostra “Meno di 1 mese”, evitando “0 mesi”; tempi non validi o mancato rientro mostrano “—”. Piccoli residui binari come 2.989,2000000000003 non sono differenze economiche da propagare nella UI.
 
 ## 11. Compatibilità dei nomi storici
 

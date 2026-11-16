@@ -141,7 +141,7 @@ Non usare le altezze dei frame come altezze fisse delle pagine. Le dimensioni de
 
 “Nuova simulazione” richiede conferma: confermando ripristina input, scelta produttiva, contesto e provenienza iniziali; annullando conserva tutto. La normale navigazione indietro mantiene invece i valori.
 
-La vista “Dati e funzionamento” descrive l’elaborazione locale. L’informativa definitiva deve riflettere titolare, hosting ed eventuali servizi effettivamente usati nel deployment. La V2 non propone il vecchio caricamento simulato della bolletta: `public/legacy` è un archivio, non un OCR o il motore attivo.
+La vista “Dati e funzionamento” descrive l’elaborazione locale e indica PCODING Software come titolare del sito, con contatto pubblico brando_11@libero.it, forniti dal proprietario. Organizza le informazioni in dati della simulazione, hosting/collegamenti e limiti. Prima della pubblicazione resta da verificare il trattamento tecnico effettivo dell’hosting, compresi destinatari e conservazione: il solo nome e contatto non completano ogni obbligo informativo applicabile. La V2 non propone il vecchio caricamento simulato della bolletta: `public/legacy` è un archivio, non un OCR o il motore attivo.
 
 ## 10. Stato di consegna
 

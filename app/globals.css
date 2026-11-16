@@ -692,6 +692,9 @@ input[type='radio'] {
   padding: 36px;
   gap: 22px;
 }
+.helper-panel p a {
+  text-decoration: underline;
+}
 .wide-helper {
   width: 100%;
 }

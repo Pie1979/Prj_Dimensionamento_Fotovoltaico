@@ -156,8 +156,50 @@ test('keyboard validation, saved assumptions, recalculation and page-only state'
   await page.getByRole('button', { name: '← Torna ai risultati' }).click();
   await page.locator('#privacy-link').click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dati e funzionamento');
+  await expect(page.getByRole('link', { name: 'brando_11@libero.it' })).toHaveAttribute(
+    'href', 'mailto:brando_11@libero.it',
+  );
+  await accessible(page);
+  await noOverflow(page);
   await page.getByRole('button', { name: '← Torna alla simulazione' }).click();
   await expect(page.locator('.with-tax')).toContainText('5 anni e 5 mesi');
   await page.reload();
   await expect(page.locator('#consumo')).toHaveValue('');
+});
+
+test('keyboard navigation and reflow preserve the contact and form at 640 CSS px', async ({ page }, testInfo) => {
+  // 640 CSS px is the layout width of a 1280px window at 200% browser zoom.
+  // This checks reflow; native browser zoom still requires a separate manual check.
+  await page.setViewportSize({ width: 640, height: 900 });
+  await page.goto('/');
+  await noOverflow(page);
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Vai alla simulazione', exact: true })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#consumo')).toBeFocused();
+  await page.keyboard.type('3000');
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#spesa')).toBeFocused();
+  await page.keyboard.type('900');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+  await noOverflow(page);
+  // Reach the information button through sequential keyboard navigation.
+  for (let i = 0; i < 40; i++) {
+    if (await page.locator('#privacy-link').evaluate(el => el === document.activeElement)) break;
+    await page.keyboard.press('Tab');
+  }
+  await expect(page.locator('#privacy-link')).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dati e funzionamento');
+  await noOverflow(page);
+  await accessible(page);
+  await page.screenshot({ path: testInfo.outputPath('04-dati.png'), fullPage: true });
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'brando_11@libero.it' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#privacy-link')).toBeFocused();
+  await expect(page.locator('#kwp')).toBeVisible();
 });

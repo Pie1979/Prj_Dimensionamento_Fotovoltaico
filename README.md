@@ -105,17 +105,17 @@ npm run lint
 npm run build
 ```
 
-I 16 test unitari verificano anche che tutte le 20 rese siano riproducibili dai 209 campioni, che la regione non sia scelta implicitamente e che il valore manuale prevalga solo nella modalità corrispondente. I test coprono conservazione dell'energia, limite dell'autoconsumo, detrazione conteggiata una volta, fine del beneficio fiscale, rientro dopo il decimo anno, mancato rientro, identità dei flussi, costi ricorrenti, scenari di produzione e sensibilità, parsing numerico italiano. Il percorso è stato verificato in Chromium a 1440, 390 e 320 px, inclusi errori, navigazione, confronto fiscale, fine delle quote, collegamenti ai campi e conservazione dei dati. La suite Playwright copre l’intero percorso a 1440, 768, 390 e 320 px, più salvataggio, validazione da tastiera, ricalcolo e perdita dello stato dopo refresh. Axe verifica WCAG A/AA sulle viste principali e sui flussi: il controllo automatico non sostituisce una prova con lettore di schermo.
+I 17 test unitari verificano anche che tutte le 20 rese siano riproducibili dai 209 campioni, che la regione non sia scelta implicitamente e che il valore manuale prevalga solo nella modalità corrispondente. I test coprono conservazione dell'energia, limite dell'autoconsumo, detrazione conteggiata una volta, fine del beneficio fiscale, rientro dopo il decimo anno, mancato rientro, identità dei flussi, costi ricorrenti, scenari di produzione e sensibilità, parsing numerico italiano. Il percorso è stato verificato in Chromium a 1440, 390 e 320 px, inclusi errori, navigazione, confronto fiscale, fine delle quote, collegamenti ai campi e conservazione dei dati. La suite Playwright copre l’intero percorso a 1440, 768, 390 e 320 px, più salvataggio, validazione da tastiera, ricalcolo e perdita dello stato dopo refresh. Axe verifica WCAG A/AA sulle viste principali e sui flussi: il controllo automatico non sostituisce una prova con lettore di schermo.
 
 ### Verifiche nel browser
 
 ```sh
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 npm run build
-npm run test:e2e
+npm run test:e2e:crossbrowser
 ```
 
-Per usare Chromium installato nel sistema: `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`. La suite avvia la build su porta 3100 e produce schermate in `test-results/`. Il workflow `Validate SunSize` esegue test, lint, TypeScript, build e browser sulle PR e sul ramo di lavoro.
+Per usare Chromium installato nel sistema: `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`. `npm run test:e2e` seleziona solo Chromium; `npm run test:e2e:crossbrowser` esegue i progetti Chromium, Firefox e WebKit. La suite avvia la build su porta 3100 e produce schermate in `test-results/`. Il workflow `Validate SunSize` esegue test, lint, TypeScript, build e browser sulle PR e sul ramo di lavoro.
 
 ## Pubblicazione
 
@@ -123,4 +123,4 @@ Il workflow GitHub Pages pubblica i push su `main`; Vercel usa una build Next.js
 
 Accesso e associazione al progetto `prj-dimensionamento-fotovoltaico` sono stati confermati direttamente tramite Vercel. L’anteprima del commit `0f90d86` è `READY` e ha superato anche i 5 test browser remoti. [Esito e identificazione del deployment](docs/verifiche-e-rilascio.md). Il sito di produzione non è stato aggiornato; le protezioni restano attive.
 
-Prima del rilascio: revisionare l’anteprima e la verifica del flusso, completare le informazioni privacy/titolare adatte al deployment effettivo, confermare dominio e destinazione di produzione e quindi integrare il ramo. Il controllo automatico di accessibilità va completato con una prova manuale su dispositivi e tecnologie assistive.
+Prima del rilascio: revisionare l’anteprima e la verifica del flusso, verificare i dettagli privacy dell’hosting effettivo (titolare PCODING Software e contatto brando_11@libero.it sono inseriti), confermare dominio e destinazione di produzione e quindi integrare il ramo. Il controllo automatico di accessibilità va completato con una prova manuale su dispositivi e tecnologie assistive.

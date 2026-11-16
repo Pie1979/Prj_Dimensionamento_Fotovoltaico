@@ -307,19 +307,27 @@ export function PrivacyView({ onBack }: { onBack: () => void }) {
         Dati e funzionamento
       </h1>
       <p>
-        SunSize è un simulatore di PCODING Software. I valori che inserisci vengono elaborati nel
-        browser, senza registrazione e senza invio a un servizio di calcolo.
+        SunSize è un simulatore di PCODING Software, titolare del sito. Per informazioni o
+        richieste sul trattamento dei dati puoi scrivere a{' '}
+        <a href="mailto:brando_11@libero.it">brando_11@libero.it</a>.
+      </p>
+      <h2>Dati della simulazione</h2>
+      <p>
+        I valori che inserisci vengono elaborati nel browser, senza registrazione e senza invio
+        a un servizio di calcolo.
       </p>
       <p>
         La simulazione rimane nella memoria della pagina: non viene salvata in un account o
         nell’archiviazione del browser. Ricaricando o chiudendo la pagina perdi i dati. “Nuova
         simulazione” li cancella dopo la conferma.
       </p>
+      <h2>Hosting e collegamenti esterni</h2>
       <p>
         Le rese regionali sono incluse nell’app. I collegamenti alle fonti aprono siti esterni
         soltanto quando li selezioni. Il servizio che ospita il sito può trattare dati tecnici di
         connessione per erogare le pagine.
       </p>
+      <h2>Limiti della stima</h2>
       <p>
         La stima è indicativa e dipende dalle ipotesi inserite. Non verifica la fiscalità
         applicabile e non sostituisce una valutazione del tetto o un preventivo professionale.
