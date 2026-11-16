@@ -117,6 +117,8 @@ npm run test:e2e:crossbrowser
 
 Per usare Chromium installato nel sistema: `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e`. `npm run test:e2e` seleziona solo Chromium; `npm run test:e2e:crossbrowser` esegue i progetti Chromium, Firefox e WebKit. La suite avvia la build su porta 3100 e produce schermate in `test-results/`. Il workflow `Validate SunSize` esegue test, lint, TypeScript, build e browser sulle PR e sul ramo di lavoro.
 
+Per l’inventario dei servizi e i limiti della verifica privacy: [hosting e dati](docs/privacy-hosting.md).
+
 ## Pubblicazione
 
 Il workflow GitHub Pages pubblica i push su `main`; Vercel usa una build Next.js standard. La PR resta in bozza e il ramo dedicato genera un’anteprima Vercel tramite l’integrazione GitHub già esistente: [anteprima SunSize](https://prj-dimensionamento-fotovoltaico-git-codex-sunsize-ux-pm79.vercel.app). Le anteprime possono richiedere l’accesso Vercel del proprietario.

@@ -14,6 +14,14 @@ Il workflow installa ed esegue Chromium, Firefox e WebKit: **18 casi superati** 
 
 Il dominio di produzione associato al progetto Vercel è `prj-dimensionamento-fotovoltaico.vercel.app`, verificato nell’inventario del progetto il 16 novembre. Non è stato modificato o promosso alcun deployment di produzione. Restano da verificare i dettagli effettivi dei dati tecnici dell’hosting (destinatari e conservazione) e da completare la prova con dispositivi e tecnologie assistive.
 
+## Completamento della verifica hosting
+
+[Verifica privacy e hosting](privacy-hosting.md): inventario del progetto e dei drain, fonti ufficiali, distinzione tra dati del simulatore e log tecnici, protezione del deployment e prove non eseguibili. Il proprietario ha scelto l’indirizzo Vercel del progetto per il rilascio pubblico.
+
+La vista informativa identifica ora Vercel nella build standard e GitHub Pages nell’export corrispondente, con collegamenti ufficiali. Non dichiara una durata di conservazione non verificata. Una nuova prova verifica il percorso di calcolo senza richieste a origini esterne o metodi diversi da GET, senza cookie e senza dati in localStorage/sessionStorage nella build locale. Sono passate in locale questa prova e le due prove da tastiera (3 casi mirati). La suite completa diventa di 7 casi per motore, 21 in totale.
+
+La prova di zoom nativo non è stata eseguibile per il blocco del browser condiviso documentato; resta distinta dalla verifica di reflow a 640 CSS px. Nessuna prova con lettore di schermo o iPhone fisico è stata dichiarata superata.
+
 ## 1. Esiti registrati del 14 novembre
 
 | Controllo | Esito e ambito |

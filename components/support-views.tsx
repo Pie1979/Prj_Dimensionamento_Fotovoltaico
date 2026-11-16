@@ -301,6 +301,7 @@ export function RegionalSource({ onBack }: { onBack: () => void }) {
 }
 
 export function PrivacyView({ onBack }: { onBack: () => void }) {
+  const githubPages = process.env.NEXT_PUBLIC_HOSTING_PROVIDER === 'github';
   return (
     <section className="panel helper-panel">
       <h1 id="step-title" tabIndex={-1}>
@@ -324,8 +325,34 @@ export function PrivacyView({ onBack }: { onBack: () => void }) {
       <h2>Hosting e collegamenti esterni</h2>
       <p>
         Le rese regionali sono incluse nell’app. I collegamenti alle fonti aprono siti esterni
-        soltanto quando li selezioni. Il servizio che ospita il sito può trattare dati tecnici di
-        connessione per erogare le pagine.
+        soltanto quando li selezioni. SunSize non integra pubblicità o statistiche di navigazione.
+      </p>
+      <p>
+        L’hosting è fornito da {githubPages ? 'GitHub Pages' : 'Vercel Inc.'}. Il fornitore può
+        trattare dati tecnici, come indirizzo IP e informazioni sulle richieste, per erogare e
+        proteggere il sito. Questi dati sono distinti dai valori della simulazione e possono
+        essere conservati anche dopo la chiusura della pagina.
+      </p>
+      <p>
+        Per le modalità di trattamento, i criteri di conservazione e gli eventuali trasferimenti
+        internazionali consulta{' '}
+        <a
+          href={githubPages
+            ? 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement'
+            : 'https://vercel.com/legal/privacy-notice'}
+          target="_blank"
+          rel="noreferrer"
+        >
+          l’informativa {githubPages ? 'GitHub' : 'Vercel'}
+        </a>
+        {!githubPages && (
+          <>
+            {' '}e il{' '}
+            <a href="https://vercel.com/legal/dpa" target="_blank" rel="noreferrer">
+              documento sul trattamento dei dati di Vercel
+            </a>
+          </>
+        )}.
       </p>
       <h2>Limiti della stima</h2>
       <p>

@@ -199,7 +199,37 @@ test('keyboard navigation and reflow preserve the contact and form at 640 CSS px
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'brando_11@libero.it' })).toBeFocused();
   await page.keyboard.press('Tab');
+  const back = page.getByRole('button', { name: '← Torna alla simulazione' });
+  for (let i = 0; i < 8; i++) {
+    if (await back.evaluate(el => el === document.activeElement)) break;
+    await page.keyboard.press('Tab');
+  }
+  await expect(back).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('#privacy-link')).toBeFocused();
   await expect(page.locator('#kwp')).toBeVisible();
+});
+
+test('simulation values stay in memory without external requests or tracking storage', async ({ page, context }) => {
+  const requests: { url: string; method: string }[] = [];
+  page.on('request', request => requests.push({ url: request.url(), method: request.method() }));
+  await page.goto('/');
+  const origin = new URL(page.url()).origin;
+  await page.locator('#consumo').fill('3000');
+  await page.locator('#spesa').fill('900');
+  await page.locator('#spesa').press('Enter');
+  await page.locator('#kwp').fill('4,5');
+  await page.locator('#costo').fill('6990');
+  await page.locator('#regione').selectOption({ label: 'Lazio' });
+  await page.getByRole('button', { name: 'Calcola la simulazione →' }).click();
+  await expect(page.locator('.comparison-card').first()).toContainText('7 anni');
+  await page.locator('#privacy-link').click();
+  await expect(page.getByRole('link', { name: 'l’informativa Vercel', exact: true })).toHaveAttribute(
+    'href', 'https://vercel.com/legal/privacy-notice',
+  );
+  await expect(page.getByText('L’hosting è fornito da Vercel Inc.', { exact: false })).toBeVisible();
+  expect(requests.filter(request => new URL(request.url).origin !== origin)).toEqual([]);
+  expect(requests.filter(request => request.method !== 'GET')).toEqual([]);
+  expect(await context.cookies()).toEqual([]);
+  expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0]);
 });
